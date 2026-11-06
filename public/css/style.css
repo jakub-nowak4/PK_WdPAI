@@ -1,0 +1,106 @@
+/* 4. Box model */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 1. Zmienne CSS (tokeny projektu) */
+:root {
+  --color-brand: #635bff;
+  --color-text: #182230;
+  --color-muted: #667085;
+  --color-surface: #ffffff;
+  --color-background: #f4f7fb;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --radius: 1rem;
+}
+
+[data-theme="dark"] {
+  --color-text: #f7f9fc;
+  --color-muted: #b6c0cf;
+  --color-surface: #202938;
+  --color-background: #111827;
+}
+
+/* 5. Kolor, tekst i stany */
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+a {
+  color: var(--color-brand);
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.2em;
+}
+
+a:hover { opacity: 0.8; }
+
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-brand) 45%, white);
+  outline-offset: 3px;
+}
+
+/* 7. Responsywny widok (mobile first) */
+.page {
+  width: min(100% - 2rem, 72rem);
+  margin-inline: auto;
+  padding-block: var(--space-3);
+}
+
+.hero {
+  display: grid;
+  gap: var(--space-3);
+}
+
+h1 {
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  line-height: 1.1;
+  margin: 0 0 var(--space-2);
+}
+
+.lead {
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* 3. Reguła i selektor (klasa) */
+.project-card {
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.project-card p { color: var(--color-muted); margin: 0; }
+.project-card > h2 { margin: 0 0 var(--space-1); font-size: 1.25rem; }
+
+/* 6. Flexbox i Grid */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--space-3);
+  margin-block: var(--space-3);
+}
+
+@media (min-width: 48rem) {
+  .hero {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+}

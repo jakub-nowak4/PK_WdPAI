@@ -21,7 +21,7 @@ Aktualnie aplikacja obsluguje:
 - PHP-FPM do wykonywania kodu PHP (rozszerzenia: gd, pdo_pgsql, pgsql, zip, bcmath, opcache)
 - PostgreSQL jako baza danych (serwis `db`), narazie nieuzywana przez aplikacje
 - Docker oraz Docker Compose
-- HTML bez frameworka frontendowego; CSS jeszcze nie dodany
+- HTML bez frameworka frontendowego; CSS w `public/css/style.css` (zmienne CSS, Flexbox/Grid, mobile first)
 
 ## Struktura katalogow
 
@@ -118,7 +118,7 @@ Kazda wartosc pochodzaca od uzytkownika lub z bazy musi byc escapowana w konteks
 <?= htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') ?>
 ```
 
-CSS nie zostal jeszcze dodany do projektu. Jesli dodasz arkusz stylow, umiesc go w `public/css/` i podlinkuj w widokach, a nastepnie zaktualizuj ten plik.
+Style znajduja sie w `public/css/style.css` i sa podlinkowane w kazdym widoku (`<link rel="stylesheet" href="/css/style.css">`). Kolory, odstepy i promienie definiuj jako zmienne CSS w `:root` (ciemny motyw: `[data-theme="dark"]`), a elementy stylizuj klasami.
 
 ## Konwencje implementacji
 
