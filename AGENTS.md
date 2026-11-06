@@ -21,7 +21,7 @@ Aktualnie aplikacja obsluguje:
 - PHP-FPM do wykonywania kodu PHP (rozszerzenia: gd, pdo_pgsql, pgsql, zip, bcmath, opcache)
 - PostgreSQL jako baza danych (serwis `db`), narazie nieuzywana przez aplikacje
 - Docker oraz Docker Compose
-- HTML bez frameworka frontendowego; CSS w `public/css/style.css` (zmienne CSS, Flexbox/Grid, mobile first)
+- HTML bez frameworka frontendowego; CSS w `public/css/style.css` (tokeny motywu, Flexbox/Grid, mobile first); motyw jasny/ciemny: `data-theme` na `<html>`, `public/js/theme.js`, klucz `theme` w localStorage
 
 ## Struktura katalogow
 
@@ -108,7 +108,7 @@ Po dodaniu lub przeniesieniu klas odswiez autoloader poleceniem `composer dump-a
 
 ### View
 
-Widoki znajduja sie w `public/views/` i maja nazwy `*.html.php`. `AppController::render()` przekazuje do nich dane jako zmienne przy uzyciu `extract(..., EXTR_SKIP)`.
+Widoki znajduja sie w `public/views/` i maja nazwy `*.html.php`. Widoki to fragmenty (sam `<main>`); wspolny dokument HTML (head, skrypt motywu, przelacznik, `<?= $content ?>`) jest w `public/views/layout.html.php`, a `AppController::render()` wstawia widok do layoutu. `AppController::render()` przekazuje do nich dane jako zmienne przy uzyciu `extract(..., EXTR_SKIP)`.
 
 Widoki odpowiadaja za prezentacje. Dozwolone sa w nich proste instrukcje warunkowe i petle, ale nie logika biznesowa, dostep do bazy ani obsluga routingu.
 
@@ -118,7 +118,7 @@ Kazda wartosc pochodzaca od uzytkownika lub z bazy musi byc escapowana w konteks
 <?= htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') ?>
 ```
 
-Style znajduja sie w `public/css/style.css` i sa podlinkowane w kazdym widoku (`<link rel="stylesheet" href="/css/style.css">`). Kolory, odstepy i promienie definiuj jako zmienne CSS w `:root` (ciemny motyw: `[data-theme="dark"]`), a elementy stylizuj klasami.
+Style znajduja sie w `public/css/style.css` i sa podlinkowane w kazdym widoku (`<link rel="stylesheet" href="/css/style.css">`). Kolory, odstepy i promienie definiuj jako zmienne CSS w `:root` (ciemny motyw: `html[data-theme="dark"]`), a elementy stylizuj klasami.
 
 ## Konwencje implementacji
 

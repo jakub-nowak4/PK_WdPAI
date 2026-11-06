@@ -1,54 +1,104 @@
-/* 4. Box model */
+/* Box model */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* 1. Zmienne CSS (tokeny projektu) */
+/* Tokeny motywu: jasny (domyślny) i ciemny */
 :root {
-  --color-brand: #635bff;
-  --color-text: #182230;
-  --color-muted: #667085;
+  color-scheme: light;
+  --color-bg: #f6f7fb;
   --color-surface: #ffffff;
-  --color-background: #f4f7fb;
+  --color-surface-muted: #eef2f7;
+  --color-text: #172033;
+  --color-muted: #667085;
+  --color-primary: #167b83;
+  --color-primary-hover: #105f65;
+  --color-border: #d9e0eb;
+  --color-focus: rgb(22 123 131 / 35%);
+  --color-danger-bg: #fff1f2;
+  --color-danger-text: #be123c;
+  --shadow-soft: 0 18px 45px rgb(21 32 51 / 12%);
+
   --space-1: 0.5rem;
   --space-2: 1rem;
   --space-3: 1.5rem;
   --radius: 1rem;
 }
 
-[data-theme="dark"] {
-  --color-text: #f7f9fc;
-  --color-muted: #b6c0cf;
-  --color-surface: #202938;
-  --color-background: #111827;
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #101418;
+  --color-surface: #171d24;
+  --color-surface-muted: #202833;
+  --color-text: #edf2f7;
+  --color-muted: #a8b3c2;
+  --color-primary: #5fcbd3;
+  --color-primary-hover: #8adce2;
+  --color-border: #2f3a48;
+  --color-focus: rgb(95 203 211 / 45%);
+  --color-danger-bg: #3f121d;
+  --color-danger-text: #fda4af;
+  --shadow-soft: 0 18px 45px rgb(0 0 0 / 32%);
 }
 
-/* 5. Kolor, tekst i stany */
+/* Kolor, tekst i stany */
+html {
+  background: var(--color-bg);
+}
+
 body {
   margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: Inter, system-ui, sans-serif;
   line-height: 1.6;
-  color: var(--color-text);
-  background: var(--color-background);
 }
 
 a {
-  color: var(--color-brand);
+  color: var(--color-primary);
   text-decoration-thickness: 0.12em;
   text-underline-offset: 0.2em;
 }
 
-a:hover { opacity: 0.8; }
+a:hover { color: var(--color-primary-hover); }
 
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--color-brand) 45%, white);
+  outline: 3px solid var(--color-focus);
   outline-offset: 3px;
 }
 
-/* 7. Responsywny widok (mobile first) */
+/* Formularze */
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary);
+  outline: 3px solid var(--color-focus);
+}
+
+button {
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+button:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Responsywny widok (mobile first) */
 .page {
   width: min(100% - 2rem, 72rem);
   margin-inline: auto;
@@ -71,18 +121,21 @@ h1 {
   margin: 0;
 }
 
-/* 3. Reguła i selektor (klasa) */
+/* Komponenty */
+.auth-card,
 .project-card {
+  background: var(--color-surface);
   color: var(--color-text);
-  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-3);
+  box-shadow: var(--shadow-soft);
 }
 
 .project-card p { color: var(--color-muted); margin: 0; }
 .project-card > h2 { margin: 0 0 var(--space-1); font-size: 1.25rem; }
 
-/* 6. Flexbox i Grid */
+/* Flexbox i Grid */
 .actions {
   display: flex;
   align-items: center;
@@ -103,4 +156,34 @@ h1 {
     grid-template-columns: 1fr 1fr;
     align-items: center;
   }
+}
+
+/* Przełącznik motywu */
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--color-surface-muted);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
 }

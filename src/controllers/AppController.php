@@ -14,7 +14,14 @@ abstract class AppController
             throw new \RuntimeException('View not found: ' . $template);
         }
 
+        $layoutPath = dirname(__DIR__, 2) . '/public/views/layout.html.php';
+
         extract($variables, EXTR_SKIP);
+
+        ob_start();
         require $templatePath;
+        $content = ob_get_clean();
+
+        require $layoutPath;
     }
 }
