@@ -2,9 +2,13 @@
 .idea/
 .vscode/
 .DS_Store
-vendor/
+/vendor/
 node_modules/
 docker/data/
+
+# Zdjecia wgrywane przez uzytkownikow (katalog zostaje w repo dzieki .gitkeep)
+public/uploads/*
+!public/uploads/.gitkeep
 
 # Konfiguracja agentów AI (lokalna, prywatna)
 CLAUDE.md
