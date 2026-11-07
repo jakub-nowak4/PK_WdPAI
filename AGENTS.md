@@ -6,6 +6,8 @@ Ten plik jest przewodnikiem dla agentow AI pracujacych w tym repozytorium. Przed
 
 To edukacyjna aplikacja webowa napisana w czystym PHP 8.3. Korzysta z lekkiej, samodzielnie zaimplementowanej architektury MVC, bez frameworka PHP. Aplikacja dziala w kontenerach Nginx i PHP-FPM uruchamianych przez Docker Compose.
 
+Docelowo aplikacja to MotoBid — platforma aukcji samochodow na zywo. Uzytkownicy dziela sie na trzy role: kupujacy (biora udzial w aukcjach i licytuja), firma (wystawia pojazdy i prowadzi aukcje) oraz administrator (zarzadza uzytkownikami i moderuje serwis).
+
 Aktualnie aplikacja obsluguje:
 
 - strone glowna pod `/`,

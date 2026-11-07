@@ -5,3 +5,14 @@
 vendor/
 node_modules/
 docker/data/
+
+# Konfiguracja agentów AI (lokalna, prywatna)
+CLAUDE.md
+.claude/
+.mcp.json
+Claude outputs/
+docs/motobid.md
+docs/wymagania.md
+docs/architect-kickoff.md
+docs/jak-to-dziala.md
+docs/
