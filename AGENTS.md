@@ -132,7 +132,7 @@ Style znajduja sie w `public/css/style.css` i sa podlinkowane w kazdym widoku (`
 - Dane przekazuj do widoku jawnie w tablicy drugiego argumentu `render()`.
 - Nie tworz globalnego stanu i nie uzywaj `$_GET`, `$_POST` ani `$_SERVER` poza warstwa wejscia, jezeli dane mozna przekazac jako argument.
 - Nie dodawaj frameworka ani duzej biblioteki bez wyraznej potrzeby i zgody uzytkownika.
-- Sekrety umieszczaj w `.env` (wzor w `.env-example`); nigdy nie commituj hasel, tokenow ani danych dostepowych.
+- Sekrety umieszczaj w `.env` (wzor w `.env.example`); nigdy nie commituj hasel, tokenow ani danych dostepowych.
 - Nie edytuj `vendor/` recznie.
 - Zachowuj zakres zadania i nie zmieniaj niezwiazanych plikow.
 
@@ -153,7 +153,7 @@ Typowy porzadek prac:
 docker compose up --build -d
 ```
 
-Aplikacja jest domyslnie dostepna pod `http://localhost:8080`. Port mozna zmienic przez zmienna `APP_PORT` (patrz `.env-example`).
+Aplikacja jest domyslnie dostepna pod `http://localhost:8080`. Port mozna zmienic przez zmienna `APP_PORT` (patrz `.env.example`).
 
 Przydatne polecenia:
 

@@ -21,7 +21,7 @@ Lokalne środowisko developmentowe aplikacji PHP uruchamiane z użyciem Docker C
 ```bash
 git clone https://github.com/jakub-nowak4/PK_WdPAI.git
 cd REPOZYTORIUM
-cp .env-example .env
+cp .env.example .env
 docker compose up --build -d
 ```
 
@@ -36,7 +36,7 @@ dane PostgreSQL, aby nie były tracone po usunięciu kontenera.
 - `public/` - kod publiczny aplikacji PHP.
 - `docker/` - Dockerfile, konfiguracja Nginx i skrypty inicjalizacyjne bazy.
 - `.env` - lokalne wartości konfiguracyjne; plik nie powinien być commitowany.
-- `.env-example` - bezpieczny szablon konfiguracji.
+- `.env.example` - bezpieczny szablon konfiguracji.
 
 ## Zasady developmentu
 
