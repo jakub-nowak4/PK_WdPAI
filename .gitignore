@@ -10,6 +10,8 @@ docker/data/
 CLAUDE.md
 .claude/
 .mcp.json
+.worktreeinclude
+ai-setup/
 Claude outputs/
 docs/motobid.md
 docs/wymagania.md
