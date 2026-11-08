@@ -1,6 +1,6 @@
 const storageKey = 'theme';
-const themeToggle = document.querySelector('.theme-toggle');
-const themeIcon = themeToggle?.querySelector('.theme-toggle__icon') ?? null;
+// Przycisków motywu może być kilka (nagłówek i stopka); wszystkie są synchronizowane.
+const themeToggles = document.querySelectorAll('[data-theme-toggle]');
 const colorSchemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 function getCurrentTheme() {
@@ -27,21 +27,21 @@ function saveTheme(theme) {
 }
 
 function syncThemeToggle() {
-    if (!themeToggle) {
-        return;
-    }
-
     const isDark = getCurrentTheme() === 'dark';
-    themeToggle.setAttribute('aria-pressed', String(isDark));
-    themeToggle.setAttribute(
-        'aria-label',
-        isDark ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'
-    );
 
-    // Ikona pokazuje działanie: księżyc włącza dark, słońce włącza light.
-    if (themeIcon) {
-        themeIcon.textContent = isDark ? '☀️' : '🌙';
-    }
+    themeToggles.forEach((toggle) => {
+        toggle.setAttribute('aria-pressed', String(isDark));
+        toggle.setAttribute(
+            'aria-label',
+            isDark ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'
+        );
+
+        // Ikona pokazuje działanie: księżyc włącza dark, słońce włącza light.
+        const icon = toggle.querySelector('.theme-toggle__icon');
+        if (icon) {
+            icon.textContent = isDark ? '☀️' : '🌙';
+        }
+    });
 }
 
 function setTheme(theme, remember = true) {
@@ -54,9 +54,11 @@ function setTheme(theme, remember = true) {
     syncThemeToggle();
 }
 
-themeToggle?.addEventListener('click', () => {
-    const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
+themeToggles.forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+        const nextTheme = getCurrentTheme() === 'dark' ? 'light' : 'dark';
+        setTheme(nextTheme);
+    });
 });
 
 colorSchemeQuery.addEventListener('change', (event) => {

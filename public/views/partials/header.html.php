@@ -35,7 +35,7 @@ $initials = $isLoggedIn ? (string) ($currentUser['initials'] ?? '') : '';
             <?php endforeach; ?>
         </form>
 
-        <button class="theme-toggle" type="button"
+        <button class="theme-toggle" type="button" data-theme-toggle
                 aria-label="<?= $e($t('theme.to_dark', 'Włącz ciemny motyw')) ?>"
                 aria-pressed="false" title="<?= $e($t('theme.toggle', 'Zmień motyw')) ?>">
             <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
