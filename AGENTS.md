@@ -21,7 +21,7 @@ Aktualnie aplikacja obsluguje:
 - Composer i autoloading PSR-4
 - Nginx jako serwer HTTP
 - PHP-FPM do wykonywania kodu PHP (rozszerzenia: gd, pdo_pgsql, pgsql, zip, bcmath, opcache)
-- PostgreSQL jako baza danych (serwis `db`), narazie nieuzywana przez aplikacje
+- PostgreSQL jako baza danych (serwis `db`); polaczenie przez `App\Database` (PDO), jeszcze nieuzywane przez kontrolery
 - Docker oraz Docker Compose
 - HTML bez frameworka frontendowego; CSS w `public/css/style.css` (tokeny motywu, Flexbox/Grid, mobile first); motyw jasny/ciemny: `data-theme` na `<html>`, `public/js/theme.js`, klucz `theme` w localStorage
 
@@ -37,8 +37,13 @@ Aktualnie aplikacja obsluguje:
 │   ├── index.php              # front controller i definicje tras
 │   └── views/                 # szablony HTML renderowane przez kontrolery
 ├── src/
-│   ├── controllers/           # kontrolery aplikacji
+│   ├── controllers/           # kontrolery aplikacji (App\Controller)
+│   ├── models/                # encje i value objecty (App\Model)
+│   ├── repositories/          # zapytania SQL (App\Repository)
+│   ├── services/              # logika aplikacji (App\Service)
+│   ├── Database.php           # polaczenie PDO z PostgreSQL
 │   └── Routing.php            # rejestracja i obsluga tras
+├── config.php                 # konfiguracja ze zmiennych srodowiskowych
 ├── composer.json              # konfiguracja autoloadingu
 └── docker-compose.yaml        # uslugi `server`, `php`, `db`, `mailpit`, `pgadmin-wdpai`
 ```
@@ -55,7 +60,7 @@ przegladarka
     -> public/index.php
     -> Routing
     -> Controller
-    -> Model / serwis (gdy zostanie dodany)
+    -> Model / repozytorium / serwis
     -> View
     -> odpowiedz HTML
 ```
@@ -97,14 +102,18 @@ Obecnie istnieja dwa kontrolery:
 
 ### Model
 
-Warstwa Model nie jest jeszcze zaimplementowana. Baza PostgreSQL jest dostepna jako kontener (`db`), ale aplikacja jeszcze nie laczy sie z nia. Nie udawaj, ze dane widoczne w widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
+Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele i repozytoria jeszcze nie istnieja, wiec widoki nadal nie czytaja danych z bazy. Nie udawaj, ze dane widoczne w widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
 
-Dla nowych klas zgodnych z mapowaniem `App\` w Composerze preferuj katalogi i nazwy klas o zgodnej wielkosci liter, np.:
+`composer.json` ma dokladne mapowania PSR-4 dla katalogow pisanych malymi literami:
 
 ```text
-src/Model/Project.php                -> App\Model\Project
-src/Repository/ProjectRepository.php -> App\Repository\ProjectRepository
+src/controllers/  -> App\Controller
+src/models/       -> App\Model
+src/repositories/ -> App\Repository
+src/services/     -> App\Service
 ```
+
+Przyklad: `src/models/Auction.php` -> `App\Model\Auction`, `src/repositories/AuctionRepository.php` -> `App\Repository\AuctionRepository`.
 
 Po dodaniu lub przeniesieniu klas odswiez autoloader poleceniem `composer dump-autoload`.
 
