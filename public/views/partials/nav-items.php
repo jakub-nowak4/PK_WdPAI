@@ -18,8 +18,9 @@ $items = [
 ];
 
 if ($role === 'BUYER') {
+    // Powiadomienia: dzwonek w naglowku. Dolny pasek: Aukcje, Moje oferty, Konto.
     $items[] = ['href' => '/my-bids', 'label' => $t('nav.my_bids', 'Moje oferty'), 'icon' => '🏷️'];
-    $items[] = ['href' => '/notifications', 'label' => $t('nav.notifications', 'Powiadomienia'), 'icon' => '🔔'];
+    $items[] = ['href' => $accountHref ?? '/my-bids', 'label' => $t('nav.account', 'Konto'), 'icon' => '👤', 'bottomOnly' => true];
 } elseif ($role === 'DEALER') {
     if ($approved) {
         $items[] = ['href' => '/company', 'label' => $t('nav.company_panel', 'Panel firmy'), 'icon' => '🏢'];
