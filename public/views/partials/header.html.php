@@ -55,7 +55,7 @@ $initials = $userName !== '' ? mb_strtoupper(mb_substr($userName, 0, 1)) : '';
                 <button class="button button--ghost" type="submit"><?= $e($t('nav.logout', 'Wyloguj się')) ?></button>
             </form>
         <?php else: ?>
-            <a class="nav-link" href="/login"><?= $e($t('nav.login', 'Zaloguj się')) ?></a>
+            <?php /* Link logowania gościa jest tylko w nav-items.php (nawigacja główna i dolna), żeby go nie dublować. */ ?>
             <a class="button button--primary" href="/register"><?= $e($t('nav.register', 'Zarejestruj się')) ?></a>
         <?php endif; ?>
     </div>
