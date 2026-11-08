@@ -1,9 +1,26 @@
+<?php
+/**
+ * Wspolny dokument HTML. Opcjonalne zmienne od kontrolera (kazda ma bezpieczna wartosc domyslna):
+ * $pageTitle, $t (callable tlumaczen: fn(string $key, string $default): string), $lang,
+ * $currentUser (['name', 'role', 'approved'] albo null), $currentPath, $csrfToken, $unreadCount.
+ */
+$e = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+$t = $t ?? static fn (string $key, string $default = ''): string => $default;
+$lang = (string) ($lang ?? 'pl');
+$lang = in_array($lang, ['pl', 'en'], true) ? $lang : 'pl';
+$currentUser = $currentUser ?? null;
+$currentPath = (string) ($currentPath ?? '/');
+$csrfToken = (string) ($csrfToken ?? '');
+$unreadCount = (int) ($unreadCount ?? 0);
+$navItems = require __DIR__ . '/partials/nav-items.php';
+?>
 <!doctype html>
-<html lang="pl">
+<html lang="<?= $e($lang) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars((string) ($pageTitle ?? ''), ENT_QUOTES, 'UTF-8') ?></title>
+    <title><?= $e($pageTitle ?? 'MotoBid') ?></title>
+    <meta name="csrf-token" content="<?= $e($csrfToken) ?>">
     <script>
         (function () {
             const storageKey = 'theme';
@@ -28,17 +45,13 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <button
-        class="theme-toggle"
-        type="button"
-        aria-label="Włącz ciemny motyw"
-        aria-pressed="false"
-        title="Zmień motyw"
-    >
-        <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
-    </button>
+    <a class="skip-link" href="#main-content"><?= $e($t('nav.skip', 'Przejdź do treści')) ?></a>
+    <?php require __DIR__ . '/partials/header.html.php'; ?>
 
     <?= $content ?>
+
+    <?php require __DIR__ . '/partials/footer.html.php'; ?>
+    <?php require __DIR__ . '/partials/bottom-nav.html.php'; ?>
     <script src="/js/theme.js" defer></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-    <main class="page">
+    <main class="page" id="main-content">
         <h1>Strona do prezentacji listy wszystkich projektów</h1>
         <!-- TODO: Lista projektów wyświetlona w pętli (kontener .projects to grid kart .project-card) -->
         <div class="projects"></div>
