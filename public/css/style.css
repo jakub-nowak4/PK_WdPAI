@@ -630,6 +630,26 @@ button {
     width: 100%;
 }
 
+.hero__search .form-field__control {
+    flex: 1 1 auto;
+    min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.hero__search .form-field__control:hover {
+    border-color: var(--color-primary);
+}
+
+.hero__search .form-field__control::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.hero__search .button {
+    flex: none;
+}
+
 .trust-badges {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -1089,10 +1109,6 @@ button {
 @media (min-width: 37.5rem) {
     .hero__search {
         flex-direction: row;
-    }
-
-    .hero__search .form-field__control {
-        flex: 1;
     }
 
     .trust-badges {
