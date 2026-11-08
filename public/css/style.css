@@ -263,6 +263,7 @@ button {
 }
 
 .site-header__actions .button--primary,
+.site-header__actions .site-header__login,
 .site-header__user {
     display: none;
 }
@@ -1126,7 +1127,8 @@ button {
         margin-right: auto;
     }
 
-    .site-header__actions .button--primary {
+    .site-header__actions .button--primary,
+    .site-header__actions .site-header__login {
         display: inline-flex;
     }
 
