@@ -3,23 +3,23 @@
 declare(strict_types=1);
 
 use App\Controller\DefaultController;
+use App\Controller\ErrorController;
 use App\Controller\ProjectController;
+use App\Exception\HttpException;
+use App\Request;
 use App\Routing;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
+$request = Request::fromGlobals();
 $routing = new Routing();
 
 $routing->get('/projects', ProjectController::class, 'index');
 $routing->get('/projects/{id}', ProjectController::class, 'show');
 $routing->get('/', DefaultController::class, 'index');
 
-$routeFound = $routing->dispatch(
-    $_SERVER['REQUEST_METHOD'],
-    $_SERVER['REQUEST_URI'],
-);
-
-if (!$routeFound) {
-    http_response_code(404);
-    (new DefaultController())->notFound();
+try {
+    $routing->dispatch($request);
+} catch (HttpException $exception) {
+    (new ErrorController())->handle($exception, $request);
 }

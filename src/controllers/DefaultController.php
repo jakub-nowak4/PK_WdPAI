@@ -12,11 +12,4 @@ final class DefaultController extends AppController
             'pageTitle' => 'Moja aplikacja',
         ]);
     }
-
-    public function notFound(): void
-    {
-        $this->render('not-found', [
-            'pageTitle' => 'Nie znaleziono strony',
-        ]);
-    }
 }
