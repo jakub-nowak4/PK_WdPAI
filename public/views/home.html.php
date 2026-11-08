@@ -1,4 +1,4 @@
-    <main class="page">
+    <main class="page" id="main-content">
         <section class="hero">
             <div>
                 <h1>Strona główna</h1>
