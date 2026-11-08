@@ -27,10 +27,14 @@ RUN apk add --no-cache \
         zip \
     && apk del .build-deps
 
+# Limity uploadu zgodne z regula 9 i docs/api.md 2.5: do 8 zdjec po max 5 MB.
+# post_max_size = 8 x 5 MB + zapas na pola formularza i naglowki multipart.
 RUN { \
-      echo 'upload_max_filesize = 512M'; \
-      echo 'post_max_size = 512M'; \
-      echo 'max_file_uploads = 20'; \
+      echo 'file_uploads = On'; \
+      echo 'upload_max_filesize = 5M'; \
+      echo 'post_max_size = 45M'; \
+      echo 'max_file_uploads = 8'; \
+      echo 'memory_limit = 256M'; \
     } > /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /app
