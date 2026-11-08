@@ -33,6 +33,7 @@ if ($role === 'BUYER') {
     $items[] = ['href' => '/admin', 'label' => $t('nav.admin_panel', 'Panel administratora'), 'icon' => '🛡️'];
 } else {
     $items[] = ['href' => '/login', 'label' => $t('nav.login', 'Zaloguj się'), 'icon' => '👤', 'bottomOnly' => true];
+    $items[] = ['href' => '/register', 'label' => $t('nav.register', 'Zarejestruj się'), 'icon' => '📝', 'bottomOnly' => true];
 }
 
 return $items;
