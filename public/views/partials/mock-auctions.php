@@ -20,7 +20,7 @@ return [
     'total' => 328,
     'page' => 1,
     'pages' => 28,
-    'filters' => ['brand' => '', 'priceMax' => '', 'sort' => 'ending'],
+    'filters' => ['q' => '', 'brand' => '', 'priceMax' => '', 'sort' => 'ending'],
     'auctions' => [
         [
             'id' => 1, 'title' => '2018 Ford Mustang GT 5.0 V8', 'seller' => 'AutoImport Kraków',

@@ -26,13 +26,10 @@ if (!isset($auctions)) {
         <p class="hero__lead"><?= $e($t('home.lead', 'Transparentna platforma licytacji pojazdów z USA i Europy z bezpośrednim udziałem zweryfikowanych sprzedawców.')) ?></p>
 
         <form class="hero__search" method="get" action="/auctions" role="search">
-            <label class="visually-hidden" for="hero-brand"><?= $e($t('filters.brand', 'Marka')) ?></label>
-            <select class="form-field__control" id="hero-brand" name="brand">
-                <option value=""><?= $e($t('filters.all_brands', 'Wszystkie marki')) ?></option>
-                <?php foreach ($brands as $slug => $name): ?>
-                    <option value="<?= $e($slug) ?>"><?= $e($name) ?></option>
-                <?php endforeach; ?>
-            </select>
+            <label class="visually-hidden" for="hero-q"><?= $e($t('home.search_label', 'Szukaj pojazdu')) ?></label>
+            <input class="form-field__control" id="hero-q" name="q" type="search" maxlength="100"
+                   autocomplete="off" value="<?= $e($filters['q'] ?? '') ?>"
+                   placeholder="<?= $e($t('home.search_placeholder', 'Marka, model, rocznik…')) ?>">
             <button class="button button--primary" type="submit"><?= $e($t('home.search', 'Szukaj pojazdu')) ?></button>
         </form>
 

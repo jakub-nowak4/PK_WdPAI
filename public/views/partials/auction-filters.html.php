@@ -16,6 +16,10 @@ $sortOptions = [
 <details class="auction-filters" open>
     <summary class="auction-filters__summary"><?= $e($t('filters.title', 'Filtry')) ?></summary>
     <form class="auction-filters__form" method="get" action="/auctions">
+        <?php if (($filters['q'] ?? '') !== ''): ?>
+            <input type="hidden" name="q" value="<?= $e($filters['q']) ?>">
+        <?php endif; ?>
+
         <div class="form-field">
             <label class="form-field__label" for="filter-brand"><?= $e($t('filters.brand', 'Marka')) ?></label>
             <select class="form-field__control" id="filter-brand" name="brand">
