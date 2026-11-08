@@ -3,7 +3,8 @@
  * Naglowek serwisu: logo, nawigacja, przelacznik jezyka, motyw, konto.
  * @var callable $t
  * @var callable $e
- * @var array{name?:string,role?:string,approved?:bool}|null $currentUser
+ * @var array{id?:int,name?:string,initials?:string,role?:string,unreadCount?:int,approved?:bool}|null $currentUser
+ * @var string $accountHref (liczone w layout.html.php wg roli)
  * @var string $currentPath
  * @var string $lang
  * @var string $csrfToken
@@ -11,7 +12,7 @@
  */
 $isLoggedIn = is_array($currentUser);
 $userName = $isLoggedIn ? (string) ($currentUser['name'] ?? '') : '';
-$initials = $userName !== '' ? mb_strtoupper(mb_substr($userName, 0, 1)) : '';
+$initials = $isLoggedIn ? (string) ($currentUser['initials'] ?? '') : '';
 ?>
 <header class="site-header">
     <a class="site-header__logo" href="/" aria-label="<?= $e($t('nav.home', 'MotoBid, strona główna')) ?>">
@@ -42,17 +43,25 @@ $initials = $userName !== '' ? mb_strtoupper(mb_substr($userName, 0, 1)) : '';
 
         <?php if ($isLoggedIn): ?>
             <a class="notification-bell" href="/notifications"
-               aria-label="<?= $e($t('nav.notifications', 'Powiadomienia')) ?>">
+               aria-label="<?= $e($t('nav.notifications', 'Powiadomienia')) ?><?= $unreadCount > 0 ? ' (' . $unreadCount . ')' : '' ?>">
                 <span aria-hidden="true">🔔</span>
                 <?php if ($unreadCount > 0): ?>
-                    <span class="notification-bell__count"><?= $e((string) $unreadCount) ?></span>
+                    <span class="notification-bell__count" aria-hidden="true"><?= $e($unreadCount > 99 ? '99+' : (string) $unreadCount) ?></span>
                 <?php endif; ?>
             </a>
-            <span class="avatar" aria-hidden="true"><?= $e($initials) ?></span>
-            <span class="site-header__user"><?= $e($userName) ?></span>
-            <form method="post" action="/logout">
+            <a class="user-tile" href="<?= $e($accountHref) ?>">
+                <span class="avatar" aria-hidden="true"><?= $e($initials) ?></span>
+                <span class="user-tile__text">
+                    <span class="user-tile__name"><?= $e($userName) ?></span>
+                    <span class="user-tile__hint"><?= $e($t('nav.my_account', 'Moje konto')) ?></span>
+                </span>
+            </a>
+            <form class="logout-form" method="post" action="/logout">
                 <input type="hidden" name="csrfToken" value="<?= $e($csrfToken) ?>">
-                <button class="button button--ghost" type="submit"><?= $e($t('nav.logout', 'Wyloguj się')) ?></button>
+                <button class="icon-button" type="submit" aria-label="<?= $e($t('nav.logout', 'Wyloguj się')) ?>"
+                        title="<?= $e($t('nav.logout', 'Wyloguj się')) ?>">
+                    <span aria-hidden="true">⎋</span>
+                </button>
             </form>
         <?php else: ?>
             <?php /* Desktop: logowanie tutaj. Mobile: CSS ukrywa .site-header__login, link jest w dolnej nawigacji (nav-items.php, bottomOnly). */ ?>
