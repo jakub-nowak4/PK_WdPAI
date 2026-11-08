@@ -263,8 +263,7 @@ button {
 }
 
 .site-header__actions .button--primary,
-.site-header__actions .site-header__login,
-.site-header__user {
+.site-header__actions .site-header__login {
     display: none;
 }
 
@@ -320,6 +319,7 @@ button {
 }
 
 .theme-toggle,
+.icon-button,
 .notification-bell {
     display: inline-grid;
     place-items: center;
@@ -328,15 +328,83 @@ button {
     border: 1px solid transparent;
     border-radius: var(--radius);
     background: transparent;
+    color: var(--color-text);
     text-decoration: none;
 }
 
 .theme-toggle:hover,
+.icon-button:hover,
 .notification-bell:hover {
     background: var(--color-surface-muted);
 }
 
+.icon-button {
+    border-color: var(--color-border);
+    font-size: 1.125rem;
+}
+
+/* Dzwonek: ikona i licznik obok siebie (bez nakładania). */
+.notification-bell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    width: auto;
+    min-width: var(--touch-target);
+    padding: 0 var(--space-xs);
+}
+
+/* Kafelek użytkownika: na telefonie tylko awatar, tekst i wylogowanie od 1024 px. */
+.user-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    padding: 0 var(--space-xs);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.user-tile:hover {
+    background: var(--color-surface-muted);
+}
+
+.user-tile__text,
+.logout-form {
+    display: none;
+}
+
+.user-tile__text {
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.user-tile__name {
+    overflow: hidden;
+    max-width: 10rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-tile__hint {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.logout-form {
+    margin: 0;
+}
+
 .avatar {
+    flex: none;
     display: inline-grid;
     place-items: center;
     width: 2.25rem;
@@ -1190,10 +1258,23 @@ button {
 
 /* ---------- >= 1024 px: filtry obok listy ---------- */
 @media (min-width: 64rem) {
-    .site-header__user {
-        display: inline;
-        font-size: 0.875rem;
-        font-weight: 600;
+    .user-tile {
+        justify-content: flex-start;
+        padding: 0 var(--space-md) 0 var(--space-xs);
+        border-color: var(--color-border);
+        background: var(--color-surface-muted);
+    }
+
+    .user-tile:hover {
+        background: var(--color-primary-soft);
+    }
+
+    .user-tile__text {
+        display: flex;
+    }
+
+    .logout-form {
+        display: block;
     }
 
     .auction-list-layout {
