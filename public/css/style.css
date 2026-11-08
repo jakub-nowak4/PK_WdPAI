@@ -263,7 +263,6 @@ button {
 }
 
 .site-header__actions .button--primary,
-.site-header__actions .nav-link,
 .site-header__user {
     display: none;
 }
@@ -1189,10 +1188,6 @@ button {
 
 /* ---------- >= 1024 px: filtry obok listy ---------- */
 @media (min-width: 64rem) {
-    .site-header__actions .nav-link {
-        display: inline-flex;
-    }
-
     .site-header__user {
         display: inline;
         font-size: 0.875rem;
