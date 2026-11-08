@@ -10,6 +10,7 @@
 <nav class="site-header__nav" aria-label="<?= $e($t('nav.main', 'Nawigacja główna')) ?>">
     <ul class="site-header__nav-list">
         <?php foreach ($navItems as $item): ?>
+            <?php if (!empty($item['bottomOnly'])) { continue; } ?>
             <?php $isActive = $currentPath === $item['href'] || str_starts_with($currentPath, $item['href'] . '/'); ?>
             <li>
                 <a class="nav-link<?= $isActive ? ' nav-link--active' : '' ?>"

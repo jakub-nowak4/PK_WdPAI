@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 /**
  * Lista linkow nawigacji zalezna od roli. Zwraca tablice elementow:
- * ['href' => string, 'label' => string, 'icon' => string].
+ * ['href' => string, 'label' => string, 'icon' => string, 'bottomOnly' => bool (opcjonalnie)].
+ * bottomOnly = wpis tylko w dolnej nawigacji (gorna go pomija; na desktopie ten link jest w akcjach naglowka).
  * Oczekuje zmiennych: $t (callable), $currentUser (array|null).
  * Rola: BUYER, DEALER (firma), ADMIN; brak uzytkownika = gosc.
  */
@@ -30,7 +31,7 @@ if ($role === 'BUYER') {
 } elseif ($role === 'ADMIN') {
     $items[] = ['href' => '/admin', 'label' => $t('nav.admin_panel', 'Panel administratora'), 'icon' => '🛡️'];
 } else {
-    $items[] = ['href' => '/login', 'label' => $t('nav.login', 'Zaloguj się'), 'icon' => '👤'];
+    $items[] = ['href' => '/login', 'label' => $t('nav.login', 'Zaloguj się'), 'icon' => '👤', 'bottomOnly' => true];
 }
 
 return $items;

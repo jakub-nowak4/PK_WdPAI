@@ -55,7 +55,8 @@ $initials = $userName !== '' ? mb_strtoupper(mb_substr($userName, 0, 1)) : '';
                 <button class="button button--ghost" type="submit"><?= $e($t('nav.logout', 'Wyloguj się')) ?></button>
             </form>
         <?php else: ?>
-            <?php /* Link logowania gościa jest tylko w nav-items.php (nawigacja główna i dolna), żeby go nie dublować. */ ?>
+            <?php /* Desktop: logowanie tutaj. Mobile: CSS ukrywa .site-header__login, link jest w dolnej nawigacji (nav-items.php, bottomOnly). */ ?>
+            <a class="button button--secondary site-header__login" href="/login"><?= $e($t('nav.login', 'Zaloguj się')) ?></a>
             <a class="button button--primary" href="/register"><?= $e($t('nav.register', 'Zarejestruj się')) ?></a>
         <?php endif; ?>
     </div>
