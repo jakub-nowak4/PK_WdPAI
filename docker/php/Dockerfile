@@ -5,17 +5,19 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN apk add --no-cache \
         libjpeg-turbo \
         libpng \
+        libwebp \
         libzip \
         postgresql-libs \
         zlib \
     && apk add --no-cache --virtual .build-deps \
         libjpeg-turbo-dev \
         libpng-dev \
+        libwebp-dev \
         libzip-dev \
         postgresql-dev \
         zlib-dev \
         $PHPIZE_DEPS \
-    && docker-php-ext-configure gd --with-jpeg \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" \
         bcmath \
         gd \
