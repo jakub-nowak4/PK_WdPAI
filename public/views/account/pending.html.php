@@ -52,9 +52,6 @@ $isRejected = $companyStatus === 'rejected';
 
         <footer class="auth-card__footer">
             <a class="button button--secondary button--block" href="/auctions"><?= $e($t('pending.to_auctions', 'Przejdź do aukcji')) ?></a>
-            <?php if (!$isRejected): ?>
-                <p><a href="/account/pending"><?= $e($t('pending.refresh', 'Sprawdź status')) ?></a></p>
-            <?php endif; ?>
         </footer>
     </section>
 </main>
