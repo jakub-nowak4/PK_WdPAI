@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Controller\AccountController;
 use App\Controller\AuctionController;
+use App\Controller\CompanyController;
 use App\Controller\DefaultController;
 use App\Controller\ErrorController;
 use App\Controller\ProjectController;
@@ -22,6 +24,9 @@ $routing->get('/auctions/{id}', AuctionController::class, 'show');
 $routing->get('/login', SecurityController::class, 'login');
 $routing->get('/register', SecurityController::class, 'register');
 $routing->get('/register/company', SecurityController::class, 'registerCompany');
+$routing->get('/account/pending', AccountController::class, 'pending');
+$routing->get('/company', CompanyController::class, 'index');
+$routing->get('/company/auctions/new', CompanyController::class, 'create');
 $routing->get('/', DefaultController::class, 'index');
 
 try {
