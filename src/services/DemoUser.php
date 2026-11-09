@@ -48,6 +48,19 @@ final class DemoUser
     }
 
     /** @return array{id:int,name:string,initials:string,role:string,unreadCount:int,approved:bool} */
+    public static function admin(): array
+    {
+        return [
+            'id' => 4,
+            'name' => 'Administrator',
+            'initials' => 'A',
+            'role' => 'ADMIN',
+            'unreadCount' => 0,
+            'approved' => true,
+        ];
+    }
+
+    /** @return array{id:int,name:string,initials:string,role:string,unreadCount:int,approved:bool} */
     public static function pendingCompany(): array
     {
         return [
