@@ -2,7 +2,10 @@
 /**
  * Wspolny dokument HTML. Opcjonalne zmienne od kontrolera (kazda ma bezpieczna wartosc domyslna):
  * $pageTitle, $t (callable tlumaczen: fn(string $key, string $default): string), $lang,
- * $currentUser (['name', 'role', 'approved'] albo null), $currentPath, $csrfToken, $unreadCount.
+ * $currentUser albo null (gosc). Struktura (przyklad, ustawia kontroler/router):
+ *   ['id' => 7, 'name' => 'Jan Kowalski', 'initials' => 'JK', 'role' => 'BUYER' (BUYER|DEALER|ADMIN),
+ *    'unreadCount' => 3, 'approved' => true (tylko DEALER, opcjonalnie)]
+ * $currentPath, $csrfToken; $unreadCount (zgodnosc wsteczna, gdy brak currentUser['unreadCount']).
  */
 $e = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
@@ -12,6 +15,19 @@ $currentUser = $currentUser ?? null;
 $currentPath = (string) ($currentPath ?? '/');
 $csrfToken = (string) ($csrfToken ?? '');
 $unreadCount = (int) ($unreadCount ?? 0);
+$accountHref = '/login';
+
+if (is_array($currentUser)) {
+    $role = (string) ($currentUser['role'] ?? '');
+    $name = trim((string) ($currentUser['name'] ?? ''));
+    $unreadCount = max(0, (int) ($currentUser['unreadCount'] ?? $unreadCount));
+    $currentUser['initials'] = mb_strtoupper(mb_substr((string) ($currentUser['initials'] ?? $name), 0, 2));
+    $accountHref = match ($role) {
+        'ADMIN' => '/admin',
+        'DEALER' => ($currentUser['approved'] ?? true) === false ? '/account/pending' : '/company',
+        default => '/my-bids',
+    };
+}
 $navItems = require __DIR__ . '/partials/nav-items.php';
 ?>
 <!doctype html>
