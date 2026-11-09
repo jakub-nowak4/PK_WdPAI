@@ -74,8 +74,7 @@ $descriptionDescribedBy = trim('field-description-hint' . ($descriptionError !==
             require __DIR__ . '/../partials/form-field.html.php';
 
             $field = ['name' => 'vin', 'label' => $t('field.vin', 'Numer VIN (opcjonalnie)'), 'minlength' => 17, 'maxlength' => 17,
-                'pattern' => '[A-HJ-NPR-Z0-9]{17}', 'placeholder' => '1FA6P8CF5J5100482',
-                'hint' => $t('field.vin_hint', '17 znaków: wielkie litery i cyfry, bez I, O i Q')];
+                'pattern' => '[A-HJ-NPR-Z0-9]{17}',                'hint' => $t('field.vin_hint', '17 znaków: wielkie litery i cyfry, bez I, O i Q')];
             require __DIR__ . '/../partials/form-field.html.php';
 
             $field = ['name' => 'fuel', 'label' => $t('field.fuel', 'Rodzaj paliwa'), 'required' => true, 'options' => $fuels,
