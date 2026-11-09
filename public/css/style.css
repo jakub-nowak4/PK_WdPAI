@@ -2831,6 +2831,11 @@ body:has(dialog[open]) {
         display: inline-block;
     }
 
+    .data-table__vehicle a {
+        display: inline-block;
+        max-width: calc(100% - 8rem);
+    }
+
     .data-table__price {
         display: table-cell;
     }
