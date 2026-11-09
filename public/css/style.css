@@ -3002,3 +3002,116 @@ textarea.form-field__control {
         scroll-behavior: auto;
     }
 }
+
+/* ---------- Ekran 16: potwierdzenie usunięcia aukcji ---------- */
+.page--confirm {
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.page--confirm > .alert {
+    width: 100%;
+    max-width: 32rem;
+}
+
+.confirm-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    width: 100%;
+    max-width: 32rem;
+    padding: var(--space-lg) var(--space-md);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-2);
+}
+
+.confirm-card__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.confirm-card__icon--danger {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+.confirm-card__title {
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+.confirm-card__text {
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.confirm-card__text strong {
+    color: var(--color-text);
+}
+
+.confirm-card__details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border-radius: var(--radius);
+    background: var(--color-surface-muted);
+    font-size: 0.875rem;
+}
+
+.confirm-card__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+.confirm-card__row dt {
+    color: var(--color-text-muted);
+}
+
+.confirm-card__row dd {
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    text-align: right;
+}
+
+.confirm-card__actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-sm);
+    margin: 0;
+    padding-top: var(--space-sm);
+}
+
+.confirm-card__actions .button {
+    width: 100%;
+    min-height: 3rem;
+}
+
+@media (min-width: 37.5rem) {
+    .confirm-card {
+        padding: var(--space-lg);
+    }
+
+    .confirm-card__actions {
+        flex-direction: row;
+        justify-content: flex-end;
+    }
+
+    .confirm-card__actions .button {
+        width: auto;
+        min-height: var(--touch-target);
+    }
+}
