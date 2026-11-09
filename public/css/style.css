@@ -2654,6 +2654,210 @@ body:has(dialog[open]) {
     }
 }
 
+/* ---------- Ekran 14: tabela aukcji firmy (telefon: karty, od 1024 px: tabela) ---------- */
+.data-table,
+.data-table tbody,
+.data-table tr,
+.data-table td {
+    display: block;
+}
+
+.data-table thead {
+    display: none;
+}
+
+.data-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.data-table tr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.data-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    min-width: 0;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.data-table td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.data-table__vehicle {
+    justify-content: flex-start;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.data-table__vehicle::before,
+.data-table__actions::before {
+    display: none;
+}
+
+.data-table__vehicle a {
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+}
+
+.data-table__vehicle a:hover {
+    color: var(--color-primary);
+}
+
+.data-table__thumb {
+    flex: none;
+    width: 6rem;
+    height: 4rem;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    object-fit: cover;
+}
+
+.data-table__thumb--empty {
+    display: inline-grid;
+    place-items: center;
+    font-size: 1.5rem;
+}
+
+.data-table__price {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.data-table__price::before {
+    margin-right: auto;
+}
+
+.data-table__note {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.data-table__price .data-table__note {
+    flex: 0 0 100%;
+    text-align: right;
+}
+
+.data-table__actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--color-border);
+}
+
+@media (min-width: 64rem) {
+    .data-table {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table thead {
+        display: table-header-group;
+    }
+
+    .data-table tbody {
+        display: table-row-group;
+    }
+
+    .data-table tr {
+        display: table-row;
+        padding: 0;
+        border: 0;
+        background: none;
+    }
+
+    .data-table thead tr {
+        background: var(--color-surface-muted);
+    }
+
+    .data-table th {
+        padding: var(--space-sm) var(--space-md);
+        color: var(--color-text-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .data-table td {
+        display: table-cell;
+        padding: var(--space-md);
+        border-bottom: 1px solid var(--color-border);
+        vertical-align: middle;
+    }
+
+    .data-table td::before {
+        display: none;
+    }
+
+    .data-table__vehicle {
+        display: table-cell;
+    }
+
+    .data-table__vehicle > * {
+        vertical-align: middle;
+    }
+
+    .data-table__vehicle .data-table__thumb {
+        display: inline-grid;
+        margin-right: var(--space-md);
+    }
+
+    .data-table__vehicle img.data-table__thumb {
+        display: inline-block;
+    }
+
+    .data-table__price {
+        display: table-cell;
+    }
+
+    .data-table__price .data-table__note {
+        text-align: left;
+    }
+
+    .data-table__actions {
+        display: table-cell;
+        padding-top: var(--space-md);
+        border-top: 0;
+        white-space: nowrap;
+    }
+
+    .data-table__actions > * + * {
+        margin-left: var(--space-sm);
+    }
+
+    .data-table__actions .data-table__note {
+        display: inline-block;
+        max-width: 12rem;
+        white-space: normal;
+        vertical-align: middle;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
