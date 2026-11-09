@@ -25,7 +25,7 @@ $tabs = [
     'rejected' => $t('admin.tab_rejected', 'Odrzucone'),
     'all' => $t('admin.tab_all', 'Wszystkie'),
 ];
-$status = in_array($status ?? 'pending', array_keys($tabs), true) ? $status : 'pending';
+$status = isset($status) && in_array($status, ['pending', 'approved', 'rejected', 'all'], true) ? $status : 'pending';
 if ($isMock) {
     $companies = $status === 'all' ? $companies : array_values(array_filter($companies, static fn (array $c): bool => $c['status'] === $status));
 }
