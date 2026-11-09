@@ -14,7 +14,6 @@ $accountType = 'company';
 <main class="page page--auth" id="main-content">
     <section class="auth-card" aria-labelledby="register-company-title">
         <header class="auth-card__header">
-            <p class="auth-card__badge"><?= $e($t('register_company.badge', 'Konto firmy')) ?></p>
             <h1 class="auth-card__title" id="register-company-title"><?= $e($t('register_company.title', 'Zarejestruj konto firmowe')) ?></h1>
             <p class="auth-card__lead"><?= $e($t('register_company.lead', 'Wystawiaj auta na licytacje. Konto firmy zatwierdza administrator.')) ?></p>
             <?php require __DIR__ . '/../partials/account-type-switch.html.php'; ?>
