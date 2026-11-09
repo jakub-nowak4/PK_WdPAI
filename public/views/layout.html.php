@@ -12,7 +12,8 @@ $t = $t ?? static fn (string $key, string $default = ''): string => $default;
 $lang = (string) ($lang ?? 'pl');
 $lang = in_array($lang, ['pl', 'en'], true) ? $lang : 'pl';
 $currentUser = $currentUser ?? null;
-$currentPath = (string) ($currentPath ?? '/');
+// Gdy kontroler nie przekazal $currentPath, bierzemy biezaca sciezke zadania (nie zakladamy '/').
+$currentPath = (string) ($currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/'));
 $csrfToken = (string) ($csrfToken ?? '');
 $unreadCount = (int) ($unreadCount ?? 0);
 $accountHref = '/login';
