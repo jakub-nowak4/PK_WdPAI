@@ -3115,3 +3115,201 @@ textarea.form-field__control {
         min-height: var(--touch-target);
     }
 }
+
+/* ---------- Ekran 17: panel administratora ---------- */
+.stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-md);
+}
+
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
+}
+
+.stat-tile--highlight {
+    border-color: var(--color-accent-border);
+    background: var(--color-accent-soft);
+}
+
+.stat-tile__label {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.stat-tile--highlight .stat-tile__label {
+    color: var(--color-accent-text);
+}
+
+.stat-tile__value {
+    color: var(--color-primary);
+    font-size: 1.75rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+@media (min-width: 37.5rem) {
+    .stat-tiles {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .stat-tile {
+        padding: var(--space-lg);
+    }
+
+    .stat-tile__value {
+        font-size: 2.25rem;
+    }
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    padding: var(--space-xs);
+    border-radius: var(--radius);
+    background: var(--color-surface-muted);
+}
+
+.tabs__item {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--touch-target);
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.tabs__item:hover {
+    background: var(--color-surface);
+    color: var(--color-primary);
+}
+
+.tabs__item--active,
+.tabs__item--active:hover {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-weight: 700;
+}
+
+@media (min-width: 37.5rem) {
+    .tabs {
+        align-self: flex-start;
+    }
+
+    .tabs__item {
+        flex: none;
+        padding: 0 var(--space-lg);
+    }
+}
+
+.admin-companies {
+    min-width: 0;
+}
+
+.admin-companies__count {
+    color: var(--color-text-muted);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.button--success {
+    background: var(--color-success);
+    color: var(--color-on-primary);
+}
+
+.button--success:hover {
+    background: var(--color-success);
+    border-color: var(--color-text);
+}
+
+.button--success:disabled {
+    background: var(--color-surface-muted);
+    border-color: var(--color-border);
+    color: var(--color-text-subtle);
+}
+
+.button--danger-outline {
+    background: var(--color-surface);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+.button--danger-outline:hover {
+    background: var(--color-danger-soft);
+}
+
+.button--danger-outline:disabled {
+    border-color: var(--color-border);
+    background: var(--color-surface-muted);
+    color: var(--color-text-subtle);
+}
+
+.data-table__form {
+    display: flex;
+    flex: 1 1 8rem;
+    margin: 0;
+}
+
+.data-table__form .button {
+    width: 100%;
+}
+
+.data-table__mono {
+    font-family: var(--font-mono);
+    overflow-wrap: anywhere;
+}
+
+.data-table tbody th.data-table__vehicle {
+    color: var(--color-text);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: normal;
+    text-align: left;
+    text-transform: none;
+    overflow-wrap: anywhere;
+}
+
+@media (min-width: 64rem) {
+    .data-table tbody th.data-table__vehicle {
+        padding: var(--space-md);
+        border-bottom: 1px solid var(--color-border);
+        font-size: 0.875rem;
+    }
+
+    .data-table__form {
+        display: inline-flex;
+        flex: none;
+        vertical-align: middle;
+    }
+
+    .data-table__form .button {
+        width: auto;
+    }
+
+    .data-table__form + .data-table__form {
+        margin-left: var(--space-sm);
+    }
+
+    .data-table__actions > .data-table__form + * {
+        margin-left: 0;
+    }
+}
