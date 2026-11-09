@@ -3160,6 +3160,12 @@ textarea.form-field__control {
     line-height: 1.1;
 }
 
+@media (max-width: 37.49rem) {
+    .stat-tile:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+}
+
 @media (min-width: 37.5rem) {
     .stat-tiles {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3307,10 +3313,6 @@ textarea.form-field__control {
 
     .data-table__form + .data-table__form {
         margin-left: var(--space-sm);
-    }
-
-    .data-table__actions > .data-table__form + * {
-        margin-left: 0;
     }
 }
 
