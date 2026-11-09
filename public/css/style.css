@@ -32,6 +32,7 @@
     --color-danger-border: #f5b5b0;
     --color-focus: #1f3a5f;
     --color-focus-gap: #fff;
+    --color-backdrop: rgb(15 23 42 / 60%);
 
     --font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 
@@ -55,6 +56,8 @@
     --shadow-4: 0 -2px 10px rgb(17 24 39 / 6%);
 
     --touch-target: 2.75rem;
+    --bottom-nav-offset: calc(4.0625rem + env(safe-area-inset-bottom));
+    --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 html[data-theme="dark"] {
@@ -85,6 +88,7 @@ html[data-theme="dark"] {
     --color-danger-border: #93000a;
     --color-focus: #aec8f4;
     --color-focus-gap: #0e141f;
+    --color-backdrop: rgb(0 0 0 / 70%);
 
     --shadow-1: 0 1px 3px rgb(0 0 0 / 40%);
     --shadow-2: 0 4px 12px rgb(0 0 0 / 45%);
@@ -1255,6 +1259,7 @@ button {
 @media (min-width: 48rem) {
     :root {
         --page-margin: 1.5rem;
+        --bottom-nav-offset: 0rem;
     }
 
     .site-header__nav {
