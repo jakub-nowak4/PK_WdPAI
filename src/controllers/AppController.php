@@ -34,4 +34,16 @@ abstract class AppController
 
         require $layoutPath;
     }
+
+    /**
+     * MAKIETA: renderuje widok jako zalogowany uzytkownik demo (klucz `currentUser` dla layoutu).
+     * Jedyne miejsce do podmiany na uzytkownika z sesji, gdy powstanie AuthService.
+     *
+     * @param array<string, mixed> $currentUser
+     * @param array<string, mixed> $variables
+     */
+    protected function renderAsUser(string $template, array $currentUser, array $variables = []): void
+    {
+        $this->render($template, ['currentUser' => $currentUser] + $variables);
+    }
 }
