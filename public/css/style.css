@@ -2702,14 +2702,14 @@ body:has(dialog[open]) {
     text-transform: uppercase;
 }
 
-.data-table__vehicle {
+.data-table td.data-table__vehicle {
     justify-content: flex-start;
     font-size: 1rem;
     font-weight: 700;
 }
 
-.data-table__vehicle::before,
-.data-table__actions::before {
+.data-table td.data-table__vehicle::before,
+.data-table td.data-table__actions::before {
     display: none;
 }
 
@@ -2737,14 +2737,15 @@ body:has(dialog[open]) {
     font-size: 1.5rem;
 }
 
-.data-table__price {
+.data-table td.data-table__price {
     display: flex;
     flex-wrap: wrap;
+    row-gap: 0;
     font-size: 1rem;
     font-weight: 800;
 }
 
-.data-table__price::before {
+.data-table td.data-table__price::before {
     margin-right: auto;
 }
 
@@ -2760,7 +2761,7 @@ body:has(dialog[open]) {
     text-align: right;
 }
 
-.data-table__actions {
+.data-table td.data-table__actions {
     flex-wrap: wrap;
     justify-content: flex-start;
     padding-top: var(--space-sm);
@@ -2814,7 +2815,7 @@ body:has(dialog[open]) {
         display: none;
     }
 
-    .data-table__vehicle {
+    .data-table td.data-table__vehicle {
         display: table-cell;
     }
 
@@ -2836,7 +2837,7 @@ body:has(dialog[open]) {
         max-width: calc(100% - 8rem);
     }
 
-    .data-table__price {
+    .data-table td.data-table__price {
         display: table-cell;
     }
 
@@ -2844,7 +2845,7 @@ body:has(dialog[open]) {
         text-align: left;
     }
 
-    .data-table__actions {
+    .data-table td.data-table__actions {
         display: table-cell;
         padding-top: var(--space-md);
         border-top: 0;
