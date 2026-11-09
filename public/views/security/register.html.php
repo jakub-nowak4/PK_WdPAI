@@ -13,7 +13,6 @@ $accountType = 'buyer';
 <main class="page page--auth" id="main-content">
     <section class="auth-card" aria-labelledby="register-title">
         <header class="auth-card__header">
-            <p class="auth-card__badge"><?= $e($t('register.badge', 'Bezpieczna rejestracja')) ?></p>
             <h1 class="auth-card__title" id="register-title"><?= $e($t('register.title', 'Utwórz konto w MotoBid')) ?></h1>
             <p class="auth-card__lead"><?= $e($t('register.lead', 'Załóż konto kupującego i zacznij licytować pojazdy')) ?></p>
             <?php require __DIR__ . '/../partials/account-type-switch.html.php'; ?>
