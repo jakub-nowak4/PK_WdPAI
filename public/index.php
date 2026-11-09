@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controller\AuctionController;
 use App\Controller\DefaultController;
 use App\Controller\ErrorController;
 use App\Controller\ProjectController;
@@ -16,6 +17,7 @@ $routing = new Routing();
 
 $routing->get('/projects', ProjectController::class, 'index');
 $routing->get('/projects/{id}', ProjectController::class, 'show');
+$routing->get('/auctions/{id}', AuctionController::class, 'show');
 $routing->get('/', DefaultController::class, 'index');
 
 try {
