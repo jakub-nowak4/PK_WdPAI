@@ -1814,6 +1814,121 @@ body:has(.bid-bar) .site-footer {
     }
 }
 
+/* ---------- Szczegóły aukcji: historia licytacji ---------- */
+.bid-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
+}
+
+.bid-history__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+.bid-history__header h2 {
+    font-size: 1.125rem;
+}
+
+.bid-history__count {
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.bid-history__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.bid-history__item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "bidder amount"
+        "when diff";
+    column-gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid transparent;
+    border-bottom-color: var(--color-border);
+}
+
+.bid-history__bidder {
+    grid-area: bidder;
+    font-size: 0.875rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.bid-history__when {
+    grid-area: when;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+}
+
+.bid-history__amount {
+    grid-area: amount;
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    text-align: right;
+}
+
+.bid-history__diff {
+    grid-area: diff;
+    color: var(--color-success);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    text-align: right;
+}
+
+.bid-history__item--leader {
+    border-color: var(--color-success-border);
+    border-radius: var(--radius-md);
+    background: var(--color-success-soft);
+}
+
+.bid-history__item--leader .bid-history__bidder::before {
+    content: "★ ";
+}
+
+.bid-history__item--you {
+    border-inline-start: 4px solid var(--color-primary);
+}
+
+.bid-history__item--you .bid-history__bidder {
+    font-weight: 800;
+}
+
+.bid-history__empty,
+.bid-history__start {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.bid-history__start {
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--color-border);
+}
+
 /* ---------- Animacje ---------- */
 @keyframes spin {
     to {
