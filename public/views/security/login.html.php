@@ -43,7 +43,6 @@ $csrfToken = (string) ($csrfToken ?? '');
         <footer class="auth-card__footer">
             <p><?= $e($t('login.no_account', 'Nie masz konta?')) ?>
                 <a href="/register"><?= $e($t('login.register', 'Zarejestruj się')) ?></a></p>
-            <p><a href="/register/company"><?= $e($t('login.register_company', 'Rejestracja firmy')) ?></a></p>
         </footer>
     </section>
 </main>
