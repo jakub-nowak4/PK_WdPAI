@@ -29,6 +29,22 @@ if (is_array($currentUser)) {
     };
 }
 $navItems = require __DIR__ . '/partials/nav-items.php';
+
+// Aktywna pozycja nawigacji: tylko jedna, o najdluzszym dopasowaniu sciezki (bez query).
+$pathOnly = (string) strtok($currentPath, '?');
+$activeHref = null;
+$bestLength = -1;
+foreach ($navItems as $navItem) {
+    foreach ([(string) strtok($navItem['href'], '?'), ...($navItem['match'] ?? [])] as $candidate) {
+        $matches = $pathOnly === $candidate || ($candidate !== '/' && str_starts_with($pathOnly, $candidate . '/'));
+        if ($matches && strlen($candidate) > $bestLength) {
+            $bestLength = strlen($candidate);
+            $activeHref = $navItem['href'];
+        }
+    }
+}
+// aria-current="page" tylko przy rownosci ze sciezka pozycji; dopasowanie sekcji to "true".
+$activeExact = $activeHref !== null && $pathOnly === strtok($activeHref, '?');
 ?>
 <!doctype html>
 <html lang="<?= $e($lang) ?>">

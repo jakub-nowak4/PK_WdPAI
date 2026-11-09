@@ -1,9 +1,10 @@
 <?php
 /**
- * Dolny pasek nawigacji na telefonach (widocznosc ustala CSS, < 768 px).
+ * Dolny pasek nawigacji na telefonach (widocznosc ustala CSS, ukryty od 768 px).
  * @var callable $t
  * @var callable $e
- * @var string $currentPath
+ * @var string|null $activeHref href aktywnej pozycji (liczy layout.html.php)
+ * @var bool $activeExact czy sciezka rowna sie href (aria-current="page"), inaczej "true"
  * @var array|null $currentUser
  * @var string $csrfToken
  * @var list<array{href:string,label:string,icon:string}> $navItems
@@ -12,17 +13,17 @@
 <nav class="bottom-nav" aria-label="<?= $e($t('nav.mobile', 'Nawigacja mobilna')) ?>">
     <ul class="bottom-nav__list">
         <?php foreach ($navItems as $item): ?>
-            <?php $isActive = $currentPath === $item['href'] || str_starts_with($currentPath, $item['href'] . '/'); ?>
+            <?php $isActive = $activeHref === $item['href']; ?>
             <li>
                 <a class="bottom-nav__link<?= $isActive ? ' bottom-nav__link--active' : '' ?>"
-                   href="<?= $e($item['href']) ?>"<?= $isActive ? ' aria-current="page"' : '' ?>>
+                   href="<?= $e($item['href']) ?>"<?= $isActive ? ' aria-current="' . ($activeExact ? 'page' : 'true') . '"' : '' ?>>
                     <span class="bottom-nav__icon" aria-hidden="true"><?= $e($item['icon']) ?></span>
                     <span class="bottom-nav__label"><?= $e($item['label']) ?></span>
                 </a>
             </li>
         <?php endforeach; ?>
         <?php if (is_array($currentUser ?? null)): ?>
-            <?php /* Mobile: wylogowanie (formularz z naglowka jest ukryty < 1024 px). */ ?>
+            <?php /* Mobile: wylogowanie (formularz z naglowka jest ukryty od 768 px). */ ?>
             <li class="bottom-nav__logout">
                 <form method="post" action="/logout">
                     <input type="hidden" name="csrfToken" value="<?= $e($csrfToken) ?>">
