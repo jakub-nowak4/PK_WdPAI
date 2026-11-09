@@ -3313,3 +3313,112 @@ textarea.form-field__control {
         margin-left: 0;
     }
 }
+
+/* ---------- Ekrany 18-19: strony błędów 400, 403, 404 ---------- */
+.error-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    justify-items: center;
+    padding-top: var(--space-xl);
+}
+
+.error-page__code,
+.error-page__card {
+    grid-area: 1 / 1;
+    width: 100%;
+    max-width: 31.25rem;
+}
+
+.error-page__code {
+    z-index: 1;
+    align-self: start;
+    margin: 0;
+    color: var(--color-primary-soft);
+    font-size: clamp(6rem, 32vw, 10rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    text-align: center;
+    pointer-events: none;
+    user-select: none;
+}
+
+.error-page__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    align-self: start;
+    padding: var(--space-xl) var(--space-md) var(--space-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-2);
+    text-align: center;
+}
+
+.error-page__icon {
+    position: relative;
+    z-index: 2;
+    flex: none;
+    box-sizing: content-box;
+    width: 3rem;
+    height: 3rem;
+    margin-top: var(--space-lg);
+    margin-bottom: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+}
+
+.error-page__label {
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-pill);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.error-page__title {
+    color: var(--color-text);
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.error-page__description {
+    max-width: 26rem;
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.error-page__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+    margin-top: var(--space-md);
+}
+
+@media (min-width: 37.5rem) {
+    .error-page {
+        padding-top: 4rem;
+    }
+
+    .error-page__card {
+        padding: var(--space-xl);
+    }
+
+    .error-page__actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: auto;
+    }
+}
