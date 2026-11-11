@@ -160,5 +160,6 @@ $specLabels = [
     <?php endif; ?>
     <?php if ($bidError !== null): ?>
         <script type="module" src="/js/dismiss.js"></script>
+        <script type="module" src="/js/clear-amount.js"></script>
     <?php endif; ?>
 </main>
