@@ -1966,11 +1966,31 @@ body:has(dialog[open]) {
     padding: var(--space-lg) var(--space-md);
 }
 
+.dialog--sheet .dialog__form::before {
+    content: "";
+    align-self: center;
+    flex: none;
+    width: 2.5rem;
+    height: 0.25rem;
+    margin-top: calc(-1 * var(--space-sm));
+    border-radius: var(--radius-pill);
+    background: var(--color-border-strong);
+}
+
 .dialog__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-md);
+}
+
+.dialog__header .button--icon {
+    border-color: transparent;
+    background: transparent;
+}
+
+.dialog__header .button--icon:hover {
+    background: var(--color-surface-muted);
 }
 
 .dialog__header h2 {
@@ -2053,6 +2073,10 @@ body:has(dialog[open]) {
 
     .dialog__form {
         padding: var(--space-lg);
+    }
+
+    .dialog--sheet .dialog__form::before {
+        display: none;
     }
 
     .dialog__footer {
