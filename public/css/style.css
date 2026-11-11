@@ -3606,3 +3606,34 @@ textarea.form-field__control {
         width: auto;
     }
 }
+
+/* ---------- Ekran 07: zostałeś przebity (baner, etykieta w panelu) ---------- */
+.bid-banner.alert--danger .bid-banner__title::before {
+    content: "⚠ ";
+}
+
+.bid-banner > .button:not(.button--icon) {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    margin-top: var(--space-sm);
+}
+
+.bid-panel__leader.status-label--outbid {
+    border-color: var(--color-danger-border);
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+.bid-panel__leader.status-label--outbid::before {
+    content: "✕";
+}
+
+@media (min-width: 37.5rem) {
+    .bid-banner > .button:not(.button--icon) {
+        grid-column: 2;
+        grid-row: 1 / span 3;
+        align-self: center;
+        justify-self: end;
+        margin-top: 0;
+    }
+}
