@@ -29,6 +29,7 @@
             <div><dt><?= $e($t('auction.current_price', 'Aktualna cena')) ?></dt><dd><?= $e($money($auction['price'])) ?></dd></div>
             <div><dt><?= $e($t('bids.min_step', 'Minimalny krok')) ?></dt><dd>+<?= $e($money($auction['minIncrement'])) ?></dd></div>
         </dl>
+        <p class="dialog__hint"><?= $e($t('bids.will_lead', 'Będziesz najwyższym licytantem')) ?></p>
 
         <p class="alert alert--warning"><?= $e($t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundach przedłuża aukcję o 30 sekund.')) ?></p>
 
