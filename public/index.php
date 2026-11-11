@@ -22,6 +22,8 @@ $routing = new Routing();
 $routing->get('/projects', ProjectController::class, 'index');
 $routing->get('/projects/{id}', ProjectController::class, 'show');
 $routing->get('/auctions/{id}', AuctionController::class, 'show');
+$routing->get('/auctions/{id}/won', AuctionController::class, 'won');
+$routing->get('/my-bids', AccountController::class, 'myBids');
 $routing->get('/login', SecurityController::class, 'login');
 $routing->get('/register', SecurityController::class, 'register');
 $routing->get('/register/company', SecurityController::class, 'registerCompany');
