@@ -38,19 +38,6 @@ if ($isMock && $previewState === 'leading') {
         ['bidder' => '', 'isYou' => true, 'amount' => 90000, 'diff' => 500, 'when' => '10 min temu', 'badge' => 'outbid'],
         ['bidder' => 'Licytujący 3', 'isYou' => false, 'amount' => 89500, 'diff' => 500, 'when' => '12 min temu'],
     ];
-} elseif ($isMock && $previewState === 'won') {
-    // MAKIETA (ekran 08): aukcja zakonczona, kupujacy wygral za 95 500 zł.
-    $auction['status'] = 'ended';
-    $auction['price'] = 95500;
-    $auction['bidCount'] = 18;
-    $auction['viewerStatus'] = 'won';
-    $auction['endsAtLabel'] = '24.03.2026, 18:30';
-    $auction['secondsLeft'] = 0;
-    $auction['timeLeft'] = '0d 0h 0m 0s';
-    $bids = [
-        ['bidder' => '', 'isYou' => true, 'amount' => 95500, 'diff' => 3500, 'when' => '24.03.2026, 18:29', 'badge' => 'leader'],
-        ['bidder' => 'Licytujący ***482', 'isYou' => false, 'amount' => 92000, 'diff' => 2000, 'when' => '24.03.2026, 18:10'],
-    ];
 } elseif ($isMock && $previewState === 'error') {
     // MAKIETA (ekran 06): oferta za niska, kupujacy zostal przebity.
     $auction['price'] = 92000;
@@ -102,8 +89,6 @@ $specLabels = [
             <p class="bid-banner__text"><?= $e($t('bids.outbid_text', 'Inny licytant złożył wyższą ofertę. Podbij, aby odzyskać prowadzenie!')) ?></p>
             <a class="button button--accent" href="#bid-amount"><?= $e($t('bids.outbid_cta', 'Przebij ofertę')) ?></a>
         </section>
-    <?php elseif ($isMock && $previewState === 'won'): ?>
-        <?php require __DIR__ . '/../partials/won-summary.html.php'; ?>
     <?php elseif ($bidError !== null): ?>
         <section class="alert alert--danger bid-banner" role="alert" data-dismissible>
             <h2 class="bid-banner__title"><?= $e($bidError['title']) ?></h2>
