@@ -23,6 +23,15 @@ final class HttpException extends \RuntimeException
         return new self(400, $message);
     }
 
+    /*
+    Pusty komunikat oznacza "brak własnego komunikatu": ErrorController
+    pokaże wtedy domyślny tekst 403.
+    */
+    public static function forbidden(string $message = ''): self
+    {
+        return new self(403, $message);
+    }
+
     public static function notFound(string $message = 'Not found'): self
     {
         return new self(404, $message);

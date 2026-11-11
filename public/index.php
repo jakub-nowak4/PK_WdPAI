@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controller\AccountController;
+use App\Controller\AdminController;
 use App\Controller\AuctionController;
 use App\Controller\CompanyController;
 use App\Controller\DefaultController;
@@ -27,6 +28,8 @@ $routing->get('/register/company', SecurityController::class, 'registerCompany')
 $routing->get('/account/pending', AccountController::class, 'pending');
 $routing->get('/company', CompanyController::class, 'index');
 $routing->get('/company/auctions/new', CompanyController::class, 'create');
+$routing->get('/company/auctions/{id}/delete', CompanyController::class, 'delete');
+$routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
 
 try {

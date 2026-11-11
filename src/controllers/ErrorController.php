@@ -8,7 +8,7 @@ use App\Exception\HttpException;
 use App\Request;
 
 /*
-Odpowiedzi błędów 400 i 404. Dla ścieżek /api/* zwraca JSON w formacie z
+Odpowiedzi błędów 400, 403 i 404. Dla ścieżek /api/* zwraca JSON w formacie z
 docs/api.md (sekcja 3), dla pozostałych stronę HTML.
 Teksty są na razie stałe; po dodaniu Translatora trafią do lang/pl.php i lang/en.php.
 */
@@ -21,6 +21,11 @@ final class ErrorController extends AppController
             'code' => 'bad_request',
             'message' => 'Nieprawidłowe żądanie.',
             'view' => 'errors/400',
+        ],
+        403 => [
+            'code' => 'forbidden',
+            'message' => 'Nie masz uprawnień do tej strony.',
+            'view' => 'errors/403',
         ],
         404 => [
             'code' => 'not_found',
@@ -35,6 +40,12 @@ final class ErrorController extends AppController
             ? $exception->statusCode()
             : 404;
         $error = self::ERRORS[$status];
+
+        // Własny komunikat z wyjątku dotyczy tylko 403 (reguły biznesowe po polsku).
+        // Komunikaty routera dla 400/404 są techniczne i po angielsku, więc ich nie pokazujemy.
+        if ($status === 403 && $exception->getMessage() !== '') {
+            $error['message'] = $exception->getMessage();
+        }
 
         http_response_code($status);
 
