@@ -23,6 +23,14 @@ final class AccountController extends AppController
         ]);
     }
 
+    public function notifications(): void
+    {
+        // MAKIETA: kupujący demo i dane z partials/mock-notifications.php, do czasu AuthService i repozytorium.
+        $this->renderAsUser('account/notifications', DemoUser::buyer(), [
+            'pageTitle' => 'Powiadomienia',
+        ]);
+    }
+
     public function pending(): void
     {
         // MAKIETA: firma demo oczekujaca na zatwierdzenie, do czasu AuthService (karta auth).
