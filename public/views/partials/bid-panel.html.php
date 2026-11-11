@@ -29,6 +29,13 @@ $modifier = match (true) {
     $viewerStatus === 'outbid' => ' bid-panel--outbid',
     default => '',
 };
+// MAKIETA (ekran 06): $bidError ustawia show.html.php; pole kwoty dostaje aria-invalid i komunikat.
+$bidError = $bidError ?? null;
+$hasError = $bidError !== null && $panelState === 'buyer';
+$isLeading = $viewerStatus === 'leading' && $panelState === 'buyer';
+if ($hasError) {
+    $modifier .= ' bid-panel--error';
+}
 $cannotText = $isOwn
     ? $t('bids.own_auction', 'Nie możesz licytować własnej aukcji.')
     : $t('bids.cannot_bid', 'Nie możesz licytować tej aukcji.');
@@ -62,10 +69,16 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
     </p>
     <p class="bid-panel__price" aria-live="polite" data-current-price><?= $e($money($auction['price'])) ?></p>
     <?php if ($viewerStatus === 'leading'): ?>
-        <p class="bid-panel__leader"><?= $e($t('bids.you_lead', 'Prowadzisz w licytacji')) ?></p>
+        <p class="bid-panel__leader status-label status-label--leading"><?= $e($t('bids.you_lead', 'Prowadzisz w licytacji')) ?></p>
+        <p class="bid-panel__leader-name"><?= $e($t('bids.leader_is', 'Lider licytacji')) ?>: <?= $e($t('bids.you', 'Ty')) ?></p>
     <?php endif; ?>
 
-    <?php if ($panelState === 'buyer'): ?>
+    <?php if ($isLeading): ?>
+        <p class="bid-panel__step"><?= $e($t('bids.next_min', 'Kolejne min')) ?>: <?= $e($money($auction['minNextBid'])) ?></p>
+        <button class="button button--accent button--block bid-panel__submit" type="button" disabled>
+            <?= $e($t('bids.leading_wait', 'Prowadzisz – poczekaj na przebicie')) ?>
+        </button>
+    <?php elseif ($panelState === 'buyer'): ?>
         <p class="bid-panel__step"><?= $e($t('bids.min_step', 'Minimalny krok')) ?>: +<?= $e($money($auction['minIncrement'])) ?></p>
 
         <form class="bid-panel__form" method="post" action="/auctions/<?= $e((string) $auctionId) ?>" data-bid-form novalidate>
@@ -83,9 +96,14 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
                     <button class="button button--icon" type="button" data-step="-1" aria-label="<?= $e($t('bids.decrease', 'Zmniejsz kwotę')) ?>">−</button>
                     <input class="form-field__control" id="bid-amount" name="amount" type="number" inputmode="numeric" required
                            min="<?= $e((string) $auction['minNextBid']) ?>" step="<?= $e((string) $auction['minIncrement']) ?>"
-                           value="<?= $e((string) $auction['minNextBid']) ?>" aria-describedby="bid-amount-hint bid-message">
+                           value="<?= $e((string) $auction['minNextBid']) ?>"
+                           <?php if ($hasError): ?>aria-invalid="true" <?php endif; ?>aria-describedby="<?= $hasError ? 'bid-amount-error ' : '' ?>bid-amount-hint bid-message">
                     <button class="button button--icon" type="button" data-step="1" aria-label="<?= $e($t('bids.increase', 'Zwiększ kwotę')) ?>">+</button>
                 </div>
+                <?php if ($hasError): ?>
+                    <p class="form-field__error" id="bid-amount-error"><?= $e($t('bids.must_exceed', 'Oferta musi być wyższa niż')) ?> <?= $e($money($auction['price'])) ?> (<?= $e($t('bids.min_step_lc', 'minimalny krok')) ?> <?= $e($money($auction['minIncrement'])) ?>)</p>
+                    <p class="bid-panel__suggested"><?= $e($t('bids.suggested', 'Sugerowana minimalna oferta')) ?>: <strong><?= $e($money($auction['minNextBid'])) ?></strong></p>
+                <?php endif; ?>
                 <p class="form-field__hint" id="bid-amount-hint"><?= $e($t('bids.min', 'Minimum')) ?>: <span data-min-next-bid><?= $e($money($auction['minNextBid'])) ?></span></p>
             </div>
             <button class="button button--accent button--block bid-panel__submit" type="submit" data-bid-open>
@@ -116,9 +134,15 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
             <span><?= $e($t('auction.remaining', 'Pozostało')) ?>: <time data-countdown aria-live="off"><?= $e($auction['timeLeft']) ?></time></span>
             <span><?= $e($t('auction.current', 'Aktualna')) ?>: <strong data-current-price><?= $e($money($auction['price'])) ?></strong></span>
         </p>
-        <button class="button button--accent button--block bid-bar__submit" type="button" data-bid-open-bar>
-            <?= $e($t('bids.place', 'Złóż ofertę')) ?> (<?= $e($money($auction['minNextBid'])) ?>)
-        </button>
+        <?php if ($isLeading): ?>
+            <button class="button button--accent button--block bid-bar__submit" type="button" disabled>
+                <?= $e($t('bids.leading_wait', 'Prowadzisz – poczekaj na przebicie')) ?>
+            </button>
+        <?php else: ?>
+            <button class="button button--accent button--block bid-bar__submit" type="button" data-bid-open-bar>
+                <?= $e($t('bids.place', 'Złóż ofertę')) ?> (<?= $e($money($auction['minNextBid'])) ?>)
+            </button>
+        <?php endif; ?>
         <p class="bid-bar__rule"><?= $e($antiSniping) ?></p>
     </div>
 <?php endif; ?>
