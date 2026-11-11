@@ -33,6 +33,9 @@ $modifier = match (true) {
 $bidError = $bidError ?? null;
 $hasError = $bidError !== null && $panelState === 'buyer';
 $isLeading = $viewerStatus === 'leading' && $panelState === 'buyer';
+// Ekran 07: przebity i znana wlasna oferta -> etykieta, kwota i przycisk "Przebij ofertę".
+$isOutbid = $viewerStatus === 'outbid' && $panelState === 'buyer' && !$hasError && isset($auction['viewerBid']);
+$placeLabel = $isOutbid ? $t('bids.outbid_cta', 'Przebij ofertę') : $t('bids.place', 'Złóż ofertę');
 if ($hasError) {
     $modifier .= ' bid-panel--error';
 }
@@ -71,6 +74,11 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
     <?php if ($viewerStatus === 'leading'): ?>
         <p class="bid-panel__leader status-label status-label--leading"><?= $e($t('bids.you_lead', 'Prowadzisz w licytacji')) ?></p>
         <p class="bid-panel__leader-name"><?= $e($t('bids.leader_is', 'Lider licytacji')) ?>: <?= $e($t('bids.you', 'Ty')) ?></p>
+    <?php endif; ?>
+
+    <?php if ($isOutbid): ?>
+        <p class="bid-panel__leader status-label status-label--outbid"><?= $e($t('bids.outbid', 'Przebita')) ?></p>
+        <p class="bid-panel__leader-name"><?= $e($t('bids.outbid_yours', 'Przebito Twoje')) ?> <?= $e($money($auction['viewerBid'])) ?></p>
     <?php endif; ?>
 
     <?php if ($isLeading): ?>
@@ -116,7 +124,7 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
                 <p class="form-field__hint" id="bid-amount-hint"><?= $e($t('bids.min', 'Minimum')) ?>: <span data-min-next-bid><?= $e($money($auction['minNextBid'])) ?></span></p>
             </div>
             <button class="button button--accent button--block bid-panel__submit" type="submit" data-bid-open>
-                <?= $e($t('bids.place', 'Złóż ofertę')) ?>
+                <?= $e($placeLabel) ?>
             </button>
             <noscript><p class="alert alert--warning"><?= $e($t('bids.noscript', 'Licytacja wymaga JavaScript.')) ?></p></noscript>
         </form>
@@ -149,7 +157,7 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
             </button>
         <?php else: ?>
             <button class="button button--accent button--block bid-bar__submit" type="button" data-bid-open-bar>
-                <?= $e($t('bids.place', 'Złóż ofertę')) ?> (<?= $e($money($auction['minNextBid'])) ?>)
+                <?= $e($placeLabel) ?> (<?= $e($money($auction['minNextBid'])) ?>)
             </button>
         <?php endif; ?>
         <p class="bid-bar__rule"><?= $e($antiSniping) ?></p>
