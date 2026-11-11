@@ -3461,6 +3461,11 @@ textarea.form-field__control {
     width: 100%;
 }
 
+.data-table .status-label {
+    flex: none;
+    min-width: max-content;
+}
+
 .data-table__mono {
     font-family: var(--font-mono);
     overflow-wrap: anywhere;
