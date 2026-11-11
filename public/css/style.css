@@ -3638,7 +3638,12 @@ textarea.form-field__control {
     }
 }
 
-/* ---------- Ekran 08: aukcja wygrana (podsumowanie nad szczegółami) ---------- */
+/* ---------- Ekran 08: aukcja wygrana (osobna strona /auctions/{id}/won) ---------- */
+.page--won {
+    padding-top: var(--space-lg);
+}
+
+/* Karta jest stroną, nie oknem: neutralna powierzchnia zamiast zielonego .alert--success. */
 .won-summary {
     display: flex;
     flex-direction: column;
@@ -3647,14 +3652,54 @@ textarea.form-field__control {
     max-width: 41rem;
     margin-inline: auto;
     padding: var(--space-md);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    box-shadow: var(--shadow-2);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-1);
     color: var(--color-text);
     font-size: 1rem;
 }
 
 .won-summary.alert--success::before {
     content: none;
+}
+
+.won-summary__icon {
+    display: grid;
+    flex: none;
+    align-self: center;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-success);
+    color: var(--color-bg);
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.won-summary__car {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface-muted);
+}
+
+.won-summary__car h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.won-summary__car p {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    overflow-wrap: anywhere;
 }
 
 .won-summary > .status-label {
