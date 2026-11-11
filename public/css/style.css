@@ -3637,3 +3637,213 @@ textarea.form-field__control {
         margin-top: 0;
     }
 }
+
+/* ---------- Ekran 08: aukcja wygrana (podsumowanie nad szczegółami) ---------- */
+.won-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    width: 100%;
+    max-width: 41rem;
+    margin-inline: auto;
+    padding: var(--space-md);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-2);
+    color: var(--color-text);
+    font-size: 1rem;
+}
+
+.won-summary.alert--success::before {
+    content: none;
+}
+
+.won-summary > .status-label {
+    align-self: center;
+}
+
+.won-summary__title {
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.won-summary__text {
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.won-summary__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--color-success-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.won-summary__fact {
+    min-width: 0;
+}
+
+.won-summary__fact dt {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.won-summary__fact dd {
+    margin-top: var(--space-xs);
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.won-summary__fact dd.won-summary__price {
+    color: var(--color-primary);
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.won-summary__seller {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+}
+
+.won-summary__seller h3,
+.won-summary > section > h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.won-summary__seller > p:last-child {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.won-summary__contacts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+.won-summary__contacts a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    min-height: var(--touch-target);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius);
+    background: var(--color-surface-muted);
+    color: var(--color-primary);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.won-summary__contacts a::after {
+    content: "→";
+    flex: none;
+}
+
+.won-summary__contacts a:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+}
+
+.won-summary__steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin: var(--space-sm) 0 0;
+    padding: 0;
+    counter-reset: won-step;
+    list-style: none;
+}
+
+.won-summary__step {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    counter-increment: won-step;
+}
+
+.won-summary__step::before {
+    content: counter(won-step);
+    display: grid;
+    grid-row: 1 / span 2;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-weight: 800;
+}
+
+.won-summary__step > span {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+}
+
+.won-summary__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.won-summary__actions .button {
+    width: 100%;
+}
+
+@media (min-width: 37.5rem) {
+    .won-summary {
+        padding: var(--space-xl);
+    }
+
+    .won-summary__title {
+        font-size: 1.875rem;
+    }
+
+    .won-summary__contacts {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .won-summary__contacts li {
+        flex: 1 1 14rem;
+    }
+
+    .won-summary__actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .won-summary__actions .button {
+        flex: 1 1 12rem;
+        width: auto;
+    }
+}
