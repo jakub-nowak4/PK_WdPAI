@@ -1,10 +1,10 @@
 <?php
 /**
- * Podsumowanie wygranej aukcji (ekran 08), wstawiane nad szczegolami aukcji.
+ * Podsumowanie wygranej aukcji (ekran 08), renderowane na osobnej stronie auctions/won.html.php.
  * @var callable $t
  * @var callable $e
  * @var callable $money
- * @var array<string,mixed> $auction price, endsAtLabel, seller (name, phone?, email)
+ * @var array<string,mixed> $auction title, vin, origin, price, endsAtLabel, seller (name, phone?, email)
  */
 $seller = $auction['seller'];
 $steps = [
@@ -14,9 +14,16 @@ $steps = [
 ];
 ?>
 <section class="alert alert--success won-summary" aria-labelledby="won-title">
+    <span class="won-summary__icon" aria-hidden="true">✓</span>
     <p class="status-label status-label--won"><?= $e($t('won.label', 'Aukcja zakończona pomyślnie')) ?></p>
     <h2 class="won-summary__title" id="won-title"><?= $e($t('won.title', 'Gratulacje! Wygrałeś aukcję')) ?></h2>
     <p class="won-summary__text"><?= $e($t('won.text', 'Twoja oferta okazała się najwyższa. Poniżej znajdziesz dane sprzedającego i kolejne kroki.')) ?></p>
+
+    <article class="won-summary__car" aria-labelledby="won-car-title">
+        <h3 id="won-car-title"><?= $e($auction['title']) ?></h3>
+        <p><?= $e($t('auction.vin', 'VIN')) ?>: <?= $e($auction['vin']) ?></p>
+        <p><?= $e($t('auction.origin', 'Kraj pochodzenia')) ?>: <?= $e($auction['origin']) ?></p>
+    </article>
 
     <dl class="won-summary__facts">
         <div class="won-summary__fact">
