@@ -3800,9 +3800,18 @@ textarea.form-field__control {
     background: var(--color-surface-muted);
     color: var(--color-primary);
     font-weight: 700;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     text-decoration: none;
     transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.won-summary__contacts li {
+    min-width: 0;
+}
+
+.won-summary__contacts a:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
 }
 
 .won-summary__contacts a::after {
@@ -3871,15 +3880,6 @@ textarea.form-field__control {
 
     .won-summary__title {
         font-size: 1.875rem;
-    }
-
-    .won-summary__contacts {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .won-summary__contacts li {
-        flex: 1 1 14rem;
     }
 
     .won-summary__actions {
