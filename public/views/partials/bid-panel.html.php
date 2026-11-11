@@ -87,17 +87,26 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
                 <?php foreach ([1, 2, 4] as $multiplier): ?>
                     <button class="button button--ghost" type="button" data-quick-add="<?= $e((string) ($auction['minIncrement'] * $multiplier)) ?>">
                         +<?= $e($money($auction['minIncrement'] * $multiplier)) ?>
+                        <span class="bid-panel__quick-result">(<?= $e($money($auction['price'] + $auction['minIncrement'] * $multiplier)) ?>)</span>
                     </button>
                 <?php endforeach; ?>
             </div>
             <div class="form-field">
-                <label class="form-field__label" for="bid-amount"><?= $e($t('bids.amount', 'Twoja oferta (zł)')) ?></label>
+                <div class="form-field__row">
+                    <label class="form-field__label" for="bid-amount"><?= $e($t('bids.amount', 'Twoja oferta (zł)')) ?></label>
+                    <?php if ($hasError): ?>
+                        <span class="form-field__badge"><?= $e($t('bids.amount_error', 'Błąd kwoty')) ?></span>
+                    <?php endif; ?>
+                </div>
                 <div class="input-group">
                     <button class="button button--icon" type="button" data-step="-1" aria-label="<?= $e($t('bids.decrease', 'Zmniejsz kwotę')) ?>">−</button>
                     <input class="form-field__control" id="bid-amount" name="amount" type="number" inputmode="numeric" required
                            min="<?= $e((string) $auction['minNextBid']) ?>" step="<?= $e((string) $auction['minIncrement']) ?>"
                            value="<?= $e((string) $auction['minNextBid']) ?>"
                            <?php if ($hasError): ?>aria-invalid="true" <?php endif; ?>aria-describedby="<?= $hasError ? 'bid-amount-error ' : '' ?>bid-amount-hint bid-message">
+                    <?php if ($hasError): ?>
+                        <button class="button button--link input-group__clear" type="button" data-clear-amount><?= $e($t('common.clear', 'Wyczyść')) ?></button>
+                    <?php endif; ?>
                     <button class="button button--icon" type="button" data-step="1" aria-label="<?= $e($t('bids.increase', 'Zwiększ kwotę')) ?>">+</button>
                 </div>
                 <?php if ($hasError): ?>
