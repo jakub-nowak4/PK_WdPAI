@@ -7,17 +7,7 @@
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
 
-$isMock = false;
-if (!isset($auctions)) {
-    $mock = require __DIR__ . '/partials/mock-auctions.php';
-    $auctions = $mock['auctions'];
-    $brands = $mock['brands'];
-    $filters = $mock['filters'];
-    $page = $mock['page'];
-    $pages = $mock['pages'];
-    $total = $mock['total'];
-    $isMock = true;
-}
+require __DIR__ . '/partials/auction-list-defaults.php';
 ?>
 <main class="page page--home" id="main-content">
     <section class="hero" aria-labelledby="hero-title">
@@ -49,34 +39,5 @@ if (!isset($auctions)) {
         </ul>
     </section>
 
-    <?php if ($isMock): ?>
-        <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
-    <?php endif; ?>
-
-    <div class="auction-list-layout">
-        <aside aria-label="<?= $e($t('filters.title', 'Filtry')) ?>">
-            <?php require __DIR__ . '/partials/auction-filters.html.php'; ?>
-        </aside>
-
-        <section class="auction-list" aria-labelledby="auction-list-title">
-            <header class="auction-list__header">
-                <h2 id="auction-list-title"><?= $e($t('auction.found', 'Znaleziono')) ?>: <?= $e((string) $total) ?> <?= $e($t('auction.active', 'aktywnych aukcji')) ?></h2>
-                <span class="status-label status-label--active"><span class="status-label__dot" aria-hidden="true"></span>LIVE 24/7</span>
-            </header>
-
-            <?php if ($auctions === []): ?>
-                <div class="empty-state">
-                    <h3 class="empty-state__title"><?= $e($t('auction.empty', 'Brak aukcji spełniających kryteria')) ?></h3>
-                    <a class="button button--secondary" href="/auctions"><?= $e($t('filters.clear', 'Wyczyść filtry')) ?></a>
-                </div>
-            <?php else: ?>
-                <div class="auction-grid">
-                    <?php foreach ($auctions as $auction): ?>
-                        <?php require __DIR__ . '/partials/auction-card.html.php'; ?>
-                    <?php endforeach; ?>
-                </div>
-                <?php require __DIR__ . '/partials/pagination.html.php'; ?>
-            <?php endif; ?>
-        </section>
-    </div>
+    <?php require __DIR__ . '/partials/auction-list-block.html.php'; ?>
 </main>
