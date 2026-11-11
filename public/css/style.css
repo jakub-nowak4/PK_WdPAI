@@ -505,6 +505,18 @@ button {
     background: var(--color-surface-muted);
 }
 
+.button--link {
+    padding: 0 var(--space-sm);
+    background: transparent;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+.button--link:hover {
+    background: var(--color-surface-muted);
+}
+
 .button--block {
     width: 100%;
 }
@@ -644,6 +656,35 @@ button {
 .input-group__suffix {
     color: var(--color-text-muted);
     font-weight: 600;
+}
+
+.form-field__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+.form-field__badge {
+    flex: none;
+    padding: 0.125rem var(--space-sm);
+    border: 1px solid var(--color-danger-border);
+    border-radius: 6px;
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+    font-size: 0.6875rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.input-group__clear {
+    flex: none;
+    min-width: var(--touch-target);
+    padding: 0 var(--space-sm);
+    color: var(--color-danger);
+    font-size: 0.75rem;
 }
 
 .alert {
@@ -1647,10 +1688,18 @@ button {
 }
 
 .bid-panel__quick .button {
-    padding: 0 var(--space-xs);
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-xs);
     font-size: 0.8125rem;
     letter-spacing: 0;
     white-space: nowrap;
+}
+
+.bid-panel__quick-result {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
 }
 
 .bid-panel__submit {
@@ -2014,6 +2063,10 @@ body:has(.bid-bar) .site-footer {
     font-weight: 800;
 }
 
+.bid-panel--error .button--icon {
+    display: none;
+}
+
 .bid-panel__suggested {
     padding: var(--space-sm) var(--space-md);
     border: 1px solid var(--color-accent-border);
@@ -2074,6 +2127,12 @@ body:has(dialog[open]) {
     margin-top: calc(-1 * var(--space-sm));
     border-radius: var(--radius-pill);
     background: var(--color-border-strong);
+}
+
+.dialog__hint {
+    color: var(--color-success);
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .dialog__header {
