@@ -16,7 +16,8 @@ return [
         'price' => 89500, 'minIncrement' => 500, 'minNextBid' => 90000, 'startPrice' => 62000, 'bidCount' => 14,
         'endsAt' => '2026-12-12T18:00:00+01:00', 'endsAtLabel' => '12.12.2026, 18:00',
         'serverTime' => '2026-12-10T13:41:28+01:00', 'secondsLeft' => 188912, 'timeLeft' => '2d 4h 28m 32s',
-        'seller' => ['name' => 'AutoImport Kraków', 'initials' => 'AK', 'since' => '2026', 'finished' => 84],
+        'seller' => ['name' => 'AutoImport Kraków', 'initials' => 'AK', 'since' => '2026', 'finished' => 84,
+            'phone' => '+48 600 000 000', 'email' => 'kontakt@autoimport.example'],
         'specs' => [
             'year' => '2018', 'mileage' => '64 200 km', 'fuel' => 'Benzyna 5.0L',
             'gearbox' => 'Automat 10-biegowy', 'origin' => 'USA (Floryda)',
