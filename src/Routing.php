@@ -25,6 +25,16 @@ final class Routing
     private array $routes = [];
 
     /**
+     * Zależności tworzone w public/index.php, wstrzykiwane do konstruktorów
+     * kontrolerów według typu parametru (klucz = nazwa klasy).
+     *
+     * @param array<class-string, object> $services
+     */
+    public function __construct(private readonly array $services = [])
+    {
+    }
+
+    /**
      * @param class-string<AppController> $controller
      */
     public function get(string $path, string $controller, string $action): void
@@ -177,6 +187,31 @@ final class Routing
     }
 
     /*
+    Tworzy kontroler, podając do konstruktora zależności z mapy $services
+    dobrane po typie parametru. Brak zależności to błąd konfiguracji (500).
+    */
+    private function createController(string $controllerClass): AppController
+    {
+        $constructor = (new \ReflectionClass($controllerClass))->getConstructor();
+        $arguments = [];
+
+        foreach ($constructor?->getParameters() ?? [] as $parameter) {
+            $type = $parameter->getType();
+            $typeName = $type instanceof \ReflectionNamedType ? $type->getName() : '';
+
+            if (!isset($this->services[$typeName])) {
+                throw new \LogicException(
+                    'Missing dependency ' . $typeName . ' for ' . $controllerClass,
+                );
+            }
+
+            $arguments[] = $this->services[$typeName];
+        }
+
+        return new $controllerClass(...$arguments);
+    }
+
+    /*
     Tworzy kontroler i wywołuje akcję. Jeśli akcja deklaruje parametr typu Request,
     router przekazuje do niej obiekt żądania (np. index(Request $request)).
     */
@@ -186,7 +221,7 @@ final class Routing
         array $parameters,
         Request $request,
     ): void {
-        $controller = new $controllerClass();
+        $controller = $this->createController($controllerClass);
 
         foreach ((new \ReflectionMethod($controller, $action))->getParameters() as $parameter) {
             $type = $parameter->getType();

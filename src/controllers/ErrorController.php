@@ -10,7 +10,8 @@ use App\Request;
 /*
 Odpowiedzi błędów 400, 403 i 404. Dla ścieżek /api/* zwraca JSON w formacie z
 docs/api.md (sekcja 3), dla pozostałych stronę HTML.
-Teksty są na razie stałe; po dodaniu Translatora trafią do lang/pl.php i lang/en.php.
+Domyślne komunikaty pochodzą z katalogu tłumaczeń (klucze error.*); własny komunikat
+403 z wyjątku zostaje bez zmian.
 */
 final class ErrorController extends AppController
 {
@@ -19,17 +20,17 @@ final class ErrorController extends AppController
     private const ERRORS = [
         400 => [
             'code' => 'bad_request',
-            'message' => 'Nieprawidłowe żądanie.',
+            'message' => 'error.bad_request',
             'view' => 'errors/400',
         ],
         403 => [
             'code' => 'forbidden',
-            'message' => 'Nie masz uprawnień do tej strony.',
+            'message' => 'error.forbidden',
             'view' => 'errors/403',
         ],
         404 => [
             'code' => 'not_found',
-            'message' => 'Nie znaleziono strony.',
+            'message' => 'error.not_found',
             'view' => 'not-found',
         ],
     ];
@@ -45,6 +46,8 @@ final class ErrorController extends AppController
         // Komunikaty routera dla 400/404 są techniczne i po angielsku, więc ich nie pokazujemy.
         if ($status === 403 && $exception->getMessage() !== '') {
             $error['message'] = $exception->getMessage();
+        } else {
+            $error['message'] = $this->translator->translate($error['message']);
         }
 
         http_response_code($status);
