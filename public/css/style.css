@@ -480,7 +480,7 @@ button {
     color: var(--color-on-primary);
 }
 
-.button--primary:hover {
+.button--primary:hover:not(:disabled):not([aria-busy="true"]) {
     background: var(--color-primary-hover);
 }
 
@@ -493,8 +493,13 @@ button {
     color: var(--color-on-accent);
 }
 
-.button--accent:hover {
+.button--accent:hover:not(:disabled):not([aria-busy="true"]) {
     background: var(--color-accent-hover);
+}
+
+.button--accent:active:not(:disabled) {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-text);
 }
 
 .button--secondary {
@@ -503,7 +508,7 @@ button {
     color: var(--color-primary);
 }
 
-.button--secondary:hover {
+.button--secondary:hover:not(:disabled):not([aria-busy="true"]) {
     background: var(--color-surface-muted);
 }
 
@@ -512,7 +517,7 @@ button {
     color: var(--color-primary);
 }
 
-.button--ghost:hover {
+.button--ghost:hover:not(:disabled):not([aria-busy="true"]) {
     background: var(--color-surface-muted);
 }
 
@@ -524,7 +529,7 @@ button {
     text-underline-offset: 0.15em;
 }
 
-.button--link:hover {
+.button--link:hover:not(:disabled):not([aria-busy="true"]) {
     background: var(--color-surface-muted);
 }
 
@@ -634,6 +639,10 @@ button {
 
 .form-field__control::placeholder {
     color: var(--color-text-muted);
+}
+
+.form-field__control:hover:not(:disabled) {
+    border-color: var(--color-primary);
 }
 
 .form-field__control:focus-visible {
@@ -1788,7 +1797,7 @@ button {
     line-height: 1;
 }
 
-.button--icon:hover {
+.button--icon:hover:not(:disabled) {
     background: var(--color-surface-muted);
 }
 
@@ -2283,6 +2292,24 @@ body:has(dialog[open]) {
     50% {
         opacity: 0.35;
     }
+}
+
+/* ---------- Stan ładowania: spinner i szkielet (z tekstem dla czytników ekranu) ---------- */
+.spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--color-border-strong);
+    border-top-color: var(--color-primary);
+    border-radius: var(--radius-pill);
+    animation: spin 0.8s linear infinite;
+}
+
+.skeleton {
+    min-height: 1rem;
+    border-radius: var(--radius-xs);
+    background: var(--color-surface-muted);
+    animation: pulse 1.6s ease-in-out infinite;
 }
 
 /* ---------- Ekrany 10-12: logowanie i rejestracje (karta .auth-card w .page--auth) ---------- */
@@ -2812,7 +2839,7 @@ body:has(dialog[open]) {
     color: var(--color-danger);
 }
 
-.button--danger:hover {
+.button--danger:hover:not(:disabled) {
     border-color: var(--color-danger);
 }
 
@@ -3435,7 +3462,7 @@ textarea.form-field__control {
     color: var(--color-on-primary);
 }
 
-.button--success:hover {
+.button--success:hover:not(:disabled) {
     background: var(--color-success);
     border-color: var(--color-text);
 }
@@ -3452,7 +3479,7 @@ textarea.form-field__control {
     color: var(--color-danger);
 }
 
-.button--danger-outline:hover {
+.button--danger-outline:hover:not(:disabled) {
     background: var(--color-danger-soft);
 }
 
