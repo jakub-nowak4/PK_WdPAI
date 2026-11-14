@@ -141,4 +141,33 @@ CREATE INDEX auctions_status_ends_idx ON auctions (status, ends_at);
 CREATE INDEX auctions_company_idx     ON auctions (company_id);
 CREATE INDEX auctions_brand_idx       ON auctions (brand_id);
 
+-- 8. Powiadomienia w serwisie (outbid, won, auction_ended)
+CREATE TABLE notifications (
+    id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id     INTEGER     NOT NULL,
+    auction_id  INTEGER     NOT NULL,
+    type        VARCHAR(20) NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    read_at     TIMESTAMPTZ NULL,
+    CONSTRAINT notifications_user_fk    FOREIGN KEY (user_id)    REFERENCES users (id)    ON DELETE CASCADE,
+    CONSTRAINT notifications_auction_fk FOREIGN KEY (auction_id) REFERENCES auctions (id) ON DELETE CASCADE,
+    CONSTRAINT notifications_type_chk   CHECK (type IN ('outbid', 'won', 'auction_ended'))
+);
+-- PostgreSQL nie indeksuje kluczy obcych automatycznie
+CREATE INDEX notifications_user_idx    ON notifications (user_id, created_at DESC);
+CREATE INDEX notifications_unread_idx  ON notifications (user_id) WHERE read_at IS NULL;
+CREATE INDEX notifications_auction_idx ON notifications (auction_id);
+-- idempotencja CRON: najwyzej jedno 'won' / 'auction_ended' na osobe i aukcje
+CREATE UNIQUE INDEX notifications_once_uq ON notifications (user_id, auction_id, type)
+    WHERE type IN ('won', 'auction_ended');
+
+-- 9. Dane slownikowe (potrzebne aplikacji niezaleznie od danych demo)
+INSERT INTO brands (name, slug) VALUES
+    ('Alfa Romeo', 'alfa-romeo'), ('Audi', 'audi'), ('BMW', 'bmw'), ('Chevrolet', 'chevrolet'),
+    ('Dodge', 'dodge'), ('Fiat', 'fiat'), ('Ford', 'ford'), ('Honda', 'honda'), ('Hyundai', 'hyundai'),
+    ('Jeep', 'jeep'), ('Kia', 'kia'), ('Land Rover', 'land-rover'), ('Lexus', 'lexus'), ('Mazda', 'mazda'),
+    ('Mercedes-Benz', 'mercedes-benz'), ('Mini', 'mini'), ('Nissan', 'nissan'), ('Peugeot', 'peugeot'),
+    ('Porsche', 'porsche'), ('Renault', 'renault'), ('Subaru', 'subaru'), ('Tesla', 'tesla'),
+    ('Toyota', 'toyota'), ('Volkswagen', 'volkswagen'), ('Volvo', 'volvo');
+
 COMMIT;
