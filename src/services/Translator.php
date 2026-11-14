@@ -77,7 +77,7 @@ final class Translator
     Skrót dla widoków: ($t)('klucz', 'tekst domyślny', ['param' => 1]).
     Taki podpis ma zmienna $t w layoutcie i partialach.
     */
-    public function callable(): \Closure
+    public function asClosure(): \Closure
     {
         return fn (string $key, string $default = '', array $params = []): string
             => $this->translate($key, $params, $default);

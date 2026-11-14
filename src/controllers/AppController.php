@@ -39,7 +39,7 @@ abstract class AppController
         // Tłumaczenia dla każdego widoku: $t('klucz', 'tekst domyślny') i $lang.
         // Wartości przekazane przez kontroler mają pierwszeństwo (EXTR_SKIP).
         $variables += [
-            't' => $this->translator->callable(),
+            't' => $this->translator->asClosure(),
             'lang' => $this->translator->language(),
         ];
 
