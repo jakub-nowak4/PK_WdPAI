@@ -11,6 +11,27 @@ final class AuctionController extends AppController
 {
     private const PREVIEW_STATES = ['confirm', 'leading', 'error', 'outbid'];
 
+    private const SORTS = ['ending', 'newest', 'price_asc', 'price_desc'];
+
+    public function index(Request $request): void
+    {
+        // Zła wartość w query to 400 (docs/api.md 2.2); pusty parametr = domyślna.
+        $filters = [
+            'q' => (string) $request->queryString('q', '/\A.{1,100}\z/su', ''),
+            'brand' => (string) $request->queryString('brand', '/\A[a-z0-9-]{1,40}\z/', ''),
+            'priceMax' => (string) $request->queryInt('priceMax', 1, 100000000, null),
+            'sort' => (string) $request->queryOneOf('sort', self::SORTS, 'ending'),
+        ];
+        $page = (int) $request->queryInt('page', 1, 100000, 1);
+
+        // MAKIETA (T-009): zalogowany kupujący demo i lista z partials/mock-auctions.php, do czasu repozytorium.
+        $this->renderAsUser('auctions/index', DemoUser::buyer(), [
+            'pageTitle' => 'Aukcje',
+            'filters' => $filters,
+            'page' => $page,
+        ]);
+    }
+
     public function show(int $id, Request $request): void
     {
         // MAKIETA (T-009): ?state=confirm|leading|error|outbid pokazuje ekrany 04-07; zła wartość to 400.
