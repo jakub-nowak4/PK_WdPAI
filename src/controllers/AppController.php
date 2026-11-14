@@ -4,8 +4,18 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Service\Translator;
+
 abstract class AppController
 {
+    /*
+    Translator trafia do kontrolera przez konstruktor (Routing wstrzykuje go na
+    podstawie typu). Kontroler z dodatkowymi zależnościami woła parent::__construct().
+    */
+    public function __construct(protected readonly Translator $translator)
+    {
+    }
+
     protected function viewExists(string $template): bool
     {
         return is_file($this->templatePath($template));
@@ -26,6 +36,13 @@ abstract class AppController
 
         $layoutPath = dirname(__DIR__, 2) . '/public/views/layout.html.php';
 
+        // Tłumaczenia dla każdego widoku: $t('klucz', 'tekst domyślny') i $lang.
+        // Wartości przekazane przez kontroler mają pierwszeństwo (EXTR_SKIP).
+        $variables += [
+            't' => $this->translator->callable(),
+            'lang' => $this->translator->language(),
+        ];
+
         extract($variables, EXTR_SKIP);
 
         ob_start();
@@ -33,6 +50,16 @@ abstract class AppController
         $content = ob_get_clean();
 
         require $layoutPath;
+    }
+
+    /*
+    Post/Redirect/Get: odpowiedź 303 na adres względny. Wywołujący ma przekazać
+    ścieżkę już zwalidowaną (np. LanguageService::safeBackPath()).
+    */
+    protected function redirect(string $path): void
+    {
+        http_response_code(303);
+        header('Location: ' . $path);
     }
 
     /**
