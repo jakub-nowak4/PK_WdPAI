@@ -17,23 +17,48 @@ final class Request
     /**
      * @param array<string, mixed> $query
      * @param array<string, mixed> $post
+     * @param array<string, mixed> $cookies
      */
     public function __construct(
         private readonly string $method,
         private readonly string $uri,
         private readonly array $query = [],
         private readonly array $post = [],
+        private readonly array $cookies = [],
+        private readonly bool $secure = false,
     ) {
     }
 
     public static function fromGlobals(): self
     {
+        $https = (string) ($_SERVER['HTTPS'] ?? '');
+
         return new self(
             (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'),
             (string) ($_SERVER['REQUEST_URI'] ?? '/'),
             $_GET,
             $_POST,
+            $_COOKIE,
+            $https !== '' && strtolower($https) !== 'off',
         );
+    }
+
+    /*
+    Czy żądanie przyszło przez HTTPS (flaga Secure ciasteczek).
+    */
+    public function isSecure(): bool
+    {
+        return $this->secure;
+    }
+
+    /*
+    Wartość ciasteczka albo null, gdy go brak lub nie jest tekstem.
+    */
+    public function cookie(string $name): ?string
+    {
+        $value = $this->cookies[$name] ?? null;
+
+        return is_string($value) ? $value : null;
     }
 
     public function method(): string
