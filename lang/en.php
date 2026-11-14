@@ -35,6 +35,15 @@ return [
     'error.not_found' => 'Page not found.',
     'error.csrf_invalid' => 'The form session has expired. Refresh the page and try again.',
     'error.language_invalid' => 'Unsupported language.',
+    'error.400.label' => 'Request error • error code 400',
+    'error.400.title' => 'Invalid request',
+    'error.400.description' => 'The address contains an invalid parameter.',
+    'error.403.label' => 'Authorization • error code 403',
+    'error.403.title' => 'Access denied',
+    'error.403.description' => 'You do not have permission to view this page.',
+    'error.404.label' => 'HTTP error 404 • resource unavailable',
+    'error.404.title' => 'Page not found',
+    'error.404.description' => 'The auction may have ended or been removed.',
 
     // Form validation
     'validation.required' => 'This field is required.',

@@ -35,6 +35,15 @@ return [
     'error.not_found' => 'Nie znaleziono strony.',
     'error.csrf_invalid' => 'Sesja formularza wygasła. Odśwież stronę i spróbuj ponownie.',
     'error.language_invalid' => 'Nieobsługiwany język.',
+    'error.400.label' => 'Błąd żądania • kod błędu 400',
+    'error.400.title' => 'Nieprawidłowe żądanie',
+    'error.400.description' => 'Adres zawiera nieprawidłowy parametr.',
+    'error.403.label' => 'Autoryzacja • kod błędu 403',
+    'error.403.title' => 'Brak dostępu',
+    'error.403.description' => 'Nie masz uprawnień do tej strony.',
+    'error.404.label' => 'Błąd HTTP 404 • zasób niedostępny',
+    'error.404.title' => 'Nie znaleziono strony',
+    'error.404.description' => 'Aukcja mogła zostać zakończona lub usunięta.',
 
     // Walidacja formularzy
     'validation.required' => 'To pole jest wymagane.',
