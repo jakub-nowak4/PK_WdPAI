@@ -31,6 +31,26 @@ Kod projektu jest montowany jako bind mount, dlatego zmiany lokalnych plików s�
 widoczne w kontenerach bez przebudowy obrazów. Named volume `app` przechowuje
 dane PostgreSQL, aby nie były tracone po usunięciu kontenera.
 
+## Konta demo
+
+Schemat (`docker/db/01-schema.sql`) i dane demo (`docker/db/02-demo-data.sql`) ładują się
+automatycznie przy pierwszym starcie pustego wolumenu bazy. Dane są fikcyjne (adresy `@example.com`).
+Aby wczytać je od nowa: `docker compose down -v`, potem `docker compose up --build -d`.
+
+| E-mail | Rola | Hasło | Uwagi |
+|---|---|---|---|
+| `admin@example.com` | ADMIN | `Admin123!` | zatwierdza konta firm |
+| `firma1@example.com` | DEALER (firma) | `Firma123!` | firma zatwierdzona, właściciel wszystkich aukcji demo |
+| `firma2@example.com` | DEALER (firma) | `Firma123!` | konto czeka na zatwierdzenie |
+| `kupujacy1@example.com` | BUYER | `Kupuj123!` | język PL |
+| `kupujacy2@example.com` | BUYER | `Kupuj123!` | język PL |
+| `kupujacy3@example.com` | BUYER | `Kupuj123!` | język EN |
+
+Hasła są zapisane w bazie wyłącznie jako hashe bcrypt. Dane demo zawierają 10 aukcji: 2 zaplanowane,
+5 aktywnych (w tym jedna bez ofert), 3 zakończone (ze zwycięzcą, z przedłużeniem anty-snipingiem
+i bez ofert) oraz przykładowe powiadomienia. Czasy są liczone względem momentu importu, więc aukcje
+aktywne kończą się po kilku dniach od pierwszego startu bazy.
+
 ## Struktura projektu
 
 - `public/` - kod publiczny aplikacji PHP.
