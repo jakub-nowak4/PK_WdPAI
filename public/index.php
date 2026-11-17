@@ -9,7 +9,6 @@ use App\Controller\CompanyController;
 use App\Controller\DefaultController;
 use App\Controller\ErrorController;
 use App\Controller\LanguageController;
-use App\Controller\ProjectController;
 use App\Controller\SecurityController;
 use App\Exception\HttpException;
 use App\Request;
