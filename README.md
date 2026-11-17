@@ -20,7 +20,7 @@ Lokalne środowisko developmentowe aplikacji PHP uruchamiane z użyciem Docker C
 
 ```bash
 git clone https://github.com/jakub-nowak4/PK_WdPAI.git
-cd REPOZYTORIUM
+cd PK_WdPAI
 cp .env.example .env
 docker compose up --build -d
 docker compose exec php composer install
@@ -32,8 +32,8 @@ Katalog `vendor/` nie jest w repozytorium, więc na czystym klonie `composer ins
 potrzebny do wygenerowania autoloadera.
 
 Kod projektu jest montowany jako bind mount, dlatego zmiany lokalnych plików są
-widoczne w kontenerach bez przebudowy obrazów. Named volume `app` przechowuje
-dane PostgreSQL, aby nie były tracone po usunięciu kontenera.
+widoczne w kontenerach bez przebudowy obrazów. Dane PostgreSQL przechowuje named volume
+`<projekt>_app` (np. `pk_wdpai_app` dla katalogu `PK_WdPAI`), więc nie giną po usunięciu kontenera.
 
 Nazwy wolumenu i sieci nie są już sztywne (`name: app`), więc Compose nadaje im prefiks nazwy
 projektu (katalogu lub opcji `-p`). Po tej zmianie stary wolumen `app` przestaje być używany,
