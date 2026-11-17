@@ -170,4 +170,56 @@ INSERT INTO brands (name, slug) VALUES
     ('Porsche', 'porsche'), ('Renault', 'renault'), ('Subaru', 'subaru'), ('Tesla', 'tesla'),
     ('Toyota', 'toyota'), ('Volkswagen', 'volkswagen'), ('Volvo', 'volvo');
 
+-- 10. Widok auction_summary: aktualna cena, liczba ofert i prowadzacy w jednym miejscu
+--     (lista i szczegoly aukcji, kryterium 25). Cena nie jest przechowywana, tylko liczona.
+--     Prowadzacy = autor najwyzszej oferty (kwoty w aukcji sa unikalne, wiec bez remisow).
+--     min_next_bid: przy braku ofert cena wywolawcza, potem aktualna cena + krok.
+CREATE VIEW auction_summary AS
+SELECT
+    a.id,
+    a.company_id,
+    c.name                                   AS company_name,
+    a.brand_id,
+    b.name                                   AS brand_name,
+    b.slug                                   AS brand_slug,
+    a.title,
+    a.model,
+    a.year,
+    a.mileage_km,
+    a.fuel,
+    a.transmission,
+    a.origin_country,
+    a.starting_price,
+    a.min_increment,
+    a.starts_at,
+    a.ends_at,
+    a.original_ends_at,
+    (a.ends_at > a.original_ends_at)         AS extended,
+    a.status,
+    a.winning_bid_id,
+    a.closed_at,
+    a.created_at,
+    COALESCE(top.amount, a.starting_price)   AS current_price,
+    COALESCE(cnt.bid_count, 0)               AS bid_count,
+    top.user_id                              AS leader_user_id,
+    CASE WHEN top.amount IS NULL
+         THEN a.starting_price
+         ELSE top.amount + a.min_increment
+    END                                      AS min_next_bid
+FROM auctions a
+JOIN companies c ON c.id = a.company_id
+JOIN brands    b ON b.id = a.brand_id
+LEFT JOIN LATERAL (
+    SELECT bd.amount, bd.user_id
+    FROM bids bd
+    WHERE bd.auction_id = a.id
+    ORDER BY bd.amount DESC
+    LIMIT 1
+) top ON TRUE
+LEFT JOIN LATERAL (
+    SELECT COUNT(*)::INTEGER AS bid_count
+    FROM bids bd
+    WHERE bd.auction_id = a.id
+) cnt ON TRUE;
+
 COMMIT;
