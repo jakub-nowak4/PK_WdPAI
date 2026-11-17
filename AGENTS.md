@@ -123,6 +123,8 @@ Przyklad: `src/models/Auction.php` -> `App\Model\Auction`, `src/repositories/Auc
 
 Po dodaniu lub przeniesieniu klas odswiez autoloader poleceniem `composer dump-autoload`.
 
+`composer.lock` jest sledzony w repozytorium (od galezi `chore/T-007-composer-lock`). Zmiana `composer.json` wymaga `composer update --lock` (lub `composer require`) i commitu `composer.lock` w tym samym commicie.
+
 ### View
 
 Widoki znajduja sie w `public/views/` i maja nazwy `*.html.php`. Widoki to fragmenty (sam `<main>`); wspolny dokument HTML (head, skrypt motywu, przelacznik, `<?= $content ?>`) jest w `public/views/layout.html.php`, a `AppController::render()` wstawia widok do layoutu. `AppController::render()` przekazuje do nich dane jako zmienne przy uzyciu `extract(..., EXTR_SKIP)`.
