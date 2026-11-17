@@ -186,6 +186,12 @@ Jesli katalog `vendor/` nie istnieje, zainstaluj zaleznosci/autoloader polecenie
 docker compose exec php composer install
 ```
 
+Warto wiedziec:
+
+- `vendor/` nie jest w repozytorium, wiec na czystym klonie po `docker compose up --build -d` trzeba raz wykonac `docker compose exec php composer install`.
+- Nazwy wolumenu bazy i sieci nie sa sztywne: Compose dodaje prefiks nazwy projektu (katalog albo opcja `-p`), np. `<projekt>_app` i `<projekt>_app-network`. Dzieki temu `-p` izoluje zasoby kilku kopii projektu. Stary wolumen o nazwie `app` nie jest juz uzywany; nowy startuje pusty i wykonuje `01-schema.sql` oraz `02-demo-data.sql`.
+- Nginx wykonuje PHP wylacznie przez `/index.php`; zadanie o inny plik `.php` (widok, partial) dostaje 404. `display_errors` jest wylaczone, a bledy PHP trafiaja do logow kontenera: `docker compose logs php`.
+
 ## Weryfikacja zmian
 
 W projekcie nie ma obecnie skonfigurowanego zestawu testow automatycznych ani narzedzia do formatowania. Po zmianie:
