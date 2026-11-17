@@ -10,10 +10,10 @@ Docelowo aplikacja to MotoBid — platforma aukcji samochodow na zywo. Uzytkowni
 
 Aktualnie aplikacja obsluguje:
 
-- strone glowna pod `/`,
-- liste projektow pod `/projects`,
-- szczegoly projektu pod `/projects/{id}`,
-- odpowiedz 404 dla nieznanych tras.
+- strone glowna pod `/` oraz strony-makiety ekranow MotoBid: lista i szczegoly aukcji (`/auctions`, `/auctions/{id}`), aukcja wygrana, moje oferty, powiadomienia, logowanie, rejestracja kupujacego i firmy, konto czeka na zatwierdzenie, panel firmy i panel administratora (pelna lista tras w `public/index.php`); dane w widokach sa statyczne (makieta, uzytkownik demo z `App\Service\DemoUser`), nie z bazy,
+- przelacznik jezyka PL/EN (`POST /language`, teksty w `lang/pl.php` i `lang/en.php`) oraz przelacznik motywu jasny/ciemny,
+- odpowiedzi bledow 400 (zly format `{id}` lub query param) i 404 (nieznana trasa) przez `ErrorController`,
+- schemat SQL z widokiem `auction_summary` (`docker/db/01-schema.sql`) i dane demo (`docker/db/02-demo-data.sql`), ladowane przy pierwszym starcie pustego wolumenu bazy.
 
 ## Stack technologiczny
 
