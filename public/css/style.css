@@ -1255,27 +1255,17 @@ button {
     height: 22px;
 }
 
-/* ---------- Widoki szkieletowe z laboratoriów (projects, project) ---------- */
+/* ---------- Widoki szkieletowe z laboratoriów ---------- */
 .lead {
     color: var(--color-text-muted);
 }
 
-.auth-card,
-.project-card {
+.auth-card {
     padding: var(--space-lg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-surface);
     box-shadow: var(--shadow-1);
-}
-
-.project-card > h2 {
-    margin: 0 0 var(--space-sm);
-    font-size: 1.25rem;
-}
-
-.project-card p {
-    color: var(--color-text-muted);
 }
 
 .actions {
@@ -1284,12 +1274,6 @@ button {
     align-items: center;
     justify-content: space-between;
     gap: var(--space-sm);
-}
-
-.projects {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
-    gap: var(--space-lg);
 }
 
 /* ---------- Szczegóły aukcji (ekran 03): układ, okruszki, nagłówek ---------- */
