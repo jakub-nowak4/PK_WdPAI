@@ -40,8 +40,6 @@ $routing = new Routing([
     LanguageService::class => $languageService,
 ]);
 
-$routing->get('/projects', ProjectController::class, 'index');
-$routing->get('/projects/{id}', ProjectController::class, 'show');
 $routing->get('/auctions', AuctionController::class, 'index');
 $routing->get('/auctions/{id}',AuctionController::class, 'show');
 $routing->get('/auctions/{id}/won', AuctionController::class, 'won');
