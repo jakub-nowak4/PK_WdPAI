@@ -9,7 +9,6 @@ use App\Controller\CompanyController;
 use App\Controller\DefaultController;
 use App\Controller\ErrorController;
 use App\Controller\LanguageController;
-use App\Controller\ProjectController;
 use App\Controller\SecurityController;
 use App\Exception\HttpException;
 use App\Request;
@@ -40,8 +39,6 @@ $routing = new Routing([
     LanguageService::class => $languageService,
 ]);
 
-$routing->get('/projects', ProjectController::class, 'index');
-$routing->get('/projects/{id}', ProjectController::class, 'show');
 $routing->get('/auctions', AuctionController::class, 'index');
 $routing->get('/auctions/{id}',AuctionController::class, 'show');
 $routing->get('/auctions/{id}/won', AuctionController::class, 'won');

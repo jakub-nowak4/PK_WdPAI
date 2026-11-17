@@ -23,13 +23,22 @@ git clone https://github.com/jakub-nowak4/PK_WdPAI.git
 cd REPOZYTORIUM
 cp .env.example .env
 docker compose up --build -d
+docker compose exec php composer install
 ```
 
 Aplikacja: http://localhost:8080
 
+Katalog `vendor/` nie jest w repozytorium, więc na czystym klonie `composer install` jest
+potrzebny do wygenerowania autoloadera.
+
 Kod projektu jest montowany jako bind mount, dlatego zmiany lokalnych plików są
 widoczne w kontenerach bez przebudowy obrazów. Named volume `app` przechowuje
 dane PostgreSQL, aby nie były tracone po usunięciu kontenera.
+
+Nazwy wolumenu i sieci nie są już sztywne (`name: app`), więc Compose nadaje im prefiks nazwy
+projektu (katalogu lub opcji `-p`). Po tej zmianie stary wolumen `app` przestaje być używany,
+a nowy startuje pusty, więc wykonają się `01-schema.sql` i `02-demo-data.sql`. Stary wolumen
+można usunąć ręcznie (`docker volume rm app`) po sprawdzeniu, że nie jest już potrzebny.
 
 ## Konta demo
 
