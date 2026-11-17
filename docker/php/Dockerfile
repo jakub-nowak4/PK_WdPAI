@@ -37,4 +37,12 @@ RUN { \
       echo 'memory_limit = 256M'; \
     } > /usr/local/etc/php/conf.d/uploads.ini
 
+# Bledy trafiaja do logow kontenera (docker compose logs php), nie do przegladarki.
+RUN { \
+      echo 'display_errors = Off'; \
+      echo 'display_startup_errors = Off'; \
+      echo 'log_errors = On'; \
+      echo 'error_log = /proc/self/fd/2'; \
+    } > /usr/local/etc/php/conf.d/errors.ini
+
 WORKDIR /app
