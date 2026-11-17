@@ -10,10 +10,10 @@ Docelowo aplikacja to MotoBid — platforma aukcji samochodow na zywo. Uzytkowni
 
 Aktualnie aplikacja obsluguje:
 
-- strone glowna pod `/`,
-- liste projektow pod `/projects`,
-- szczegoly projektu pod `/projects/{id}`,
-- odpowiedz 404 dla nieznanych tras.
+- strone glowna pod `/` oraz strony-makiety ekranow MotoBid: lista i szczegoly aukcji (`/auctions`, `/auctions/{id}`), aukcja wygrana, moje oferty, powiadomienia, logowanie, rejestracja kupujacego i firmy, konto czeka na zatwierdzenie, panel firmy i panel administratora (pelna lista tras w `public/index.php`); dane w widokach sa statyczne (makieta, uzytkownik demo z `App\Service\DemoUser`), nie z bazy,
+- przelacznik jezyka PL/EN (`POST /language`, teksty w `lang/pl.php` i `lang/en.php`) oraz przelacznik motywu jasny/ciemny,
+- odpowiedzi bledow 400 (zly format `{id}` lub query param) i 404 (nieznana trasa) przez `ErrorController`,
+- schemat SQL z widokiem `auction_summary` (`docker/db/01-schema.sql`) i dane demo (`docker/db/02-demo-data.sql`), ladowane przy pierwszym starcie pustego wolumenu bazy.
 
 ## Stack technologiczny
 
@@ -67,7 +67,7 @@ przegladarka
 
 ### Front Controller
 
-`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, rejestruje trasy, przekazuje metode HTTP i URI do routera oraz uruchamia widok 404, gdy zadna trasa nie pasuje.
+`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 403, 404) obsluguje `ErrorController`.
 
 Nowe trasy dodawaj w tym pliku w postaci:
 
@@ -78,9 +78,9 @@ $routing->post('/example', ExampleController::class, 'store');
 
 ### Router
 
-`src/Routing.php` (namespace `App`) laczy metode HTTP i sciezke URL z publiczna metoda kontrolera. Parametry zapisane jako `{name}` sa obecnie dopasowywane tylko do cyfr, konwertowane na `int` i przekazywane do akcji kontrolera przez nazwane argumenty.
+`src/Routing.php` (namespace `App`) laczy metode HTTP i sciezke URL z publiczna metoda kontrolera. Parametr zapisany jako `{name}` dopasowuje jeden segment sciezki i trafia do akcji kontrolera przez nazwany argument. Wartosc `{id}` musi byc dodatnia liczba calkowita bez zer wiodacych (najwyzej 2147483647) i jest konwertowana na `int`; zly format daje 400, brak pasujacej trasy 404. Akcja z parametrem typu `App\Request` dostaje biezace zadanie.
 
-Przyklad: `/projects/{id}` wywoluje `ProjectController::show(int $id)`.
+Przyklad: `/auctions/{id}` wywoluje `AuctionController::show(int $id, Request $request)`.
 
 Router obsluguje obecnie metody GET i POST. Nie dodawaj logiki biznesowej do routera.
 
@@ -95,10 +95,16 @@ Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Cont
 
 Kontroler powinien byc cienki. Nie umieszczaj w nim rozbudowanych zapytan do bazy, HTML ani stylow.
 
-Obecnie istnieja dwa kontrolery:
+Obecnie istnieja kontrolery (ekrany aukcji, konta, firmy i administratora to na razie makiety):
 
-- `DefaultController` — `index()` (strona glowna), `notFound()` (widok 404),
-- `ProjectController` — `index()` (lista projektow), `show(int $id)` (szczegoly projektu).
+- `DefaultController` — `index()` (strona glowna),
+- `AuctionController` — `index()` (lista aukcji z filtrami w query), `show(int $id)` (szczegoly aukcji), `won(int $id)` (aukcja wygrana),
+- `AccountController` — `myBids()`, `notifications()`, `pending()` (konto czeka na zatwierdzenie),
+- `SecurityController` — `login()`, `register()`, `registerCompany()`,
+- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (usun aukcje),
+- `AdminController` — `index()` (panel administratora),
+- `LanguageController` — `change()` (zmiana jezyka, `POST /language`),
+- `ErrorController` — `handle()` (strony bledow 400/403/404, dla `/api/*` JSON).
 
 ### Model
 
@@ -116,6 +122,8 @@ src/services/     -> App\Service
 Przyklad: `src/models/Auction.php` -> `App\Model\Auction`, `src/repositories/AuctionRepository.php` -> `App\Repository\AuctionRepository`.
 
 Po dodaniu lub przeniesieniu klas odswiez autoloader poleceniem `composer dump-autoload`.
+
+`composer.lock` jest sledzony w repozytorium (od galezi `chore/T-007-composer-lock`). Zmiana `composer.json` wymaga `composer update --lock` (lub `composer require`) i commitu `composer.lock` w tym samym commicie.
 
 ### View
 
@@ -179,6 +187,12 @@ Jesli katalog `vendor/` nie istnieje, zainstaluj zaleznosci/autoloader polecenie
 ```bash
 docker compose exec php composer install
 ```
+
+Warto wiedziec:
+
+- `vendor/` nie jest w repozytorium, wiec na czystym klonie po `docker compose up --build -d` trzeba raz wykonac `docker compose exec php composer install`.
+- Nazwy wolumenu bazy i sieci nie sa sztywne: Compose dodaje prefiks nazwy projektu (katalog albo opcja `-p`), np. `<projekt>_app` i `<projekt>_app-network`. Dzieki temu `-p` izoluje zasoby kilku kopii projektu. Stary wolumen o nazwie `app` nie jest juz uzywany; nowy startuje pusty i wykonuje `01-schema.sql` oraz `02-demo-data.sql`.
+- Nginx wykonuje PHP wylacznie przez `/index.php`; zadanie o inny plik `.php` (widok, partial) dostaje 404. `display_errors` jest wylaczone, a bledy PHP trafiaja do logow kontenera: `docker compose logs php`.
 
 ## Weryfikacja zmian
 

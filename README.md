@@ -14,13 +14,14 @@ Lokalne środowisko developmentowe aplikacji PHP uruchamiane z użyciem Docker C
 |---|---|
 | Backend | PHP 8.3 |
 | Serwer HTTP | Nginx |
+| Baza danych | PostgreSQL 18 |
 | Konteneryzacja | Docker Compose |
 
 ## Szybki start
 
 ```bash
 git clone https://github.com/jakub-nowak4/PK_WdPAI.git
-cd REPOZYTORIUM
+cd PK_WdPAI
 cp .env.example .env
 docker compose up --build -d
 docker compose exec php composer install
@@ -32,8 +33,8 @@ Katalog `vendor/` nie jest w repozytorium, więc na czystym klonie `composer ins
 potrzebny do wygenerowania autoloadera.
 
 Kod projektu jest montowany jako bind mount, dlatego zmiany lokalnych plików są
-widoczne w kontenerach bez przebudowy obrazów. Named volume `app` przechowuje
-dane PostgreSQL, aby nie były tracone po usunięciu kontenera.
+widoczne w kontenerach bez przebudowy obrazów. Dane PostgreSQL przechowuje named volume
+`<projekt>_app` (np. `pk_wdpai_app` dla katalogu `PK_WdPAI`), więc nie giną po usunięciu kontenera.
 
 Nazwy wolumenu i sieci nie są już sztywne (`name: app`), więc Compose nadaje im prefiks nazwy
 projektu (katalogu lub opcji `-p`). Po tej zmianie stary wolumen `app` przestaje być używany,
@@ -60,9 +61,14 @@ Hasła są zapisane w bazie wyłącznie jako hashe bcrypt. Dane demo zawierają 
 i bez ofert) oraz przykładowe powiadomienia. Czasy są liczone względem momentu importu, więc aukcje
 aktywne kończą się po kilku dniach od pierwszego startu bazy.
 
+Logowanie nie jest jeszcze zaimplementowane: ekrany są na razie makietami z danymi demo
+w kodzie, a konta powyżej istnieją tylko w bazie.
+
 ## Struktura projektu
 
-- `public/` - kod publiczny aplikacji PHP.
+- `public/` - front controller (`index.php`), widoki, CSS i JS.
+- `src/` - router, kontrolery i serwisy (namespace `App\…`).
+- `lang/` - teksty interfejsu PL i EN.
 - `docker/` - Dockerfile, konfiguracja Nginx i skrypty inicjalizacyjne bazy.
 - `.env` - lokalne wartości konfiguracyjne; plik nie powinien być commitowany.
 - `.env.example` - bezpieczny szablon konfiguracji.
