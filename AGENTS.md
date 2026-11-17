@@ -67,7 +67,7 @@ przegladarka
 
 ### Front Controller
 
-`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, rejestruje trasy, przekazuje metode HTTP i URI do routera oraz uruchamia widok 404, gdy zadna trasa nie pasuje.
+`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 403, 404) obsluguje `ErrorController`.
 
 Nowe trasy dodawaj w tym pliku w postaci:
 
@@ -78,9 +78,9 @@ $routing->post('/example', ExampleController::class, 'store');
 
 ### Router
 
-`src/Routing.php` (namespace `App`) laczy metode HTTP i sciezke URL z publiczna metoda kontrolera. Parametry zapisane jako `{name}` sa obecnie dopasowywane tylko do cyfr, konwertowane na `int` i przekazywane do akcji kontrolera przez nazwane argumenty.
+`src/Routing.php` (namespace `App`) laczy metode HTTP i sciezke URL z publiczna metoda kontrolera. Parametr zapisany jako `{name}` dopasowuje jeden segment sciezki i trafia do akcji kontrolera przez nazwany argument. Wartosc `{id}` musi byc dodatnia liczba calkowita bez zer wiodacych (najwyzej 2147483647) i jest konwertowana na `int`; zly format daje 400, brak pasujacej trasy 404. Akcja z parametrem typu `App\Request` dostaje biezace zadanie.
 
-Przyklad: `/projects/{id}` wywoluje `ProjectController::show(int $id)`.
+Przyklad: `/auctions/{id}` wywoluje `AuctionController::show(int $id, Request $request)`.
 
 Router obsluguje obecnie metody GET i POST. Nie dodawaj logiki biznesowej do routera.
 
@@ -95,10 +95,16 @@ Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Cont
 
 Kontroler powinien byc cienki. Nie umieszczaj w nim rozbudowanych zapytan do bazy, HTML ani stylow.
 
-Obecnie istnieja dwa kontrolery:
+Obecnie istnieja kontrolery (ekrany aukcji, konta, firmy i administratora to na razie makiety):
 
-- `DefaultController` — `index()` (strona glowna), `notFound()` (widok 404),
-- `ProjectController` — `index()` (lista projektow), `show(int $id)` (szczegoly projektu).
+- `DefaultController` — `index()` (strona glowna),
+- `AuctionController` — `index()` (lista aukcji z filtrami w query), `show(int $id)` (szczegoly aukcji), `won(int $id)` (aukcja wygrana),
+- `AccountController` — `myBids()`, `notifications()`, `pending()` (konto czeka na zatwierdzenie),
+- `SecurityController` — `login()`, `register()`, `registerCompany()`,
+- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (usun aukcje),
+- `AdminController` — `index()` (panel administratora),
+- `LanguageController` — `change()` (zmiana jezyka, `POST /language`),
+- `ErrorController` — `handle()` (strony bledow 400/403/404, dla `/api/*` JSON).
 
 ### Model
 
