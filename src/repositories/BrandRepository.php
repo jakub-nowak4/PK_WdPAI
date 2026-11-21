@@ -23,7 +23,12 @@ final class BrandRepository extends BaseRepository
 
     public function findById(int $id): ?Brand
     {
-        $statement = $this->pdo->prepare('SELECT ' . self::COLUMNS . ' FROM brands WHERE id = :id');
+        // brands.id jest SMALLINT, a PDO (EMULATE_PREPARES=false) wiąże int jako INTEGER.
+        // CAST na BIGINT daje porównanie smallint = bigint: dla dużych id wynik to null,
+        // a nie błąd 22003 "value out of range for type smallint". Indeks dalej działa.
+        $statement = $this->pdo->prepare(
+            'SELECT ' . self::COLUMNS . ' FROM brands WHERE id = CAST(:id AS BIGINT)'
+        );
         $statement->execute(['id' => $id]);
         $row = $statement->fetch();
 
