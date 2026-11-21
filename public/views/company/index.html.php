@@ -3,11 +3,10 @@
  * Panel firmy (ekran 14): GET /company.
  * Oczekiwane zmienne od kontrolera (na razie brak, uzywana jest MAKIETA z partials/mock-company-auctions.php):
  * $auctions (id, title, image|null, status, price, minIncrement, bidCount, endsAtLabel, canDelete), $company (name, city);
- * opcjonalnie $flash (komunikat po dodaniu/usunieciu), $t, $e.
+ * opcjonalnie $t, $e (komunikat flash wypisuje layout).
  */
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
-$flash = (string) ($flash ?? '');
 
 $isMock = false;
 if (!isset($auctions)) {
@@ -36,9 +35,6 @@ $statusLabels = [
 
     <?php if ($isMock): ?>
         <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
-    <?php endif; ?>
-    <?php if ($flash !== ''): ?>
-        <p class="alert alert--success" role="status"><?= $e($flash) ?></p>
     <?php endif; ?>
 
     <section class="card company-auctions" aria-labelledby="company-auctions-title">
