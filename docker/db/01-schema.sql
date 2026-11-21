@@ -174,6 +174,9 @@ INSERT INTO brands (name, slug) VALUES
 --     (lista i szczegoly aukcji, kryterium 25). Cena nie jest przechowywana, tylko liczona.
 --     Prowadzacy = autor najwyzszej oferty (kwoty w aukcji sa unikalne, wiec bez remisow).
 --     min_next_bid: przy braku ofert cena wywolawcza, potem aktualna cena + krok.
+--     Na koncu listy: vin, description i cover_path (sciezka zdjecia z position = 1, NULL bez zdjec).
+--     Widok powstaje przy pierwszym starcie pustego wolumenu, wiec po zmianie trzeba zrobic
+--     `docker compose down -v` (kasuje dane bazy), zeby import wykonal sie od nowa.
 CREATE VIEW auction_summary AS
 SELECT
     a.id,
@@ -205,7 +208,10 @@ SELECT
     CASE WHEN top.amount IS NULL
          THEN a.starting_price
          ELSE top.amount + a.min_increment
-    END                                      AS min_next_bid
+    END                                      AS min_next_bid,
+    a.vin,
+    a.description,
+    cover.path                               AS cover_path
 FROM auctions a
 JOIN companies c ON c.id = a.company_id
 JOIN brands    b ON b.id = a.brand_id
@@ -220,6 +226,7 @@ LEFT JOIN LATERAL (
     SELECT COUNT(*)::INTEGER AS bid_count
     FROM bids bd
     WHERE bd.auction_id = a.id
-) cnt ON TRUE;
+) cnt ON TRUE
+LEFT JOIN auction_images cover ON cover.auction_id = a.id AND cover.position = 1;
 
 COMMIT;

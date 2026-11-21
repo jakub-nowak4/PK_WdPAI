@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Model\Auction;
 use App\Model\AuctionStatus;
+use App\Model\AuctionSummary;
 use App\Model\Fuel;
 use App\Model\Money;
 use App\Model\NewAuction;
@@ -13,7 +14,8 @@ use App\Model\Transmission;
 use DateTimeImmutable;
 
 // Aukcje (tabela auctions). Cały SQL dla aukcji jest tutaj; walidację, transakcje i reguły (np. 403 przy aukcji
-// z ofertami) robi serwis. Zdjęcia, lista z filtrami i agregaty (cena, liczba ofert) są w osobnych klasach.
+// z ofertami) robi serwis. Agregaty (cena, liczba ofert, lider, okładka) czytamy z widoku auction_summary
+// (AuctionSummary); zdjęcia są w AuctionImageRepository.
 final class AuctionRepository extends BaseRepository
 {
     private const COLUMNS = [
@@ -21,6 +23,8 @@ final class AuctionRepository extends BaseRepository
         'origin_country', 'vin', 'description', 'starting_price', 'min_increment', 'starts_at', 'ends_at',
         'original_ends_at', 'status', 'winning_bid_id', 'closed_at', 'created_at',
     ];
+
+    private const SUMMARY_FROM = 'FROM auctions a JOIN auction_summary s ON s.id = a.id';
 
     // auctions.id to INTEGER, a id z URL przeszło router (1…2147483647), więc porównujemy wprost.
     public function findById(int $id): ?Auction
@@ -41,6 +45,31 @@ final class AuctionRepository extends BaseRepository
         $row = $statement->fetch();
 
         return $row === false ? null : $this->mapRow($row);
+    }
+
+    // Aukcja z cena, liczba ofert, liderem i okładką z widoku auction_summary: jedno zapytanie, bez N+1.
+    public function findSummaryById(int $id): ?AuctionSummary
+    {
+        $statement = $this->pdo->prepare('SELECT ' . $this->summaryColumns() . ' ' . self::SUMMARY_FROM . ' WHERE a.id = :id');
+        $statement->execute(['id' => $id]);
+        $row = $statement->fetch();
+
+        return $row === false ? null : $this->mapSummaryRow($row);
+    }
+
+    // Aukcje firmy (panel firmy), najnowsze pierwsze; id jako drugi klucz daje stały porządek przy równym created_at.
+    /**
+     * @return list<AuctionSummary>
+     */
+    public function findSummariesByCompanyId(int $companyId): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT ' . $this->summaryColumns() . ' ' . self::SUMMARY_FROM
+            . ' WHERE a.company_id = :company_id ORDER BY a.created_at DESC, a.id DESC'
+        );
+        $statement->execute(['company_id' => $companyId]);
+
+        return array_map($this->mapSummaryRow(...), $statement->fetchAll());
     }
 
     // Status (active, gdy starts_at <= now(), inaczej scheduled) i original_ends_at liczy sam INSERT na czasie serwera
@@ -96,10 +125,36 @@ final class AuctionRepository extends BaseRepository
         return $statement->rowCount() > 0;
     }
 
+    // Kolumny aukcji (a.*) mapuje mapRow(); z widoku dochodzą tylko agregaty i nazwy z JOIN-ów.
+    private function summaryColumns(): string
+    {
+        return $this->columns('a.')
+            . ', s.company_name, s.brand_name, s.brand_slug, s.current_price, s.min_next_bid,'
+            . ' s.bid_count, s.leader_user_id, s.cover_path';
+    }
+
     // Lista kolumn auctions z opcjonalnym prefiksem aliasu (np. 'a.'): jedno źródło dla wszystkich zapytań.
     private function columns(string $prefix = ''): string
     {
         return implode(', ', array_map(static fn (string $column): string => $prefix . $column, self::COLUMNS));
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    private function mapSummaryRow(array $row): AuctionSummary
+    {
+        return new AuctionSummary(
+            $this->mapRow($row),
+            (string) $row['company_name'],
+            (string) $row['brand_name'],
+            (string) $row['brand_slug'],
+            new Money((int) $row['current_price']),
+            new Money((int) $row['min_next_bid']),
+            (int) $row['bid_count'],
+            $row['leader_user_id'] === null ? null : (int) $row['leader_user_id'],
+            $row['cover_path'] === null ? null : (string) $row['cover_path'],
+        );
     }
 
     /**
