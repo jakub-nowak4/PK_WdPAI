@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Model\Auction;
+use App\Model\AuctionFilter;
+use App\Model\AuctionSort;
 use App\Model\AuctionStatus;
 use App\Model\AuctionSummary;
 use App\Model\Fuel;
@@ -12,6 +14,7 @@ use App\Model\Money;
 use App\Model\NewAuction;
 use App\Model\Transmission;
 use DateTimeImmutable;
+use PDO;
 
 // Aukcje (tabela auctions). Cały SQL dla aukcji jest tutaj; walidację, transakcje i reguły (np. 403 przy aukcji
 // z ofertami) robi serwis. Agregaty (cena, liczba ofert, lider, okładka) czytamy z widoku auction_summary
@@ -55,6 +58,49 @@ final class AuctionRepository extends BaseRepository
         $row = $statement->fetch();
 
         return $row === false ? null : $this->mapSummaryRow($row);
+    }
+
+    // Lista publiczna (docs/api.md 2.2): aukcje active i scheduled z ends_at > now() (po czasie znikają od razu, nawet
+    // zanim CRON je zamknie), jedna strona. Cena (filtr i sortowanie) idzie po s.current_price z widoku, nie z PHP.
+    // Jedno zapytanie na listę: agregaty, marka i okładka przychodzą z widoku (bez N+1).
+    /**
+     * @return list<AuctionSummary>
+     */
+    public function findListed(AuctionFilter $filter, AuctionSort $sort, int $limit, int $offset): array
+    {
+        [$where, $params] = $this->buildListFilter($filter);
+
+        // Kolejność z białej listy (enum), nigdy z wejścia; id na końcu rozstrzyga remisy, więc strony są stabilne.
+        $orderBy = match ($sort) {
+            AuctionSort::Ending => 'a.ends_at ASC, a.id ASC',
+            AuctionSort::Newest => 'a.created_at DESC, a.id DESC',
+            AuctionSort::PriceAsc => 's.current_price ASC, a.id ASC',
+            AuctionSort::PriceDesc => 's.current_price DESC, a.id DESC',
+        };
+
+        $statement = $this->pdo->prepare(
+            'SELECT ' . $this->summaryColumns() . ' ' . self::SUMMARY_FROM
+            . ' WHERE ' . $where . ' ORDER BY ' . $orderBy . ' LIMIT :limit OFFSET :offset'
+        );
+        foreach ($params as $name => $value) {
+            $statement->bindValue($name, $value);
+        }
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
+        $statement->execute();
+
+        return array_map($this->mapSummaryRow(...), $statement->fetchAll());
+    }
+
+    // Liczba wyników dla tych samych filtrów co findListed() (paginacja).
+    public function countListed(AuctionFilter $filter): int
+    {
+        [$where, $params] = $this->buildListFilter($filter);
+
+        $statement = $this->pdo->prepare('SELECT COUNT(*) ' . self::SUMMARY_FROM . ' WHERE ' . $where);
+        $statement->execute($params);
+
+        return (int) $statement->fetchColumn();
     }
 
     // Aukcje firmy (panel firmy), najnowsze pierwsze; id jako drugi klucz daje stały porządek przy równym created_at.
@@ -123,6 +169,33 @@ final class AuctionRepository extends BaseRepository
         $statement->execute(['id' => $id]);
 
         return $statement->rowCount() > 0;
+    }
+
+    // Wspólny WHERE dla findListed() i countListed(): [fragment, parametry]. Tylko stałe fragmenty SQL; wartości z wejścia
+    // trafiają wyłącznie do parametrów nazwanych. Marka po slugu (brand_slug, UNIQUE w brands), więc bez zamiany na id.
+    /**
+     * @return array{0: string, 1: array<string, int|string>}
+     */
+    private function buildListFilter(AuctionFilter $filter): array
+    {
+        $conditions = ["a.status IN ('active', 'scheduled')", 'a.ends_at > now()'];
+        $params = [];
+
+        if ($filter->brandSlug !== null) {
+            $conditions[] = 's.brand_slug = :brand';
+            $params['brand'] = $filter->brandSlug;
+        }
+        if ($filter->priceMax !== null) {
+            $conditions[] = 's.current_price <= :price_max';
+            $params['price_max'] = $filter->priceMax->grosze();
+        }
+        foreach ($filter->searchTerms as $i => $term) {
+            // Backslash, % i _ w słowie są zwykłymi znakami, nie wzorcem (backslash to domyślny znak ucieczki w LIKE).
+            $conditions[] = "(s.title || ' ' || s.brand_name) ILIKE :term" . $i;
+            $params['term' . $i] = '%' . addcslashes($term, '\\%_') . '%';
+        }
+
+        return [implode(' AND ', $conditions), $params];
     }
 
     // Kolumny aukcji (a.*) mapuje mapRow(); z widoku dochodzą tylko agregaty i nazwy z JOIN-ów.
