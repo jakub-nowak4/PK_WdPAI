@@ -5,7 +5,7 @@
  * $currentUser albo null (gosc). Struktura (przyklad, ustawia kontroler/router):
  *   ['id' => 7, 'name' => 'Jan Kowalski', 'initials' => 'JK', 'role' => 'BUYER' (BUYER|DEALER|ADMIN),
  *    'unreadCount' => 3, 'approved' => true (tylko DEALER, opcjonalnie)]
- * $currentPath, $csrfToken; $unreadCount (zgodnosc wsteczna, gdy brak currentUser['unreadCount']).
+ * $flash (null albo ['type' => 'success'|'info'|'error', 'message' => string]), $currentPath, $csrfToken; $unreadCount (zgodnosc wsteczna, gdy brak currentUser['unreadCount']).
  */
 $e = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
@@ -16,6 +16,7 @@ $currentUser = $currentUser ?? null;
 $currentPath = (string) ($currentPath ?? ($_SERVER['REQUEST_URI'] ?? '/'));
 $csrfToken = (string) ($csrfToken ?? '');
 $unreadCount = (int) ($unreadCount ?? 0);
+$flash = $flash ?? null;
 $accountHref = '/login';
 
 if (is_array($currentUser)) {
@@ -81,6 +82,7 @@ $activeExact = $activeHref !== null && $pathOnly === strtok($activeHref, '?');
     <a class="skip-link" href="#main-content"><?= $e($t('nav.skip', 'Przejdź do treści')) ?></a>
     <?php require __DIR__ . '/partials/header.html.php'; ?>
 
+    <?php require __DIR__ . '/partials/flash.html.php'; ?>
     <?= $content ?>
 
     <?php require __DIR__ . '/partials/footer.html.php'; ?>
