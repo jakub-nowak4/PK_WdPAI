@@ -21,8 +21,16 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 $request = Request::fromGlobals();
 
 // Sesja: konfigurowana raz tutaj (HttpOnly, SameSite=Lax, Secure na HTTPS).
+// Secure zależy tylko od HTTPS widzianego przez PHP (Request::isSecure); nagłówka
+// X-Forwarded-Proto nie ufamy, bo klient mógłby go podstawić.
+// Ciasteczko sesyjne (lifetime 0) znika z zamknięciem przeglądarki, a po stronie
+// serwera nieużywana sesja wygasa po 2 godzinach (gc_maxlifetime).
 ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.use_trans_sid', '0');
+ini_set('session.gc_maxlifetime', '7200');
 session_set_cookie_params([
+    'lifetime' => 0,
     'path' => '/',
     'secure' => $request->isSecure(),
     'httponly' => true,

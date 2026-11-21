@@ -34,6 +34,8 @@ return [
     'error.forbidden' => 'Nie masz uprawnień do tej strony.',
     'error.not_found' => 'Nie znaleziono strony.',
     'error.csrf_invalid' => 'Sesja formularza wygasła. Odśwież stronę i spróbuj ponownie.',
+    'error.login_required' => 'Zaloguj się, aby wykonać tę operację.',
+    'auth.session_expired' => 'Sesja wygasła. Zaloguj się ponownie.',
     'error.language_invalid' => 'Nieobsługiwany język.',
     'error.400.label' => 'Błąd żądania • kod błędu 400',
     'error.400.title' => 'Nieprawidłowe żądanie',

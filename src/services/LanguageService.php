@@ -61,7 +61,7 @@ final class LanguageService
     tylko ścieżka względna zaczynająca się od jednego "/", bez "//", "\", spacji
     i znaków sterujących, maks. 200 znaków. Inna wartość daje "/".
     */
-    public function safeBackPath(string|array|null $back): string
+    public static function safeBackPath(string|array|null $back): string
     {
         if (!is_string($back) || strlen($back) > self::MAX_BACK_LENGTH) {
             return '/';

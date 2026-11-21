@@ -18,6 +18,7 @@ final class Request
      * @param array<string, mixed> $query
      * @param array<string, mixed> $post
      * @param array<string, mixed> $cookies
+     * @param array<string, string> $headers klucze małymi literami, np. x-csrf-token
      */
     public function __construct(
         private readonly string $method,
@@ -26,12 +27,21 @@ final class Request
         private readonly array $post = [],
         private readonly array $cookies = [],
         private readonly bool $secure = false,
+        private readonly array $headers = [],
     ) {
     }
 
     public static function fromGlobals(): self
     {
         $https = (string) ($_SERVER['HTTPS'] ?? '');
+        $headers = [];
+
+        // Nagłówki żądania PHP wystawia jako HTTP_X_CSRF_TOKEN; klucze zapisujemy małymi literami z myślnikami.
+        foreach ($_SERVER as $key => $value) {
+            if (is_string($value) && str_starts_with($key, 'HTTP_')) {
+                $headers[strtolower(str_replace('_', '-', substr($key, 5)))] = $value;
+            }
+        }
 
         return new self(
             (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'),
@@ -40,7 +50,16 @@ final class Request
             $_POST,
             $_COOKIE,
             $https !== '' && strtolower($https) !== 'off',
+            $headers,
         );
+    }
+
+    /*
+    Wartość nagłówka żądania (nazwa bez rozróżniania wielkości liter) albo null.
+    */
+    public function header(string $name): ?string
+    {
+        return $this->headers[strtolower($name)] ?? null;
     }
 
     /*

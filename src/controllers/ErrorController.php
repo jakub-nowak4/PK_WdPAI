@@ -6,10 +6,13 @@ namespace App\Controller;
 
 use App\Exception\HttpException;
 use App\Request;
+use App\Service\LanguageService;
 
 /*
-Odpowiedzi błędów 400, 403 i 404. Dla ścieżek /api/* zwraca JSON w formacie z
+Odpowiedzi błędów 400, 401, 403 i 404. Dla ścieżek /api/* zwraca JSON w formacie z
 docs/api.md (sekcja 3), dla pozostałych stronę HTML.
+401 w HTML nie jest stroną błędu: gość dostaje 303 na /login (GET: z ?next=<ścieżka>,
+POST: komunikat "Sesja wygasła"), w JSON zwykłe 401 login_required (docs/api.md, 1.3 i 1.5).
 Domyślne komunikaty pochodzą z katalogu tłumaczeń (klucze error.*); własny komunikat
 403 z wyjątku zostaje bez zmian.
 */
@@ -23,6 +26,11 @@ final class ErrorController extends AppController
             'message' => 'error.bad_request',
             'view' => 'errors/400',
         ],
+        401 => [
+            'code' => 'login_required',
+            'message' => 'error.login_required',
+            'view' => 'errors/403',
+        ],
         403 => [
             'code' => 'forbidden',
             'message' => 'error.forbidden',
@@ -35,12 +43,32 @@ final class ErrorController extends AppController
         ],
     ];
 
+    /** Kody błędów z wyjątku, które mają własny klucz tłumaczenia (docs/api.md, sekcja 4). */
+    private const CODE_MESSAGES = [
+        'login_required' => 'error.login_required',
+        'csrf_invalid' => 'error.csrf_invalid',
+    ];
+
     public function handle(HttpException $exception, Request $request): void
     {
         $status = array_key_exists($exception->statusCode(), self::ERRORS)
             ? $exception->statusCode()
             : 404;
         $error = self::ERRORS[$status];
+        $isApi = str_starts_with($request->path(), self::API_PREFIX);
+
+        if ($status === 401 && !$isApi) {
+            $this->redirectToLogin($request);
+
+            return;
+        }
+
+        $exceptionCode = $exception->errorCode();
+
+        if ($exceptionCode !== null && $status === $exception->statusCode()) {
+            $error['code'] = $exceptionCode;
+            $error['message'] = self::CODE_MESSAGES[$exceptionCode] ?? $error['message'];
+        }
 
         // Własny komunikat z wyjątku dotyczy tylko 403 (reguły biznesowe po polsku).
         // Komunikaty routera dla 400/404 są techniczne i po angielsku, więc ich nie pokazujemy.
@@ -52,7 +80,7 @@ final class ErrorController extends AppController
 
         http_response_code($status);
 
-        if (str_starts_with($request->path(), self::API_PREFIX)) {
+        if ($isApi) {
             $this->renderJson($error['code'], $error['message']);
 
             return;
@@ -69,6 +97,25 @@ final class ErrorController extends AppController
             'pageTitle' => (string) $status,
             'errorMessage' => $error['message'],
         ]);
+    }
+
+    /*
+    Gość na stronie chronionej. GET wraca po zalogowaniu na bieżący adres (next
+    przechodzi tę samą walidację co back w LanguageService); POST kończy się
+    komunikatem o wygasłej sesji, bo formularza nie da się powtórzyć automatycznie.
+    */
+    private function redirectToLogin(Request $request): void
+    {
+        if ($request->isPost()) {
+            $this->addFlash('error', 'auth.session_expired');
+            $this->redirect('/login');
+
+            return;
+        }
+
+        $next = LanguageService::safeBackPath($request->path());
+
+        $this->redirect('/login?next=' . rawurlencode($next));
     }
 
     private function renderJson(string $code, string $message): void
