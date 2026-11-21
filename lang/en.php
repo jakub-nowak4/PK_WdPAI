@@ -34,6 +34,8 @@ return [
     'error.forbidden' => 'You do not have permission to view this page.',
     'error.not_found' => 'Page not found.',
     'error.csrf_invalid' => 'The form session has expired. Refresh the page and try again.',
+    'error.login_required' => 'Log in to perform this action.',
+    'auth.session_expired' => 'Your session has expired. Please log in again.',
     'error.language_invalid' => 'Unsupported language.',
     'error.400.label' => 'Request error • error code 400',
     'error.400.title' => 'Invalid request',

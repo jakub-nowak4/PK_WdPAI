@@ -62,6 +62,19 @@ abstract class AppController
         header('Location: ' . $path);
     }
 
+    /*
+    Komunikat jednorazowy po 303 (docs/api.md, 1.6): typ success|error|info i klucz
+    tłumaczenia. Widok odczyta i usunie go z sesji przy następnym renderze.
+    */
+    protected function addFlash(string $type, string $messageKey): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        $_SESSION['flash'] = ['type' => $type, 'message' => $messageKey];
+    }
+
     /**
      * MAKIETA: renderuje widok jako zalogowany uzytkownik demo (klucz `currentUser` dla layoutu).
      * Jedyne miejsce do podmiany na uzytkownika z sesji, gdy powstanie AuthService.
