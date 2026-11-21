@@ -48,6 +48,11 @@ abstract class AppController
             'csrfToken' => session_status() === PHP_SESSION_ACTIVE ? $this->csrfToken() : '',
         ];
 
+        // Flash z sesji czytamy tylko wtedy, gdy kontroler nie przekazał własnego $flash.
+        if (!array_key_exists('flash', $variables)) {
+            $variables['flash'] = $this->takeFlash();
+        }
+
         extract($variables, EXTR_SKIP);
 
         ob_start();
@@ -168,6 +173,31 @@ abstract class AppController
         }
 
         $_SESSION['flash'] = ['type' => $type, 'message' => $messageKey];
+    }
+
+    /*
+    Odczyt komunikatu flash dla layoutu (docs/api.md, 1.6): jednorazowo, bo wpis
+    znika z sesji przy pierwszym renderze. Zły kształt (typ spoza success|error|info,
+    pusty lub nietekstowy klucz) daje null. Klucz jest tłumaczony przez Translator.
+    @return array{type: string, message: string}|null
+    */
+    private function takeFlash(): ?array
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE || !array_key_exists('flash', $_SESSION)) {
+            return null;
+        }
+
+        $flash = $_SESSION['flash'];
+        unset($_SESSION['flash']);
+
+        $type = is_array($flash) ? ($flash['type'] ?? null) : null;
+        $key = is_array($flash) ? ($flash['message'] ?? null) : null;
+
+        if (!in_array($type, ['success', 'error', 'info'], true) || !is_string($key) || trim($key) === '') {
+            return null;
+        }
+
+        return ['type' => $type, 'message' => $this->translator->translate($key)];
     }
 
     /**
