@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Model\Notification;
 use App\Model\NotificationType;
 use DateTimeImmutable;
+use PDO;
 
 // Powiadomienia w serwisie (tabela notifications). Cały SQL dla powiadomień jest tutaj; kto je tworzy i kiedy,
 // ustalają serwisy: outbid BidService (w transakcji oferty), won i auction_ended CRON (docs/api.md 2.4).
@@ -45,16 +46,19 @@ final class NotificationRepository extends BaseRepository
     }
 
     // Lista użytkownika, najnowsze pierwsze (notifications_user_idx); id rozstrzyga równe created_at.
-    // Kontrakt (api.md 2.4) nie przewiduje paginacji, więc bez limitu.
+    // Rozmiar listy (ile ostatnich powiadomień) ustala serwis; repozytorium nie zna tej liczby.
     /**
      * @return list<Notification>
      */
-    public function findByUserId(int $userId): array
+    public function findByUserId(int $userId, int $limit): array
     {
         $statement = $this->pdo->prepare(
-            'SELECT ' . self::COLUMNS . ' FROM notifications WHERE user_id = :user_id ORDER BY created_at DESC, id DESC'
+            'SELECT ' . self::COLUMNS . ' FROM notifications WHERE user_id = :user_id
+             ORDER BY created_at DESC, id DESC LIMIT :limit'
         );
-        $statement->execute(['user_id' => $userId]);
+        $statement->bindValue('user_id', $userId, PDO::PARAM_INT);
+        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+        $statement->execute();
 
         return array_map($this->mapRow(...), $statement->fetchAll());
     }
