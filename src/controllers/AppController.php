@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Exception\HttpException;
+use App\Request;
 use App\Service\Translator;
 
 abstract class AppController
@@ -38,9 +40,11 @@ abstract class AppController
 
         // Tłumaczenia dla każdego widoku: $t('klucz', 'tekst domyślny') i $lang.
         // Wartości przekazane przez kontroler mają pierwszeństwo (EXTR_SKIP).
+        // $csrfToken trafia do ukrytych pól formularzy (name="csrfToken") i do meta csrf-token.
         $variables += [
             't' => $this->translator->asClosure(),
             'lang' => $this->translator->language(),
+            'csrfToken' => session_status() === PHP_SESSION_ACTIVE ? $this->csrfToken() : '',
         ];
 
         extract($variables, EXTR_SKIP);
@@ -60,6 +64,44 @@ abstract class AppController
     {
         http_response_code(303);
         header('Location: ' . $path);
+    }
+
+    /*
+    Token CSRF (docs/api.md, 1.4): jeden na sesję, tworzony przy pierwszym użyciu
+    z random_bytes i trzymany w $_SESSION['csrf'].
+    */
+    protected function csrfToken(): string
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            throw new \LogicException('CSRF token requires an active session.');
+        }
+
+        $token = $_SESSION['csrf'] ?? null;
+
+        if (!is_string($token) || $token === '') {
+            $token = bin2hex(random_bytes(32));
+            $_SESSION['csrf'] = $token;
+        }
+
+        return $token;
+    }
+
+    /*
+    Sprawdza token CSRF z pola formularza `csrfToken` albo nagłówka `X-CSRF-Token`
+    (Fetch API). Porównanie stałoczasowe; brak lub zły token to 403 (csrf_invalid).
+    Wołać na początku każdej akcji obsługującej POST.
+    */
+    protected function verifyCsrf(Request $request): void
+    {
+        $sent = $request->post('csrfToken');
+
+        if (!is_string($sent)) {
+            $sent = $request->header('X-CSRF-Token');
+        }
+
+        if ($sent === null || $sent === '' || !hash_equals($this->csrfToken(), $sent)) {
+            throw HttpException::csrfInvalid();
+        }
     }
 
     /*
