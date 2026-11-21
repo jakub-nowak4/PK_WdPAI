@@ -3,12 +3,11 @@
  * Panel administratora (ekran 17): GET /admin?status=pending|approved|rejected|all.
  * Oczekiwane zmienne od kontrolera (na razie brak, uzywana jest MAKIETA z partials/mock-admin-companies.php):
  * $companies (id, name, city, email, registeredAtLabel, status), $status (aktywna zakladka), $csrfToken,
- * opcjonalnie $stats (pending, approved, auctions), $flash, $formError (np. 409), $t, $e.
+ * opcjonalnie $stats (pending, approved, auctions), $formError (np. 409), $t, $e.
  */
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
 $csrfToken = (string) ($csrfToken ?? '');
-$flash = (string) ($flash ?? '');
 $formError = (string) ($formError ?? '');
 
 $isMock = false;
@@ -47,9 +46,6 @@ $statusLabels = [
 
     <?php if ($isMock): ?>
         <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
-    <?php endif; ?>
-    <?php if ($flash !== ''): ?>
-        <p class="alert alert--success" role="status"><?= $e($flash) ?></p>
     <?php endif; ?>
     <?php if ($formError !== ''): ?>
         <p class="alert alert--error" role="alert"><?= $e($formError) ?></p>
