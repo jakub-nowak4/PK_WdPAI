@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Exception\HttpException;
+use App\Model\Role;
 use App\Request;
 use App\Service\Translator;
 
@@ -64,6 +65,58 @@ abstract class AppController
     {
         http_response_code(303);
         header('Location: ' . $path);
+    }
+
+    /*
+    Id zalogowanego użytkownika z sesji albo null dla gościa. Sesja trzyma tylko
+    userId i role (docs/api.md, 2.4); wartość o złym typie traktujemy jak brak logowania.
+    */
+    protected function currentUserId(): ?int
+    {
+        $userId = $_SESSION['userId'] ?? null;
+
+        return is_int($userId) && $userId > 0 ? $userId : null;
+    }
+
+    protected function currentRole(): ?Role
+    {
+        $role = $_SESSION['role'] ?? null;
+
+        return is_string($role) ? Role::tryFrom($role) : null;
+    }
+
+    /*
+    Autoryzacja po stronie serwera, na początku chronionej akcji (kryterium 22).
+    Gość: wyjątek 401, który ErrorController zamienia na 303 na /login (HTML)
+    albo 401 JSON (/api/*). Zwraca id użytkownika. Strona chroniona nie trafia do
+    cache przeglądarki, więc "Wstecz" po wylogowaniu nie pokaże danych (kryterium 24).
+    */
+    protected function requireLogin(): int
+    {
+        $userId = $this->currentUserId();
+
+        if ($userId === null || $this->currentRole() === null) {
+            throw HttpException::unauthorized();
+        }
+
+        header('Cache-Control: no-store');
+
+        return $userId;
+    }
+
+    /*
+    Wymaga zalogowania i jednej z podanych ról; inna rola to 403. Zwraca id użytkownika.
+    Status firmy (zatwierdzona/oczekująca) sprawdza kontroler firmy, nie ta metoda.
+    */
+    protected function requireRole(Role ...$roles): int
+    {
+        $userId = $this->requireLogin();
+
+        if (!in_array($this->currentRole(), $roles, true)) {
+            throw HttpException::forbidden();
+        }
+
+        return $userId;
     }
 
     /*
