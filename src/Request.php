@@ -102,6 +102,18 @@ final class Request
         return $path === '' ? '/' : $path;
     }
 
+    /*
+    Ścieżka razem z query stringiem (bez fragmentu, którego przeglądarka nie wysyła),
+    np. "/my-bids?status=won". Surowa wartość: przed użyciem w Location przepuść ją
+    przez LanguageService::safeBackPath().
+    */
+    public function pathWithQuery(): string
+    {
+        $uri = explode('#', $this->uri, 2)[0];
+
+        return $uri === '' ? '/' : $uri;
+    }
+
     public function query(string $name): string|array|null
     {
         return $this->query[$name] ?? null;
