@@ -60,6 +60,35 @@ final class AuctionRepository extends BaseRepository
         return $row === false ? null : $this->mapSummaryRow($row);
     }
 
+    // Podsumowania wielu aukcji jednym zapytaniem (bez N+1 w "Moje oferty" i na liście powiadomień). Wynik jest
+    // indeksowany id aukcji, nieistniejące id po prostu nie występują; duplikaty w $ids nie szkodzą. Bez ORDER BY
+    // (kolejność daje wołający po swojej liście) i bez filtra statusu/czasu: to odczyt po id, nie lista publiczna.
+    // Id trafiają do SQL jako jeden parametr: literał tablicy zbudowany z typowanych int, rzutowany na INTEGER[].
+    /**
+     * @param list<int> $ids
+     * @return array<int, AuctionSummary>
+     */
+    public function findSummariesByIds(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+
+        $statement = $this->pdo->prepare(
+            'SELECT ' . $this->summaryColumns() . ' ' . self::SUMMARY_FROM
+            . ' WHERE a.id = ANY(CAST(:ids AS INTEGER[]))'
+        );
+        $statement->execute(['ids' => '{' . implode(',', array_map(static fn (int $id): string => (string) $id, $ids)) . '}']);
+
+        $summaries = [];
+        foreach ($statement->fetchAll() as $row) {
+            $summary = $this->mapSummaryRow($row);
+            $summaries[$summary->getAuction()->getId()] = $summary;
+        }
+
+        return $summaries;
+    }
+
     // Lista publiczna (docs/api.md 2.2): aukcje active i scheduled z ends_at > now() (po czasie znikają od razu, nawet
     // zanim CRON je zamknie), jedna strona. Cena (filtr i sortowanie) idzie po s.current_price z widoku, nie z PHP.
     // Jedno zapytanie na listę: agregaty, marka i okładka przychodzą z widoku (bez N+1).
