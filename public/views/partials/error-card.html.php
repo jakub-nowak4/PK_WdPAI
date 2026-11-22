@@ -28,7 +28,7 @@ $iconPaths = [
         <h1 class="error-page__title" id="error-title"><?= $e($errorTitle) ?></h1>
         <p class="error-page__description"><?= $e($errorDescription) ?></p>
         <p class="error-page__actions">
-            <a class="button button--accent" href="/"><?= $e($t('error.back_to_auctions', 'Wróć do aukcji')) ?></a>
+            <a class="button button--accent" href="/auctions"><?= $e($t('error.back_to_auctions', 'Wróć do aukcji')) ?></a>
             <?php if ($isGuest): ?>
                 <a class="button button--secondary" href="/login"><?= $e($t('nav.login', 'Zaloguj się')) ?></a>
             <?php endif; ?>
