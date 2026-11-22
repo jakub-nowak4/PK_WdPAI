@@ -200,6 +200,8 @@ final class AuthService
             $errors['name'] = $this->translator->translate('validation.min_length', ['min' => self::NAME_MIN]);
         } elseif ($nameLength > self::NAME_MAX) {
             $errors['name'] = $this->translator->translate('validation.max_length', ['max' => self::NAME_MAX]);
+        } elseif ($this->hasControlCharacters($name)) {
+            $errors['name'] = $this->translator->translate('validation.invalid_format');
         }
 
         if ($email === '') {
@@ -245,6 +247,8 @@ final class AuthService
             $errors['companyName'] = $this->translator->translate('validation.min_length', ['min' => self::COMPANY_NAME_MIN]);
         } elseif ($nameLength > self::COMPANY_NAME_MAX) {
             $errors['companyName'] = $this->translator->translate('validation.max_length', ['max' => self::COMPANY_NAME_MAX]);
+        } elseif ($this->hasControlCharacters($companyName)) {
+            $errors['companyName'] = $this->translator->translate('validation.invalid_format');
         }
 
         $cityLength = mb_strlen($city);
@@ -254,6 +258,8 @@ final class AuthService
             $errors['city'] = $this->translator->translate('validation.min_length', ['min' => self::CITY_MIN]);
         } elseif ($cityLength > self::CITY_MAX) {
             $errors['city'] = $this->translator->translate('validation.max_length', ['max' => self::CITY_MAX]);
+        } elseif ($this->hasControlCharacters($city)) {
+            $errors['city'] = $this->translator->translate('validation.invalid_format');
         }
 
         if ($phone !== '' && preg_match(self::PHONE_PATTERN, $phone) !== 1) {
@@ -261,6 +267,18 @@ final class AuthService
         }
 
         return $errors;
+    }
+
+    /*
+    Pola jednowierszowe (imię, osoba kontaktowa, nazwa firmy, miasto) nie przyjmują znaków
+    sterujących C0 (CR, LF, TAB, \0 i inne), DEL ani C1: nie mają sensu w nazwie, a CR/LF
+    w polu mogłyby zafałszować nagłówek e-maila lub wpis w logu. Hasła tu nie trafiają
+    (nie są przycinane ani filtrowane, \0 w haśle obsługuje validateRegistration).
+    Wejście jest już poprawnym UTF-8 (App\Request); gdyby nie było, preg_match zwraca false.
+    */
+    private function hasControlCharacters(string $value): bool
+    {
+        return preg_match('/[\x00-\x1F\x7F-\x9F]/u', $value) !== 0;
     }
 
     /*
