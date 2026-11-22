@@ -1,22 +1,15 @@
 <?php
 /**
  * Panel administratora (ekran 17): GET /admin?status=pending|approved|rejected|all.
- * Oczekiwane zmienne od kontrolera (na razie brak, uzywana jest MAKIETA z partials/mock-admin-companies.php):
+ * Zmienne od AdminController (dane z bazy):
  * $companies (id, name, city, email, registeredAtLabel, status), $status (aktywna zakladka), $csrfToken,
- * opcjonalnie $stats (pending, approved, auctions), $formError (np. 409), $t, $e.
+ * $stats (pending, approved, auctions), $formError (np. 409), $t, $e.
  */
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
 $csrfToken = (string) ($csrfToken ?? '');
 $formError = (string) ($formError ?? '');
 
-$isMock = false;
-if (!isset($companies)) {
-    $mock = require __DIR__ . '/../partials/mock-admin-companies.php';
-    $companies = $mock['companies'];
-    $stats = $mock['stats'];
-    $isMock = true;
-}
 $stats = $stats ?? null;
 $tabs = [
     'pending' => $t('admin.tab_pending', 'Oczekujące'),
@@ -25,9 +18,6 @@ $tabs = [
     'all' => $t('admin.tab_all', 'Wszystkie'),
 ];
 $status = isset($status) && in_array($status, ['pending', 'approved', 'rejected', 'all'], true) ? $status : 'pending';
-if ($isMock) {
-    $companies = $status === 'all' ? $companies : array_values(array_filter($companies, static fn (array $c): bool => $c['status'] === $status));
-}
 $statusLabels = [
     'pending' => $t('admin.status_pending', 'Oczekuje'),
     'approved' => $t('admin.status_approved', 'Zatwierdzona'),
@@ -44,9 +34,6 @@ $statusLabels = [
         <a class="button button--secondary" href="/admin"><?= $e($t('admin.refresh', 'Odśwież')) ?></a>
     </header>
 
-    <?php if ($isMock): ?>
-        <p class="alert alert--info" role="note"><?= $e($t('common.mock_notice', 'MAKIETA: dane przykładowe, nie pochodzą z bazy.')) ?></p>
-    <?php endif; ?>
     <?php if ($formError !== ''): ?>
         <p class="alert alert--error" role="alert"><?= $e($formError) ?></p>
     <?php endif; ?>
