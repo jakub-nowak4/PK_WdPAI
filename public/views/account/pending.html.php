@@ -27,6 +27,12 @@ $isRejected = $companyStatus === 'rejected';
             </p>
         </header>
 
+        <?php if (!$isRejected): ?>
+            <p class="alert alert--info" role="status">
+                <?= $e($t('pending.info', 'Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.')) ?>
+            </p>
+        <?php endif; ?>
+
         <section aria-labelledby="pending-steps-title">
             <h2 class="status-card__subtitle" id="pending-steps-title"><?= $e($t('pending.steps', 'Postęp zgłoszenia')) ?></h2>
             <ol class="stepper">
@@ -51,6 +57,7 @@ $isRejected = $companyStatus === 'rejected';
         </section>
 
         <footer class="auth-card__footer">
+            <a class="button button--secondary button--block" href="/account/pending"><?= $e($t('pending.refresh', 'Sprawdź status')) ?></a>
             <a class="button button--secondary button--block" href="/auctions"><?= $e($t('pending.to_auctions', 'Przejdź do aukcji')) ?></a>
         </footer>
     </section>
