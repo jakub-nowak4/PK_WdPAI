@@ -120,7 +120,7 @@ final class SecurityController extends AppController
         $email = $this->postString($request, 'email');
 
         try {
-            $user = $this->auth->registerBuyer(
+            $registration = $this->auth->registerBuyer(
                 $name,
                 $email,
                 $this->postString($request, 'password'),
@@ -138,8 +138,14 @@ final class SecurityController extends AppController
             return;
         }
 
-        $this->logInUser($user);
-        $this->addFlash('success', 'register.success');
+        // Konto jest zapisane także wtedy, gdy e-mail powitalny nie wyszedł (szczegóły w logu).
+        $this->logInUser($registration->getUser());
+        if ($registration->isWelcomeMailSent()) {
+            $this->addFlash('success', 'register.success');
+        } else {
+            $this->addFlash('info', 'register.success_mail_failed');
+        }
+
         $this->redirect('/auctions');
     }
 
@@ -174,7 +180,7 @@ final class SecurityController extends AppController
         ];
 
         try {
-            $user = $this->auth->registerCompany(
+            $registration = $this->auth->registerCompany(
                 $old['name'],
                 $old['email'],
                 $this->postString($request, 'password'),
@@ -195,8 +201,13 @@ final class SecurityController extends AppController
             return;
         }
 
-        $this->logInUser($user);
-        $this->addFlash('success', 'register_company.success');
+        $this->logInUser($registration->getUser());
+        if ($registration->isWelcomeMailSent()) {
+            $this->addFlash('success', 'register_company.success');
+        } else {
+            $this->addFlash('info', 'register_company.success_mail_failed');
+        }
+
         $this->redirect('/account/pending');
     }
 

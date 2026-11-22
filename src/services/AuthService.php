@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Exception\InvalidCredentialsException;
+use App\Exception\MailException;
 use App\Exception\ValidationException;
 use App\Model\Role;
 use App\Model\User;
@@ -42,12 +43,14 @@ final class AuthService
         private readonly CompanyRepository $companies,
         private readonly \PDO $pdo,
         private readonly Translator $translator,
+        private readonly WelcomeMailService $welcomeMail,
     ) {
     }
 
     /**
      * Rejestracja kupującego (rola BUYER). Błąd reguł: ValidationException 422,
-     * zajęty e-mail: ValidationException 409 (przy polu e-mail).
+     * zajęty e-mail: ValidationException 409 (przy polu e-mail). Po zapisie konta
+     * wychodzi e-mail powitalny; jego błąd nie cofa rejestracji (wynik niesie flagę).
      *
      * @throws ValidationException
      */
@@ -57,7 +60,7 @@ final class AuthService
         string $password,
         string $passwordRepeat,
         string $locale,
-    ): User {
+    ): RegistrationResult {
         $name = trim($name);
         $email = mb_strtolower(trim($email));
 
@@ -73,7 +76,7 @@ final class AuthService
         }
 
         try {
-            return $this->users->create($email, password_hash($password, PASSWORD_DEFAULT), $name, Role::Buyer, $locale);
+            $user = $this->users->create($email, password_hash($password, PASSWORD_DEFAULT), $name, Role::Buyer, $locale);
         } catch (\PDOException $exception) {
             if ($exception->getCode() === self::SQLSTATE_UNIQUE_VIOLATION) {
                 throw $this->emailTaken();
@@ -81,6 +84,8 @@ final class AuthService
 
             throw $exception;
         }
+
+        return new RegistrationResult($user, $this->sendWelcomeMail($user));
     }
 
     /**
@@ -88,7 +93,8 @@ final class AuthService
      * Pola konta walidowane jak u kupującego (`name` to osoba kontaktowa), do tego nazwa
      * firmy, miasto i opcjonalny telefon. Konto i profil powstają w jednej transakcji:
      * błąd drugiego zapisu cofa pierwszy. Błąd reguł: ValidationException 422, zajęty
-     * e-mail: ValidationException 409 (przy polu e-mail).
+     * e-mail: ValidationException 409 (przy polu e-mail). E-mail powitalny (konto czeka na
+     * zatwierdzenie) wychodzi dopiero po COMMIT, a jego błąd nie cofa rejestracji.
      *
      * @throws ValidationException
      */
@@ -101,7 +107,7 @@ final class AuthService
         string $city,
         string $phone,
         string $locale,
-    ): User {
+    ): RegistrationResult {
         $name = trim($name);
         $email = mb_strtolower(trim($email));
         $companyName = trim($companyName);
@@ -136,7 +142,7 @@ final class AuthService
             throw $exception;
         }
 
-        return $user;
+        return new RegistrationResult($user, $this->sendWelcomeMail($user));
     }
 
     /**
@@ -255,6 +261,29 @@ final class AuthService
         }
 
         return $errors;
+    }
+
+    /*
+    Wysyła e-mail powitalny po zapisie konta. Każdy błąd poczty kończy się tylko wpisem w
+    logu (`mail=failed`, id konta i przyczyna): bez adresu odbiorcy, hasła i treści listu.
+    Dla wyjątku innego niż MailException logujemy samą klasę, bo jego komunikat mógłby
+    zawierać dane użytkownika. Zwraca false, gdy list nie wyszedł.
+    */
+    private function sendWelcomeMail(User $user): bool
+    {
+        try {
+            $this->welcomeMail->sendWelcome($user);
+
+            return true;
+        } catch (\Throwable $exception) {
+            error_log(sprintf(
+                'mail=failed type=welcome userId=%d reason=%s',
+                $user->getId(),
+                $exception instanceof MailException ? $exception->getMessage() : $exception::class,
+            ));
+
+            return false;
+        }
     }
 
     private function emailTaken(): ValidationException

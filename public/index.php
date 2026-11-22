@@ -21,7 +21,9 @@ use App\Service\AuthService;
 use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
+use App\Service\MailService;
 use App\Service\Translator;
+use App\Service\WelcomeMailService;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -54,6 +56,18 @@ $translator = new Translator(dirname(__DIR__) . '/lang', $languageService->resol
 $config = require dirname(__DIR__) . '/config.php';
 $database = new Database($config['database']);
 
+// Poczta: MailService łączy się z SMTP dopiero przy wysyłce, więc samo utworzenie obiektu nic nie kosztuje.
+$welcomeMail = new WelcomeMailService(
+    new MailService(
+        $config['mail']['host'],
+        $config['mail']['port'],
+        $config['mail']['from'],
+        $config['mail']['fromName'],
+    ),
+    dirname(__DIR__) . '/lang',
+    $config['app']['url'],
+);
+
 // Użytkownik dla layoutu: czyta bazę dopiero dla zalogowanego (getConnection(...) to tylko referencja).
 $currentUserProvider = new CurrentUserProvider($database->getConnection(...));
 
@@ -67,6 +81,7 @@ $routing = new Routing([
         new CompanyRepository($database->getConnection()),
         $database->getConnection(),
         $translator,
+        $welcomeMail,
     ),
     CompanyReviewService::class => static fn (): CompanyReviewService => new CompanyReviewService(
         new CompanyRepository($database->getConnection()),
