@@ -45,6 +45,16 @@ final class HttpException extends \RuntimeException
     }
 
     /*
+    Firma DEALER niezatwierdzona (status pending lub rejected, docs/api.md 1.5): 403, a
+    ErrorController zamiast strony 403 pokazuje ekran "konto czeka na zatwierdzenie".
+    Komunikat wyjątku niesie status firmy (wartość CompanyStatus).
+    */
+    public static function companyNotApproved(string $companyStatus): self
+    {
+        return new self(403, $companyStatus, 'company_not_approved');
+    }
+
+    /*
     Brak lub zły token CSRF (403, w JSON kod csrf_invalid).
     */
     public static function csrfInvalid(): self

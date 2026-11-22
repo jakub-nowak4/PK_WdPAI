@@ -59,7 +59,8 @@ $routing = new Routing([
     Translator::class => $translator,
     LanguageService::class => $languageService,
     CurrentUserProvider::class => $currentUserProvider,
-    AuthService::class => static fn (): AuthService => new AuthService(
+    CompanyRepository::class => static fn (): CompanyRepository => new CompanyRepository($database->getConnection()),
+    AuthService::class =>static fn (): AuthService => new AuthService(
         new UserRepository($database->getConnection()),
         new CompanyRepository($database->getConnection()),
         $database->getConnection(),
