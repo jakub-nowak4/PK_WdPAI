@@ -57,4 +57,8 @@ return [
     'validation.min_value' => 'The value cannot be lower than {min}.',
     'validation.max_value' => 'The value cannot be higher than {max}.',
     'validation.invalid_format' => 'Invalid format.',
+    'validation.email_taken' => 'An account with this e-mail address already exists.',
+
+    // Registration
+    'register.success' => 'Your account has been created. Welcome to MotoBid!',
 ];
