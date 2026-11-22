@@ -8,6 +8,7 @@ use App\Exception\HttpException;
 use App\Model\Role;
 use App\Model\User;
 use App\Request;
+use App\Service\CurrentUserProvider;
 use App\Service\Translator;
 
 abstract class AppController
@@ -15,9 +16,13 @@ abstract class AppController
     /*
     Translator trafia do kontrolera przez konstruktor (Routing wstrzykuje go na
     podstawie typu). Kontroler z dodatkowymi zależnościami woła parent::__construct().
+    CurrentUserProvider dostarcza layoutowi zalogowanego użytkownika z bazy (null =
+    layout bez użytkownika, np. ErrorController poza routerem).
     */
-    public function __construct(protected readonly Translator $translator)
-    {
+    public function __construct(
+        protected readonly Translator $translator,
+        private readonly ?CurrentUserProvider $currentUsers = null,
+    ) {
     }
 
     protected function viewExists(string $template): bool
@@ -48,6 +53,11 @@ abstract class AppController
             'lang' => $this->translator->language(),
             'csrfToken' => session_status() === PHP_SESSION_ACTIVE ? $this->csrfToken() : '',
         ];
+
+        // Layout dostaje $currentUser z bazy (docs/api.md, 1.5); kontroler może go jawnie nadpisać.
+        if (!array_key_exists('currentUser', $variables)) {
+            $variables['currentUser'] = $this->loadCurrentUser();
+        }
 
         // Flash z sesji czytamy tylko wtedy, gdy kontroler nie przekazał własnego $flash.
         if (!array_key_exists('flash', $variables)) {
@@ -89,6 +99,29 @@ abstract class AppController
         $role = $_SESSION['role'] ?? null;
 
         return is_string($role) ? Role::tryFrom($role) : null;
+    }
+
+    /*
+    Zalogowany użytkownik dla layoutu albo null (gość). Sesja daje tylko id; nazwę, status
+    firmy i licznik powiadomień czyta CurrentUserProvider z bazy. Konto usunięte z bazy
+    kończy sesję (czyścimy userId i role), więc nie zostaje "duch" bez danych.
+    @return array{id: int, name: string, initials: string, role: string, unreadCount: int, approved: bool}|null
+    */
+    private function loadCurrentUser(): ?array
+    {
+        $userId = $this->currentUserId();
+
+        if ($userId === null || $this->currentRole() === null || $this->currentUsers === null) {
+            return null;
+        }
+
+        $user = $this->currentUsers->find($userId);
+
+        if ($user === null) {
+            unset($_SESSION['userId'], $_SESSION['role']);
+        }
+
+        return $user;
     }
 
     /*

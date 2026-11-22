@@ -16,6 +16,7 @@ use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
 use App\Service\AuthService;
+use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
 use App\Service\Translator;
 
@@ -50,9 +51,13 @@ $translator = new Translator(dirname(__DIR__) . '/lang', $languageService->resol
 $config = require dirname(__DIR__) . '/config.php';
 $database = new Database($config['database']);
 
+// Użytkownik dla layoutu: czyta bazę dopiero dla zalogowanego (getConnection(...) to tylko referencja).
+$currentUserProvider = new CurrentUserProvider($database->getConnection(...));
+
 $routing = new Routing([
     Translator::class => $translator,
     LanguageService::class => $languageService,
+    CurrentUserProvider::class => $currentUserProvider,
     AuthService::class => static fn (): AuthService => new AuthService(
         new UserRepository($database->getConnection()),
         $translator,
@@ -81,5 +86,5 @@ $routing->post('/language', LanguageController::class, 'change');
 try {
     $routing->dispatch($request);
 } catch (HttpException $exception) {
-    (new ErrorController($translator))->handle($exception, $request);
+    (new ErrorController($translator, $currentUserProvider))->handle($exception, $request);
 }
