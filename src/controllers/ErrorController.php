@@ -113,7 +113,7 @@ final class ErrorController extends AppController
             return;
         }
 
-        $next = LanguageService::safeBackPath($request->path());
+        $next = LanguageService::safeBackPath($request->pathWithQuery());
 
         $this->redirect('/login?next=' . rawurlencode($next));
     }

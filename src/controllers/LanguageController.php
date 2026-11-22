@@ -22,6 +22,9 @@ final class LanguageController extends AppController
 
     public function change(Request $request): void
     {
+        // Token CSRF najpierw: zły lub brak tokenu to 403, zanim ruszymy resztę danych.
+        $this->verifyCsrf($request);
+
         $language = $request->post('lang');
 
         if (!is_string($language) || !Translator::isSupported($language)) {
