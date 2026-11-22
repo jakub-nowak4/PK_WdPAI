@@ -21,7 +21,7 @@ $accountType = 'company';
 
         <?php require __DIR__ . '/../partials/form-errors.html.php'; ?>
 
-        <form class="auth-card__form" method="post" action="/register/company" novalidate>
+        <form class="auth-card__form" method="post" action="/register/company" data-validate novalidate>
             <input type="hidden" name="csrfToken" value="<?= $e($csrfToken) ?>">
 
             <fieldset class="auth-card__group">
@@ -76,4 +76,5 @@ $accountType = 'company';
                 <a href="/login"><?= $e($t('register_company.login', 'Przejdź do logowania')) ?></a></p>
         </footer>
     </section>
+    <?php require __DIR__ . '/../partials/validation-messages.html.php'; ?>
 </main>
