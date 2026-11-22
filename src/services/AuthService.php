@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Exception\InvalidCredentialsException;
 use App\Exception\ValidationException;
 use App\Model\Role;
 use App\Model\User;
@@ -12,7 +13,7 @@ use App\Repository\UserRepository;
 /*
 Konta użytkowników: walidacja pól rejestracji (jedyne miejsce, docs/api.md 1.7),
 hashowanie hasła i zapis. Granice są stałymi tej klasy; kontroler ich nie powtarza.
-Logowanie dodaje T-019 w tej samej klasie.
+Obsługuje też logowanie (login).
 */
 final class AuthService
 {
@@ -24,6 +25,9 @@ final class AuthService
     public const PASSWORD_MAX = 72;
 
     private const SQLSTATE_UNIQUE_VIOLATION = '23505';
+
+    // Hash bcrypt losowego, nieużywanego hasła: logowanie na nieistniejące konto robi tyle samo pracy co zwykłe.
+    private const DUMMY_HASH = '$2y$10$C6DZKxrkcjcG0k93NfFYf.wKVGExv8kdZPPJ9KojaZtNdAaa9W1gS';
 
     public function __construct(
         private readonly UserRepository $users,
@@ -67,6 +71,47 @@ final class AuthService
 
             throw $exception;
         }
+    }
+
+    /**
+     * Logowanie (docs/api.md, 2.4). Puste pole lub zły format e-maila: ValidationException 422
+     * (błędy przy polach). Zły e-mail albo hasło: InvalidCredentialsException (401, jeden
+     * ogólny komunikat). Hasło sprawdzamy także dla nieistniejącego konta (hash zastępczy),
+     * żeby czas odpowiedzi nie zdradzał, czy e-mail jest w bazie.
+     *
+     * @throws ValidationException
+     * @throws InvalidCredentialsException
+     */
+    public function login(string $email, string $password): User
+    {
+        $email = mb_strtolower(trim($email));
+        $errors = [];
+
+        if ($email === '') {
+            $errors['email'] = $this->translator->translate('validation.required');
+        } elseif (mb_strlen($email) > self::EMAIL_MAX) {
+            $errors['email'] = $this->translator->translate('validation.max_length', ['max' => self::EMAIL_MAX]);
+        } elseif (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            $errors['email'] = $this->translator->translate('validation.email');
+        }
+
+        if ($password === '') {
+            $errors['password'] = $this->translator->translate('validation.required');
+        }
+
+        if ($errors !== []) {
+            throw new ValidationException($errors, 422);
+        }
+
+        $user = $this->users->findByEmail($email);
+        $passwordMatches = password_verify($password, $user?->getPasswordHash() ?? self::DUMMY_HASH);
+
+        // Bajt \0 kończy hasło dla crypt(), więc "abc\0x" przeszłoby jako "abc"; rejestracja takich haseł nie przyjmuje.
+        if ($user === null || !$passwordMatches || str_contains($password, "\0")) {
+            throw new InvalidCredentialsException($this->translator->translate('auth.invalid_credentials'));
+        }
+
+        return $user;
     }
 
     /**

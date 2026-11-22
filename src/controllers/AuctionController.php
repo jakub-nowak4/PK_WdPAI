@@ -24,8 +24,8 @@ final class AuctionController extends AppController
         ];
         $page = (int) $request->queryInt('page', 1, 100000, 1);
 
-        // MAKIETA (T-009): zalogowany kupujący demo i lista z partials/mock-auctions.php, do czasu repozytorium.
-        $this->renderAsUser('auctions/index', DemoUser::buyer(), [
+        // MAKIETA (T-009): lista z partials/mock-auctions.php, do czasu repozytorium.
+        $this->render('auctions/index', [
             'pageTitle' => 'Aukcje',
             'filters' => $filters,
             'page' => $page,
@@ -37,8 +37,8 @@ final class AuctionController extends AppController
         // MAKIETA (T-009): ?state=confirm|leading|error|outbid pokazuje ekrany 04-07; zła wartość to 400.
         $state = $request->queryOneOf('state', self::PREVIEW_STATES);
 
-        // MAKIETA: zalogowany kupujacy demo, do czasu AuthService (karta auth).
-        $this->renderAsUser('auctions/show', DemoUser::buyer(), [
+        // MAKIETA: dane aukcji statyczne, do czasu repozytorium.
+        $this->render('auctions/show', [
             'pageTitle' => 'Szczegóły aukcji',
             'auctionId' => $id,
             'previewState' => $state,
@@ -48,7 +48,7 @@ final class AuctionController extends AppController
     public function won(int $id): void
     {
         // MAKIETA (T-009): ekran 08 jako osobna strona; docelowo tylko zwycięzca (403/404 inaczej).
-        $this->renderAsUser('auctions/won', DemoUser::buyer(), [
+        $this->render('auctions/won', [
             'pageTitle' => 'Aukcja wygrana',
             'auctionId' => $id,
         ]);

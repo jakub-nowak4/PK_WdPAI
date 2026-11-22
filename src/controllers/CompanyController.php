@@ -11,16 +11,16 @@ final class CompanyController extends AppController
 {
     public function index(): void
     {
-        // MAKIETA: zalogowana, zatwierdzona firma demo, do czasu AuthService (karta auth).
-        $this->renderAsUser('company/index', DemoUser::approvedCompany(), [
+        // MAKIETA: tresc statyczna, do czasu panelu firmy.
+        $this->render('company/index', [
             'pageTitle' => 'Panel firmy',
         ]);
     }
 
     public function create(): void
     {
-        // MAKIETA: zalogowana, zatwierdzona firma demo, do czasu AuthService (karta auth).
-        $this->renderAsUser('company/create', DemoUser::approvedCompany(), [
+        // MAKIETA: tresc statyczna, do czasu panelu firmy.
+        $this->render('company/create', [
             'pageTitle' => 'Dodaj aukcję',
         ]);
     }
@@ -33,8 +33,8 @@ final class CompanyController extends AppController
             throw HttpException::forbidden('company.error.has_bids');
         }
 
-        // MAKIETA: zalogowana, zatwierdzona firma demo, do czasu AuthService (karta auth).
-        $this->renderAsUser('company/delete', DemoUser::approvedCompany(), [
+        // MAKIETA: tresc statyczna, do czasu panelu firmy.
+        $this->render('company/delete', [
             'pageTitle' => 'Usuń aukcję',
             'auctionId' => $id,
         ]);
