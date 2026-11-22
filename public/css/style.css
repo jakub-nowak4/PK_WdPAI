@@ -3186,16 +3186,6 @@ textarea.form-field__control {
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation: none;
-        transition: none;
-        scroll-behavior: auto;
-    }
-}
-
 /* ---------- Ekran 16: potwierdzenie usunięcia aukcji ---------- */
 .page--confirm {
     align-items: center;
@@ -4060,5 +4050,20 @@ textarea.form-field__control {
 
     .page--notifications .page__header .button {
         width: auto;
+    }
+}
+
+/* ---------- Ograniczony ruch (na końcu pliku, żeby wygrywać z regułami komponentów) ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after,
+    .button[aria-busy="true"]::before,
+    .status-label__dot,
+    .spinner,
+    .skeleton {
+        animation: none;
+        transition: none;
+        scroll-behavior: auto;
     }
 }
