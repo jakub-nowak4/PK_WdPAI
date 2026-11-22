@@ -27,4 +27,11 @@ return [
         'user' => $env('POSTGRES_USER', 'app'),
         'password' => $env('POSTGRES_PASSWORD'),
     ],
+    // Poczta SMTP (App\Service\MailService). Lokalnie Mailpit w sieci Docker: mailpit:1025.
+    'mail' => [
+        'host' => $env('SMTP_HOST', 'mailpit'),
+        'port' => (int) $env('SMTP_PORT', '1025'),
+        'from' => $env('SMTP_FROM', 'no-reply@motobid.local'),
+        'fromName' => $env('SMTP_FROM_NAME', 'MotoBid'),
+    ],
 ];
