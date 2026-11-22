@@ -57,4 +57,8 @@ return [
     'validation.min_value' => 'Wartość nie może być mniejsza niż {min}.',
     'validation.max_value' => 'Wartość nie może być większa niż {max}.',
     'validation.invalid_format' => 'Niepoprawny format.',
+    'validation.email_taken' => 'Konto z tym adresem e-mail już istnieje.',
+
+    // Rejestracja
+    'register.success' => 'Konto zostało utworzone. Witaj w MotoBid!',
 ];
