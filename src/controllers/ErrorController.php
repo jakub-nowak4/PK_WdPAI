@@ -13,8 +13,9 @@ Odpowiedzi błędów 400, 401, 403 i 404. Dla ścieżek /api/* zwraca JSON w for
 docs/api.md (sekcja 3), dla pozostałych stronę HTML.
 401 w HTML nie jest stroną błędu: gość dostaje 303 na /login (GET: z ?next=<ścieżka>,
 POST: komunikat "Sesja wygasła"), w JSON zwykłe 401 login_required (docs/api.md, 1.3 i 1.5).
-Domyślne komunikaty pochodzą z katalogu tłumaczeń (klucze error.*); własny komunikat
-403 z wyjątku zostaje bez zmian.
+Domyślne komunikaty pochodzą z katalogu tłumaczeń (klucze error.*). Komunikat 403
+z wyjątku to klucz tłumaczenia (np. company.error.has_bids), nieznany klucz daje
+error.forbidden. Tytuł strony (<title>) to przetłumaczone error.<status>.title.
 */
 final class ErrorController extends AppController
 {
@@ -69,13 +70,13 @@ final class ErrorController extends AppController
             $error['message'] = self::CODE_MESSAGES[$exceptionCode] ?? $error['message'];
         }
 
-        // Własny komunikat z wyjątku dotyczy tylko 403 (reguły biznesowe po polsku).
+        // Własny komunikat z wyjątku dotyczy tylko 403 i jest kluczem tłumaczenia
+        // (reguły biznesowe); klucz spoza katalogu wraca do domyślnego error.forbidden.
         // Komunikaty routera dla 400/404 są techniczne i po angielsku, więc ich nie pokazujemy.
-        if ($status === 403 && $exception->getMessage() !== '') {
-            $error['message'] = $exception->getMessage();
-        } else {
-            $error['message'] = $this->translator->translate($error['message']);
-        }
+        $messageKey = $status === 403 && $this->translator->has($exception->getMessage())
+            ? $exception->getMessage()
+            : $error['message'];
+        $error['message'] = $this->translator->translate($messageKey);
 
         http_response_code($status);
 

@@ -30,7 +30,7 @@ final class CompanyController extends AppController
         // MAKIETA, do zastąpienia sprawdzeniem w repozytorium: aukcja nr 1 ma oferty
         // w danych przykładowych, więc jej usunięcie daje 403 (reguła biznesowa 1).
         if ($id === 1) {
-            throw HttpException::forbidden('Nie można usunąć aukcji, w której są oferty.');
+            throw HttpException::forbidden('company.error.has_bids');
         }
 
         // MAKIETA: zalogowana, zatwierdzona firma demo, do czasu AuthService (karta auth).
