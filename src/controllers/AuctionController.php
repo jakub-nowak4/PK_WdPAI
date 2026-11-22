@@ -25,7 +25,7 @@ final class AuctionController extends AppController
 
         // MAKIETA (T-009): lista z partials/mock-auctions.php, do czasu repozytorium.
         $this->render('auctions/index', [
-            'pageTitle' => 'Aukcje',
+            'pageTitle' => $this->translator->translate('page.auctions.title'),
             'filters' => $filters,
             'page' => $page,
         ]);
@@ -38,7 +38,7 @@ final class AuctionController extends AppController
 
         // MAKIETA: dane aukcji statyczne, do czasu repozytorium.
         $this->render('auctions/show', [
-            'pageTitle' => 'Szczegóły aukcji',
+            'pageTitle' => $this->translator->translate('page.auction_show.title'),
             'auctionId' => $id,
             'previewState' => $state,
         ]);
@@ -51,7 +51,7 @@ final class AuctionController extends AppController
 
         // MAKIETA (T-009): ekran 08 jako osobna strona; docelowo tylko zwycięzca (403/404 inaczej).
         $this->render('auctions/won', [
-            'pageTitle' => 'Aukcja wygrana',
+            'pageTitle' => $this->translator->translate('page.auction_won.title'),
             'auctionId' => $id,
         ]);
     }

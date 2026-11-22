@@ -33,7 +33,7 @@ final class AccountController extends AppController
 
         // MAKIETA: dane z partials/mock-my-bids.php, do czasu repozytorium (naglowek: zalogowany uzytkownik z sesji).
         $this->render('account/my-bids', [
-            'pageTitle' => 'Moje oferty',
+            'pageTitle' => $this->translator->translate('page.my_bids.title'),
             'status' => $status,
         ]);
     }
@@ -44,7 +44,7 @@ final class AccountController extends AppController
 
         // MAKIETA: dane z partials/mock-notifications.php, do czasu repozytorium.
         $this->render('account/notifications', [
-            'pageTitle' => 'Powiadomienia',
+            'pageTitle' => $this->translator->translate('page.notifications.title'),
         ]);
     }
 
@@ -70,7 +70,7 @@ final class AccountController extends AppController
         }
 
         $this->render('account/pending', [
-            'pageTitle' => 'Konto czeka na zatwierdzenie',
+            'pageTitle' => $this->translator->translate('page.pending.title'),
             'companyStatus' => $company->getStatus()->value,
         ]);
     }
