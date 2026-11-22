@@ -28,9 +28,14 @@ $iconPaths = [
         <h1 class="error-page__title" id="error-title"><?= $e($errorTitle) ?></h1>
         <p class="error-page__description"><?= $e($errorDescription) ?></p>
         <p class="error-page__actions">
-            <a class="button button--accent" href="/auctions"><?= $e($t('error.back_to_auctions', 'Wróć do aukcji')) ?></a>
-            <?php if ($isGuest): ?>
-                <a class="button button--secondary" href="/login"><?= $e($t('nav.login', 'Zaloguj się')) ?></a>
+            <?php if ($errorCode === '404'): ?>
+                <a class="button button--accent" href="/auctions"><?= $e($t('error.browse_auctions', 'Przeglądaj aukcje')) ?></a>
+                <a class="button button--secondary" href="/"><?= $e($t('error.back_home', 'Wróć do strony głównej')) ?></a>
+            <?php else: ?>
+                <a class="button button--accent" href="/auctions"><?= $e($t('error.back_to_auctions', 'Wróć do aukcji')) ?></a>
+                <?php if ($isGuest): ?>
+                    <a class="button button--secondary" href="/login"><?= $e($t('nav.login', 'Zaloguj się')) ?></a>
+                <?php endif; ?>
             <?php endif; ?>
         </p>
     </section>
