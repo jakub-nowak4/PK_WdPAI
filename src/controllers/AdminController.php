@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Model\Role;
 use App\Request;
-use App\Service\DemoUser;
 
 final class AdminController extends AppController
 {
@@ -13,6 +13,8 @@ final class AdminController extends AppController
 
     public function index(Request $request): void
     {
+        $this->requireRole(Role::Admin);
+
         // Zła wartość ?status= kończy się wyjątkiem 400 (docs/api.md, 2.6).
         $status = (string) $request->queryOneOf('status', self::STATUSES, 'pending');
 
