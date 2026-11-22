@@ -24,14 +24,30 @@ final class Routing
     /** @var list<array{method: string, pattern: string, static: bool, controller: class-string<AppController>, action: string}> */
     private array $routes = [];
 
+    /** @var array<class-string, object> usługi utworzone z fabryk (zapamiętane po pierwszym użyciu) */
+    private array $resolved = [];
+
     /**
      * Zależności tworzone w public/index.php, wstrzykiwane do konstruktorów
-     * kontrolerów według typu parametru (klucz = nazwa klasy).
+     * kontrolerów według typu parametru (klucz = nazwa klasy). Wartością jest
+     * gotowy obiekt albo fabryka \Closure: fabryka działa dopiero, gdy kontroler
+     * potrzebuje usługi (np. z bazą), więc żądanie bez bazy nie otwiera połączenia.
      *
-     * @param array<class-string, object> $services
+     * @param array<class-string, object|\Closure> $services
      */
     public function __construct(private readonly array $services = [])
     {
+    }
+
+    private function resolveService(string $type): object
+    {
+        if (isset($this->resolved[$type])) {
+            return $this->resolved[$type];
+        }
+
+        $service = $this->services[$type];
+
+        return $this->resolved[$type] = $service instanceof \Closure ? $service() : $service;
     }
 
     /**
@@ -205,7 +221,7 @@ final class Routing
                 );
             }
 
-            $arguments[] = $this->services[$typeName];
+            $arguments[] = $this->resolveService($typeName);
         }
 
         return new $controllerClass(...$arguments);
