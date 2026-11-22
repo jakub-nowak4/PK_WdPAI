@@ -9,7 +9,7 @@ use App\Request;
 use App\Service\LanguageService;
 
 /*
-Odpowiedzi błędów 400, 401, 403 i 404. Dla ścieżek /api/* zwraca JSON w formacie z
+Odpowiedzi błędów 400, 401, 403, 404 i 500. Dla ścieżek /api/* zwraca JSON w formacie z
 docs/api.md (sekcja 3), dla pozostałych stronę HTML.
 401 w HTML nie jest stroną błędu: gość dostaje 303 na /login (GET: z ?next=<ścieżka>,
 POST: komunikat "Sesja wygasła"), w JSON zwykłe 401 login_required (docs/api.md, 1.3 i 1.5).
@@ -106,6 +106,44 @@ final class ErrorController extends AppController
         $this->render($error['view'], [
             'pageTitle' => $this->translator->translate('error.' . $status . '.title'),
             'errorMessage' => $error['message'],
+        ]);
+    }
+
+    /*
+    500: nieoczekiwany wyjątek (docs/api.md, 2.8). Nie dotyka bazy, bo przyczyną może być jej
+    awaria: layout gościa (currentUser = null), bez flasha i bez tokenu CSRF. Czyści rozpoczęte
+    bufory, żeby nie wysłać połowy strony. Treść wyjątku nie trafia do odpowiedzi (jest w logu).
+    */
+    public function handleServerError(Request $request): void
+    {
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        $message = $this->translator->translate('error.server');
+
+        http_response_code(500);
+
+        if (str_starts_with($request->path(), self::API_PREFIX)) {
+            $this->renderJson('server_error', $message);
+
+            return;
+        }
+
+        // Do czasu widoku errors/500 (T-067) zostaje odpowiedź tekstowa.
+        if (!$this->viewExists('errors/500')) {
+            header('Content-Type: text/plain; charset=utf-8');
+            echo '500 ' . $message;
+
+            return;
+        }
+
+        $this->render('errors/500', [
+            'pageTitle' => $this->translator->translate('error.500.title'),
+            'errorMessage' => $message,
+            'currentUser' => null,
+            'flash' => null,
+            'csrfToken' => '',
         ]);
     }
 

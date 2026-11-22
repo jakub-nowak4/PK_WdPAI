@@ -10,10 +10,12 @@ Docelowo aplikacja to MotoBid — platforma aukcji samochodow na zywo. Uzytkowni
 
 Aktualnie aplikacja obsluguje:
 
-- strone glowna pod `/` oraz strony-makiety ekranow MotoBid: lista i szczegoly aukcji (`/auctions`, `/auctions/{id}`), aukcja wygrana, moje oferty, powiadomienia, logowanie, rejestracja kupujacego i firmy, konto czeka na zatwierdzenie, panel firmy i panel administratora (pelna lista tras w `public/index.php`); dane w widokach sa statyczne (makieta, uzytkownik demo z `App\Service\DemoUser`), nie z bazy,
+- konta z bazy danych: rejestracje kupujacego (`GET|POST /register`) i firmy (`GET|POST /register/company`, konto i firma w jednej transakcji), logowanie (`GET|POST /login`) i wylogowanie (`POST /logout`) przez `App\Service\AuthService`; w sesji tylko `userId` i `role`, token CSRF na kazdym POST, komunikaty flash po przekierowaniu,
+- ekran „konto czeka na zatwierdzenie" (`/account/pending`) ze statusem firmy z bazy (zatwierdzona firma dostaje 303 na `/company`); uzytkownika w naglowku layoutu dostarcza `App\Service\CurrentUserProvider` (z bazy, tylko dla zalogowanego),
+- strone glowna pod `/` oraz ekrany, ktore sa jeszcze makietami ze statycznymi danymi: lista i szczegoly aukcji (`/auctions`, `/auctions/{id}`), aukcja wygrana, moje oferty, powiadomienia, panel firmy (`/company`, dodaj i usun aukcje) i panel administratora (`/admin`); makiety maja juz guardy dostepu (gosc: 303 na `/login`, zla rola: 403, firma niezatwierdzona: 403 z ekranem „konto czeka"); pelna lista tras w `public/index.php`,
 - przelacznik jezyka PL/EN (`POST /language`, teksty w `lang/pl.php` i `lang/en.php`) oraz przelacznik motywu jasny/ciemny,
-- odpowiedzi bledow 400 (zly format `{id}` lub query param) i 404 (nieznana trasa) przez `ErrorController`,
-- schemat SQL z widokiem `auction_summary` (`docker/db/01-schema.sql`) i dane demo (`docker/db/02-demo-data.sql`), ladowane przy pierwszym starcie pustego wolumenu bazy.
+- odpowiedzi bledow 400 (zly format `{id}` lub query param), 401 (w HTML przekierowanie na `/login`), 403 i 404 (nieznana trasa lub zasob) przez `ErrorController`, dla `/api/*` w JSON,
+- schemat SQL z widokiem `auction_summary` (`docker/db/01-schema.sql`) i dane demo (`docker/db/02-demo-data.sql`), ladowane przy pierwszym starcie pustego wolumenu bazy, oraz modele i repozytoria dla wszystkich tabel.
 
 ## Stack technologiczny
 
@@ -21,7 +23,7 @@ Aktualnie aplikacja obsluguje:
 - Composer i autoloading PSR-4
 - Nginx jako serwer HTTP
 - PHP-FPM do wykonywania kodu PHP (rozszerzenia: gd, pdo_pgsql, pgsql, zip, bcmath, opcache)
-- PostgreSQL jako baza danych (serwis `db`); polaczenie przez `App\Database` (PDO), jeszcze nieuzywane przez kontrolery
+- PostgreSQL jako baza danych (serwis `db`); polaczenie przez `App\Database` (PDO), uzywane przez repozytoria w `src/repositories/`
 - Docker oraz Docker Compose
 - HTML bez frameworka frontendowego; CSS w `public/css/style.css` (tokeny motywu, Flexbox/Grid, mobile first); motyw jasny/ciemny: `data-theme` na `<html>`, `public/js/theme.js`, klucz `theme` w localStorage
 
@@ -67,7 +69,7 @@ przegladarka
 
 ### Front Controller
 
-`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 403, 404) obsluguje `ErrorController`.
+`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, konfiguruje i uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`, `Database`, `CurrentUserProvider`), rejestruje w `Routing` serwisy korzystajace z bazy (`CompanyRepository`, `AuthService`) jako leniwe fabryki (polaczenie otwiera sie dopiero dla kontrolera, ktory ich potrzebuje), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 401, 403, 404) obsluguje `ErrorController`.
 
 Nowe trasy dodawaj w tym pliku w postaci:
 
@@ -95,20 +97,21 @@ Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Cont
 
 Kontroler powinien byc cienki. Nie umieszczaj w nim rozbudowanych zapytan do bazy, HTML ani stylow.
 
-Obecnie istnieja kontrolery (ekrany aukcji, konta, firmy i administratora to na razie makiety):
+Obecnie istnieja kontrolery (ekrany aukcji, moich ofert, powiadomien, firmy i administratora to na razie makiety ze statycznymi danymi, ale z guardami dostepu):
 
+- `AppController` — klasa bazowa: `render()`, `redirect()`, `addFlash()`, `requireLogin()`, `requireRole()`, `verifyCsrf()`, `csrfToken()`, `logInUser()`, `logOutUser()`, `homePathFor()`, `redirectIfLoggedIn()`,
 - `DefaultController` — `index()` (strona glowna),
-- `AuctionController` — `index()` (lista aukcji z filtrami w query), `show(int $id)` (szczegoly aukcji), `won(int $id)` (aukcja wygrana),
-- `AccountController` — `myBids()`, `notifications()`, `pending()` (konto czeka na zatwierdzenie),
-- `SecurityController` — `login()`, `register()`, `registerCompany()`,
-- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (usun aukcje),
-- `AdminController` — `index()` (panel administratora),
-- `LanguageController` — `change()` (zmiana jezyka, `POST /language`),
-- `ErrorController` — `handle()` (strony bledow 400/403/404, dla `/api/*` JSON).
+- `AuctionController` — `index(Request)` (lista aukcji z filtrami w query), `show(int $id, Request)` (szczegoly aukcji), `won(int $id)` (aukcja wygrana, tylko zalogowany),
+- `AccountController` — `myBids(Request)` (tylko kupujacy, filtr `?status=`), `notifications()` (zalogowany), `pending()` (firma; status z bazy, zatwierdzona dostaje 303 na `/company`),
+- `SecurityController` — `login()`, `register()`, `registerCompany()` (GET formularz, POST przez `AuthService`), `logout()` (`POST /logout`),
+- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (ekran usuwania aukcji); kazda akcja zaczyna od prywatnego `requireApprovedCompany()` (firma `pending`/`rejected`: `HttpException::companyNotApproved()`, 403 z ekranem „konto czeka"),
+- `AdminController` — `index(Request)` (tylko administrator, filtr `?status=`),
+- `LanguageController` — `change()` (zmiana jezyka, `POST /language` z CSRF),
+- `ErrorController` — `handle()` (400/401/403/404; 401 w HTML to 303 na `/login`, kod `company_not_approved` renderuje `account/pending`; dla `/api/*` JSON).
 
 ### Model
 
-Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele i repozytoria jeszcze nie istnieja, wiec widoki nadal nie czytaja danych z bazy. Nie udawaj, ze dane widoczne w widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
+Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele (`src/models/`) i repozytoria (`src/repositories/`) istnieja dla wszystkich tabel. Z bazy korzystaja dzis konta (rejestracja, logowanie, `CurrentUserProvider` w layoucie) i status firmy; ekrany aukcji, ofert, powiadomien, panelu firmy i administratora nadal pokazuja dane statyczne. Nie udawaj, ze dane widoczne w tych widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
 
 `composer.json` ma dokladne mapowania PSR-4 dla katalogow pisanych malymi literami:
 
