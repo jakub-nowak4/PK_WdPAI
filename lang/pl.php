@@ -35,6 +35,7 @@ return [
     'theme.to_dark' => 'Włącz ciemny motyw',
     'common.cancel' => 'Anuluj',
     'common.close' => 'Zamknij',
+    'common.mock_notice' => 'MAKIETA: dane przykładowe, nie pochodzą z bazy.',
     'error.back_to_auctions' => 'Wróć do aukcji',
 
     // Błędy HTTP i bezpieczeństwo
@@ -89,7 +90,7 @@ return [
     'mail.welcome.subject' => 'Witaj w MotoBid',
     'mail.welcome.body' => "Cześć {name},\n\nTwoje konto w MotoBid zostało utworzone. Możesz już przeglądać aukcje samochodów i licytować.\n\nPrzejdź do aukcji: {url}\n\nZespół MotoBid",
     'mail.welcome_company.subject' => 'Witaj w MotoBid: konto firmy czeka na zatwierdzenie',
-    'mail.welcome_company.body' => "Cześć {name},\n\nTwoje konto firmowe w MotoBid zostało utworzone i czeka na zatwierdzenie przez administratora, zwykle w ciągu 24 godzin. Po zatwierdzeniu zalogujesz się do panelu firmy i dodasz pierwszą aukcję.\n\nStatus zgłoszenia: {url}\n\nZespół MotoBid",
+    'mail.welcome_company.body' => "Cześć {name},\n\nTwoje konto firmowe w MotoBid zostało utworzone i czeka na zatwierdzenie przez administratora. Po zatwierdzeniu zalogujesz się do panelu firmy i dodasz pierwszą aukcję.\n\nStatus zgłoszenia: {url}\n\nZespół MotoBid",
 
     // Pola formularzy kont
     'field.name' => 'Imię i nazwisko',
@@ -255,7 +256,7 @@ return [
     // Konto firmy czeka na zatwierdzenie
     'pending.title' => 'Konto firmy czeka na zatwierdzenie',
     'pending.title_rejected' => 'Zgłoszenie firmy zostało odrzucone',
-    'pending.lead' => 'Administrator sprawdzi dane Twojej firmy, zwykle w ciągu 24 godzin. Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
+    'pending.lead' => 'Administrator sprawdzi dane Twojej firmy. Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
     'pending.lead_rejected' => 'Zgłoszenie firmy zostało odrzucone. Skontaktuj się z administratorem.',
     'pending.info' => 'Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
     'pending.steps' => 'Postęp zgłoszenia',
