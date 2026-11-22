@@ -92,4 +92,20 @@ try {
     $routing->dispatch($request);
 } catch (HttpException $exception) {
     (new ErrorController($translator, $currentUserProvider))->handle($exception, $request);
+} catch (\Throwable $exception) {
+    // Nieoczekiwany błąd (np. PDOException): jedna linia w logu, bez sesji, formularza i
+    // query (mogą zawierać hasła), potem ogólna odpowiedź 500 bez treści wyjątku.
+    error_log(sprintf(
+        'Unhandled %s: %s in %s:%d [%s %s]',
+        $exception::class,
+        preg_replace('/\s+/', ' ', $exception->getMessage()),
+        $exception->getFile(),
+        $exception->getLine(),
+        $request->method(),
+        $request->path(),
+    ));
+
+    if (!headers_sent()) {
+        (new ErrorController($translator))->handleServerError($request);
+    }
 }
