@@ -4061,7 +4061,11 @@ textarea.form-field__control {
     .button[aria-busy="true"]::before,
     .status-label__dot,
     .spinner,
-    .skeleton {
+    .skeleton,
+    .button,
+    .auction-card,
+    .tabs__item,
+    .won-summary__contacts a {
         animation: none;
         transition: none;
         scroll-behavior: auto;
