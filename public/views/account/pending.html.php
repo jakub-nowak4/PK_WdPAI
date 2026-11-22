@@ -23,7 +23,7 @@ $isRejected = $companyStatus === 'rejected';
             <p class="auth-card__lead">
                 <?= $e($isRejected
                     ? $t('pending.lead_rejected', 'Zgłoszenie firmy zostało odrzucone. Skontaktuj się z administratorem.')
-                    : $t('pending.lead', 'Administrator sprawdzi dane Twojej firmy, zwykle w ciągu 24 godzin. Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.')) ?>
+                    : $t('pending.lead', 'Administrator sprawdzi dane Twojej firmy. Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.')) ?>
             </p>
         </header>
 
