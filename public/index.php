@@ -12,6 +12,7 @@ use App\Controller\LanguageController;
 use App\Controller\SecurityController;
 use App\Exception\HttpException;
 use App\Database;
+use App\Repository\CompanyRepository;
 use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
@@ -60,6 +61,8 @@ $routing = new Routing([
     CurrentUserProvider::class => $currentUserProvider,
     AuthService::class => static fn (): AuthService => new AuthService(
         new UserRepository($database->getConnection()),
+        new CompanyRepository($database->getConnection()),
+        $database->getConnection(),
         $translator,
     ),
 ]);
