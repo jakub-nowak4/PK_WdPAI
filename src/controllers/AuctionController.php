@@ -46,6 +46,9 @@ final class AuctionController extends AppController
 
     public function won(int $id): void
     {
+        // Tylko zalogowany; sprawdzenie zwycięzcy i 404 dojdą z danymi.
+        $this->requireLogin();
+
         // MAKIETA (T-009): ekran 08 jako osobna strona; docelowo tylko zwycięzca (403/404 inaczej).
         $this->render('auctions/won', [
             'pageTitle' => 'Aukcja wygrana',
