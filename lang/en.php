@@ -149,6 +149,9 @@ return [
     'admin.approve' => 'Approve',
     'admin.reject' => 'Reject',
     'admin.decided' => 'Reviewed',
+    'admin.flash_approved' => 'The company has been approved.',
+    'admin.flash_rejected' => 'The company has been rejected.',
+    'admin.error_not_pending' => 'This company has already been reviewed. Refresh the list.',
 
     // Company panel: auction list and deletion
     'company.eyebrow' => 'Company panel',

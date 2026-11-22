@@ -149,6 +149,9 @@ return [
     'admin.approve' => 'Zatwierdź',
     'admin.reject' => 'Odrzuć',
     'admin.decided' => 'Rozpatrzona',
+    'admin.flash_approved' => 'Firma została zatwierdzona.',
+    'admin.flash_rejected' => 'Firma została odrzucona.',
+    'admin.error_not_pending' => 'Ta firma została już rozpatrzona. Odśwież listę.',
 
     // Panel firmy: lista aukcji i usuwanie
     'company.eyebrow' => 'Panel firmy',
