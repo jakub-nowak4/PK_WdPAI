@@ -113,13 +113,10 @@ $routing->post('/login',SecurityController::class, 'login');
 $routing->post('/logout', SecurityController::class, 'logout');
 $routing->post('/language', LanguageController::class, 'change');
 
-try {
-    $routing->dispatch($request);
-} catch (HttpException $exception) {
-    (new ErrorController($translator, $currentUserProvider))->handle($exception, $request);
-} catch (\Throwable $exception) {
-    // Nieoczekiwany błąd (np. PDOException): jedna linia w logu, bez sesji, formularza i
-    // query (mogą zawierać hasła), potem ogólna odpowiedź 500 bez treści wyjątku.
+// Nieoczekiwany błąd (np. PDOException): jedna linia w logu, bez sesji, formularza i
+// query (mogą zawierać hasła), potem ogólna odpowiedź 500 bez treści wyjątku.
+// handleServerError() nie dotyka bazy, więc nie rzuca dalej (brak pętli).
+$failWithServerError = static function (\Throwable $exception) use ($request, $translator): void {
     error_log(sprintf(
         'Unhandled %s: %s in %s:%d [%s %s]',
         $exception::class,
@@ -133,4 +130,18 @@ try {
     if (!headers_sent()) {
         (new ErrorController($translator))->handleServerError($request);
     }
+};
+
+try {
+    $routing->dispatch($request);
+} catch (HttpException $exception) {
+    // Wyjątek z catch nie trafia do sąsiedniego catch (\Throwable), więc render strony
+    // błędu (np. layout czytający bazę zalogowanego) ma własny try/catch.
+    try {
+        (new ErrorController($translator, $currentUserProvider))->handle($exception, $request);
+    } catch (\Throwable $inner) {
+        $failWithServerError($inner);
+    }
+} catch (\Throwable $exception) {
+    $failWithServerError($exception);
 }
