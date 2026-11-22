@@ -69,4 +69,5 @@ return [
 
     // Registration
     'register.success' => 'Your account has been created. Welcome to MotoBid!',
+    'register_company.success' => 'Your company account has been created. It is waiting for administrator approval.',
 ];
