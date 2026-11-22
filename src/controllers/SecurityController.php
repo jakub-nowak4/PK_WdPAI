@@ -143,11 +143,61 @@ final class SecurityController extends AppController
         $this->redirect('/auctions');
     }
 
-    public function registerCompany(): void
+    /*
+    GET /register/company: formularz (zalogowany: 303 na stronę roli, przed CSRF). POST: CSRF,
+    AuthService::registerCompany (konto DEALER + firma pending w jednej transakcji), logInUser
+    i Post/Redirect/Get na /account/pending z komunikatem. Błąd reguł to 422, zajęty e-mail 409:
+    ten sam widok z błędami przy polach i zachowanymi wartościami (bez haseł).
+    */
+    public function registerCompany(Request $request): void
     {
-        $this->render('security/register-company', [
-            'pageTitle' => 'Rejestracja firmy',
-        ]);
+        if ($this->redirectIfLoggedIn()) {
+            return;
+        }
+
+        if (!$request->isPost()) {
+            $this->render('security/register-company', [
+                'pageTitle' => 'Rejestracja firmy',
+            ]);
+
+            return;
+        }
+
+        $this->verifyCsrf($request);
+
+        $old = [
+            'name' => $this->postString($request, 'name'),
+            'email' => $this->postString($request, 'email'),
+            'companyName' => $this->postString($request, 'companyName'),
+            'city' => $this->postString($request, 'city'),
+            'phone' => $this->postString($request, 'phone'),
+        ];
+
+        try {
+            $user = $this->auth->registerCompany(
+                $old['name'],
+                $old['email'],
+                $this->postString($request, 'password'),
+                $this->postString($request, 'passwordRepeat'),
+                $old['companyName'],
+                $old['city'],
+                $old['phone'],
+                $this->translator->language(),
+            );
+        } catch (ValidationException $exception) {
+            http_response_code($exception->statusCode());
+            $this->render('security/register-company', [
+                'pageTitle' => 'Rejestracja firmy',
+                'errors' => $exception->errors(),
+                'old' => $old,
+            ]);
+
+            return;
+        }
+
+        $this->logInUser($user);
+        $this->addFlash('success', 'register_company.success');
+        $this->redirect('/account/pending');
     }
 
     /*

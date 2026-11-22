@@ -82,7 +82,8 @@ $routing->get('/company/auctions/{id}/delete', CompanyController::class, 'delete
 $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
 $routing->post('/register', SecurityController::class, 'register');
-$routing->post('/login', SecurityController::class, 'login');
+$routing->post('/register/company', SecurityController::class, 'registerCompany');
+$routing->post('/login',SecurityController::class, 'login');
 $routing->post('/logout', SecurityController::class, 'logout');
 $routing->post('/language', LanguageController::class, 'change');
 

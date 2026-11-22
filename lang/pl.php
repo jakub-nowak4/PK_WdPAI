@@ -69,4 +69,5 @@ return [
 
     // Rejestracja
     'register.success' => 'Konto zostało utworzone. Witaj w MotoBid!',
+    'register_company.success' => 'Konto firmy zostało utworzone. Czeka na zatwierdzenie przez administratora.',
 ];
