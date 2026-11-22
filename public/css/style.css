@@ -319,7 +319,7 @@ button {
 
 .segmented__item {
     min-width: var(--touch-target);
-    min-height: 2.25rem;
+    min-height: var(--touch-target);
     padding: 0 var(--space-sm);
     border: 0;
     border-radius: var(--radius-sm);
