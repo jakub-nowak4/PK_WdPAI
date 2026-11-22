@@ -82,6 +82,14 @@ return [
     // Rejestracja
     'register.success' => 'Konto zostało utworzone. Witaj w MotoBid!',
     'register_company.success' => 'Konto firmy zostało utworzone. Czeka na zatwierdzenie przez administratora.',
+    'register.success_mail_failed' => 'Konto zostało utworzone. Nie udało się wysłać e-maila powitalnego.',
+    'register_company.success_mail_failed' => 'Konto firmy zostało utworzone i czeka na zatwierdzenie przez administratora. Nie udało się wysłać e-maila powitalnego.',
+
+    // E-maile (treść listu w języku konta)
+    'mail.welcome.subject' => 'Witaj w MotoBid',
+    'mail.welcome.body' => "Cześć {name},\n\nTwoje konto w MotoBid zostało utworzone. Możesz już przeglądać aukcje samochodów i licytować.\n\nPrzejdź do aukcji: {url}\n\nZespół MotoBid",
+    'mail.welcome_company.subject' => 'Witaj w MotoBid: konto firmy czeka na zatwierdzenie',
+    'mail.welcome_company.body' => "Cześć {name},\n\nTwoje konto firmowe w MotoBid zostało utworzone i czeka na zatwierdzenie przez administratora, zwykle w ciągu 24 godzin. Po zatwierdzeniu zalogujesz się do panelu firmy i dodasz pierwszą aukcję.\n\nStatus zgłoszenia: {url}\n\nZespół MotoBid",
 
     // Pola formularzy kont
     'field.name' => 'Imię i nazwisko',
