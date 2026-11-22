@@ -104,7 +104,7 @@ $statusLabels = [
                         $companyId = (int) $row['id'];
                         $name = (string) $row['name']; ?>
                         <tr>
-                            <th class="data-table__vehicle" scope="row" data-label="<?= $e($t('admin.col_name', 'Nazwa firmy')) ?>"><?= $e($name) ?></th>
+                            <td class="data-table__vehicle" data-label="<?= $e($t('admin.col_name', 'Nazwa firmy')) ?>"><strong><?= $e($name) ?></strong></td>
                             <td data-label="<?= $e($t('admin.col_city', 'Miasto')) ?>"><?= $e($row['city']) ?></td>
                             <td class="data-table__mono" data-label="<?= $e($t('admin.col_email', 'E-mail konta')) ?>"><?= $e($row['email']) ?></td>
                             <td data-label="<?= $e($t('admin.col_date', 'Data rejestracji')) ?>"><?= $e($row['registeredAtLabel']) ?></td>
