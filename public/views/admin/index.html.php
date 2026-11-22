@@ -45,7 +45,7 @@ $statusLabels = [
     </header>
 
     <?php if ($isMock): ?>
-        <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
+        <p class="alert alert--info" role="note"><?= $e($t('common.mock_notice', 'MAKIETA: dane przykładowe, nie pochodzą z bazy.')) ?></p>
     <?php endif; ?>
     <?php if ($formError !== ''): ?>
         <p class="alert alert--error" role="alert"><?= $e($formError) ?></p>

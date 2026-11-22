@@ -21,7 +21,7 @@ $canDelete = (int) ($auction['bidCount'] ?? 0) === 0;
 ?>
 <main class="page page--confirm" id="main-content">
     <?php if ($isMock): ?>
-        <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
+        <p class="alert alert--info" role="note"><?= $e($t('common.mock_notice', 'MAKIETA: dane przykładowe, nie pochodzą z bazy.')) ?></p>
     <?php endif; ?>
 
     <section class="confirm-card card" aria-labelledby="delete-title">
