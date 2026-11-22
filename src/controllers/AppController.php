@@ -139,6 +139,30 @@ abstract class AppController
     }
 
     /*
+    Wylogowanie (docs/api.md, 2.4): czyścimy $_SESSION, wysyłamy cookie sesji z datą w
+    przeszłości (te same parametry, z jakimi je ustawiono) i niszczymy sesję po stronie
+    serwera, więc stary identyfikator nie działa. Cookie `lang` jest niezależne od sesji.
+    */
+    protected function logOutUser(): void
+    {
+        $_SESSION = [];
+
+        if (ini_get('session.use_cookies') === '1') {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', [
+                'expires' => time() - 42000,
+                'path' => $params['path'],
+                'domain' => $params['domain'],
+                'secure' => $params['secure'],
+                'httponly' => $params['httponly'],
+                'samesite' => $params['samesite'],
+            ]);
+        }
+
+        session_destroy();
+    }
+
+    /*
     Autoryzacja po stronie serwera, na początku chronionej akcji (kryterium 22).
     Gość: wyjątek 401, który ErrorController zamienia na 303 na /login (HTML)
     albo 401 JSON (/api/*). Zwraca id użytkownika. Strona chroniona nie trafia do
