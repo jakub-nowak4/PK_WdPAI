@@ -11,8 +11,11 @@ use App\Controller\ErrorController;
 use App\Controller\LanguageController;
 use App\Controller\SecurityController;
 use App\Exception\HttpException;
+use App\Database;
+use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
+use App\Service\AuthService;
 use App\Service\LanguageService;
 use App\Service\Translator;
 
@@ -42,9 +45,15 @@ session_start();
 $languageService = new LanguageService();
 $translator = new Translator(dirname(__DIR__) . '/lang', $languageService->resolve($request));
 
+// Baza i serwisy kont: PDO z config.php, repozytorium, serwis (zależności wstrzykiwane konstruktorem).
+$config = require dirname(__DIR__) . '/config.php';
+$database = new Database($config['database']);
+$authService = new AuthService(new UserRepository($database->getConnection()), $translator);
+
 $routing = new Routing([
     Translator::class => $translator,
     LanguageService::class => $languageService,
+    AuthService::class => $authService,
 ]);
 
 $routing->get('/auctions', AuctionController::class, 'index');
@@ -61,6 +70,7 @@ $routing->get('/company/auctions/new', CompanyController::class, 'create');
 $routing->get('/company/auctions/{id}/delete', CompanyController::class, 'delete');
 $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
+$routing->post('/register', SecurityController::class, 'register');
 $routing->post('/language', LanguageController::class, 'change');
 
 try {
