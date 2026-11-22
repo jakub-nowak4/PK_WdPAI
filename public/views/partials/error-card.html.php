@@ -7,7 +7,7 @@
  * @var string $errorLabel etykieta nad tytulem
  * @var string $errorTitle tytul H1
  * @var string $errorDescription opis
- * @var string $errorIcon "lock" (403), "alert" (400) lub "search" (404)
+ * @var string $errorIcon "lock" (403), "alert" (400, 500) lub "search" (404)
  * @var array|null $currentUser zalogowany uzytkownik; brak = gosc
  */
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
@@ -33,7 +33,7 @@ $iconPaths = [
                 <a class="button button--secondary" href="/"><?= $e($t('error.back_home', 'Wróć do strony głównej')) ?></a>
             <?php else: ?>
                 <a class="button button--accent" href="/auctions"><?= $e($t('error.back_to_auctions', 'Wróć do aukcji')) ?></a>
-                <?php if ($isGuest): ?>
+                <?php if ($isGuest && $errorCode !== '500'): ?>
                     <a class="button button--secondary" href="/login"><?= $e($t('nav.login', 'Zaloguj się')) ?></a>
                 <?php endif; ?>
             <?php endif; ?>
