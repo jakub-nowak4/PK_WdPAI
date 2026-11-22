@@ -116,12 +116,12 @@ final class Request
 
     public function query(string $name): string|array|null
     {
-        return $this->query[$name] ?? null;
+        return $this->utf8Checked($this->query[$name] ?? null, $name);
     }
 
     public function post(string $name): string|array|null
     {
-        return $this->post[$name] ?? null;
+        return $this->utf8Checked($this->post[$name] ?? null, $name);
     }
 
     /*
@@ -200,7 +200,7 @@ final class Request
     */
     private function rawQueryValue(string $name): ?string
     {
-        $value = $this->query[$name] ?? null;
+        $value = $this->utf8Checked($this->query[$name] ?? null, $name);
 
         if ($value === null || $value === '') {
             return null;
@@ -211,5 +211,38 @@ final class Request
         }
 
         return $value;
+    }
+
+    /*
+    Jedyne miejsce kontroli kodowania wejścia (docs/api.md, 1.7): wartość tekstowa z query
+    lub formularza (także elementy zagnieżdżonych tablic i ich klucze) musi być poprawnym
+    UTF-8. Przeglądarka wysyła takie bajty zawsze, więc zły bajt (np. %F3) to spreparowane
+    żądanie: 400, zanim wartość trafi do serwisu i bazy (PostgreSQL odrzuciłby ją błędem 22021).
+    Sprawdzenie jest przy odczycie pola, więc nieużyty parametr nie blokuje żądania.
+    */
+    private function utf8Checked(mixed $value, string $name): mixed
+    {
+        if (!self::isValidUtf8($value)) {
+            throw HttpException::badRequest('Invalid character encoding: ' . $name);
+        }
+
+        return $value;
+    }
+
+    private static function isValidUtf8(mixed $value): bool
+    {
+        if (is_string($value)) {
+            return mb_check_encoding($value, 'UTF-8');
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                if (!self::isValidUtf8($key) || !self::isValidUtf8($item)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }
