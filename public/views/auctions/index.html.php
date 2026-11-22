@@ -1,8 +1,8 @@
 <?php
 /**
  * Lista aukcji (GET /auctions?brand=&priceMax=&sort=&page=&q=): ten sam blok listy co na stronie glownej, bez banera.
- * Oczekiwane zmienne od kontrolera: $filters (q, brand, priceMax, sort), $page;
- * reszta (MAKIETA) z partials/mock-auctions.php do czasu repozytorium.
+ * Zmienne od kontrolera (docs/api.md 2.2): $auctions (list<AuctionSummary>), $brands, $filters (q, brand, priceMax, sort),
+ * $page, $pages, $total. Bez $auctions: MAKIETA z partials/mock-auctions.php (do czasu T-028).
  */
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
