@@ -45,15 +45,18 @@ session_start();
 $languageService = new LanguageService();
 $translator = new Translator(dirname(__DIR__) . '/lang', $languageService->resolve($request));
 
-// Baza i serwisy kont: PDO z config.php, repozytorium, serwis (zależności wstrzykiwane konstruktorem).
+// Baza: Database łączy się leniwie. Serwisy z bazą to fabryki, wywoływane dopiero
+// przy pierwszym kontrolerze, który ich potrzebuje (makiety i strony błędów nie łączą się z bazą).
 $config = require dirname(__DIR__) . '/config.php';
 $database = new Database($config['database']);
-$authService = new AuthService(new UserRepository($database->getConnection()), $translator);
 
 $routing = new Routing([
     Translator::class => $translator,
     LanguageService::class => $languageService,
-    AuthService::class => $authService,
+    AuthService::class => static fn (): AuthService => new AuthService(
+        new UserRepository($database->getConnection()),
+        $translator,
+    ),
 ]);
 
 $routing->get('/auctions', AuctionController::class, 'index');
