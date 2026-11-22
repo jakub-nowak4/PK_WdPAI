@@ -16,8 +16,8 @@ final class AdminController extends AppController
         // Zła wartość ?status= kończy się wyjątkiem 400 (docs/api.md, 2.6).
         $status = (string) $request->queryOneOf('status', self::STATUSES, 'pending');
 
-        // MAKIETA: zalogowany administrator demo, do czasu AuthService (karta auth).
-        $this->renderAsUser('admin/index', DemoUser::admin(), [
+        // MAKIETA: tresc statyczna, do czasu panelu administratora.
+        $this->render('admin/index', [
             'pageTitle' => 'Panel administratora',
             'status' => $status,
         ]);

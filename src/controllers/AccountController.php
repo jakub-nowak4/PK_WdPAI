@@ -16,8 +16,8 @@ final class AccountController extends AppController
         // Zły status w query to 400 (docs/api.md).
         $status = $request->queryOneOf('status', self::BID_STATUSES, 'all');
 
-        // MAKIETA: zalogowany kupujący demo i dane z partials/mock-my-bids.php, do czasu AuthService i repozytorium.
-        $this->renderAsUser('account/my-bids', DemoUser::buyer(), [
+        // MAKIETA: dane z partials/mock-my-bids.php, do czasu repozytorium (naglowek: zalogowany uzytkownik z sesji).
+        $this->render('account/my-bids', [
             'pageTitle' => 'Moje oferty',
             'status' => $status,
         ]);
@@ -25,16 +25,16 @@ final class AccountController extends AppController
 
     public function notifications(): void
     {
-        // MAKIETA: kupujący demo i dane z partials/mock-notifications.php, do czasu AuthService i repozytorium.
-        $this->renderAsUser('account/notifications', DemoUser::buyer(), [
+        // MAKIETA: dane z partials/mock-notifications.php, do czasu repozytorium.
+        $this->render('account/notifications', [
             'pageTitle' => 'Powiadomienia',
         ]);
     }
 
     public function pending(): void
     {
-        // MAKIETA: firma demo oczekujaca na zatwierdzenie, do czasu AuthService (karta auth).
-        $this->renderAsUser('account/pending', DemoUser::pendingCompany(), [
+        // MAKIETA: tresc statyczna; status firmy do czasu T-021.
+        $this->render('account/pending', [
             'pageTitle' => 'Konto czeka na zatwierdzenie',
         ]);
     }
