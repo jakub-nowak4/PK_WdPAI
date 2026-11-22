@@ -132,6 +132,12 @@ final class AuctionRepository extends BaseRepository
         return (int) $statement->fetchColumn();
     }
 
+    // Liczba wszystkich aukcji (kafelek panelu administratora).
+    public function countAll(): int
+    {
+        return (int) $this->pdo->query('SELECT COUNT(*) FROM auctions')->fetchColumn();
+    }
+
     // Aukcje firmy (panel firmy), najnowsze pierwsze; id jako drugi klucz daje stały porządek przy równym created_at.
     /**
      * @return list<AuctionSummary>

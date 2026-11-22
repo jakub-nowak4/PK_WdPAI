@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use App\Model\Company;
+use App\Model\CompanyApplication;
 use App\Model\CompanyStatus;
 use DateTimeImmutable;
 
@@ -59,6 +60,49 @@ final class CompanyRepository extends BaseRepository
         return array_map($this->mapRow(...), $statement->fetchAll());
     }
 
+    /**
+     * Panel administratora (docs/api.md 2.6): firmy z e-mailem konta, opcjonalnie tylko w danym statusie
+     * (null = wszystkie). Najstarsze zgłoszenia pierwsze, id jako drugi klucz daje stały porządek.
+     *
+     * @return list<CompanyApplication>
+     */
+    public function findApplications(?CompanyStatus $status): array
+    {
+        $sql = 'SELECT c.id, c.user_id, c.name, c.city, c.phone, c.status, c.reviewed_by, c.reviewed_at, c.created_at, u.email
+                FROM companies c
+                JOIN users u ON u.id = c.user_id';
+        $params = [];
+
+        if ($status !== null) {
+            $sql .= ' WHERE c.status = :status';
+            $params['status'] = $status->value;
+        }
+
+        $statement = $this->pdo->prepare($sql . ' ORDER BY c.created_at, c.id');
+        $statement->execute($params);
+
+        return array_map(
+            fn (array $row): CompanyApplication => new CompanyApplication($this->mapRow($row), (string) $row['email']),
+            $statement->fetchAll()
+        );
+    }
+
+    /**
+     * Liczba firm w każdym statusie (kafelki panelu); status bez firm ma 0.
+     *
+     * @return array{pending: int, approved: int, rejected: int}
+     */
+    public function countByStatus(): array
+    {
+        $counts = ['pending' => 0, 'approved' => 0, 'rejected' => 0];
+
+        foreach ($this->pdo->query('SELECT status, COUNT(*) AS total FROM companies GROUP BY status') as $row) {
+            $counts[(string) $row['status']] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
+
     // Status ustawia baza (DEFAULT 'pending'). Wywołuje serwis rejestracji firmy w transakcji razem z UserRepository::create().
     // Drugi profil z tym samym user_id kończy się PDOException z SQLSTATE 23505 (companies_user_uq).
     public function create(int $userId, string $name, string $city, ?string $phone): Company
@@ -80,13 +124,14 @@ final class CompanyRepository extends BaseRepository
 
     // Zatwierdzenie lub odrzucenie przez administratora. reviewed_at ustawia baza (czas serwera), bo CHECK
     // companies_reviewed_chk wymaga reviewed_at dla każdego statusu poza pending; dlatego $status ma być Approved albo Rejected.
-    // Zwraca null, gdy firma nie istnieje. Sprawdzenie, że była pending (409), robi serwis.
+    // Warunek status = 'pending' jest w samym UPDATE (atomowo, bez wyścigu dwóch administratorów): zwraca null, gdy
+    // firmy nie ma albo nie była pending. Który z tych przypadków (404 czy 409) to jest, rozstrzyga serwis przez findById().
     public function updateStatus(int $id, CompanyStatus $status, int $reviewedBy): ?Company
     {
         $statement = $this->pdo->prepare(
             'UPDATE companies
              SET status = :status, reviewed_by = :reviewed_by, reviewed_at = now()
-             WHERE id = :id
+             WHERE id = :id AND status = \'pending\'
              RETURNING ' . self::COLUMNS
         );
         $statement->execute([

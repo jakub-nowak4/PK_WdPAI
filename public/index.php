@@ -12,11 +12,13 @@ use App\Controller\LanguageController;
 use App\Controller\SecurityController;
 use App\Exception\HttpException;
 use App\Database;
+use App\Repository\AuctionRepository;
 use App\Repository\CompanyRepository;
 use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
 use App\Service\AuthService;
+use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
 use App\Service\Translator;
@@ -66,6 +68,12 @@ $routing = new Routing([
         $database->getConnection(),
         $translator,
     ),
+    CompanyReviewService::class => static fn (): CompanyReviewService => new CompanyReviewService(
+        new CompanyRepository($database->getConnection()),
+        new AuctionRepository($database->getConnection()),
+        $database->getConnection(),
+        $translator,
+    ),
 ]);
 
 $routing->get('/auctions', AuctionController::class, 'index');
@@ -82,6 +90,8 @@ $routing->get('/company/auctions/new', CompanyController::class, 'create');
 $routing->get('/company/auctions/{id}/delete', CompanyController::class, 'delete');
 $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
+$routing->post('/admin/companies/{id}/approve', AdminController::class, 'approve');
+$routing->post('/admin/companies/{id}/reject', AdminController::class, 'reject');
 $routing->post('/register', SecurityController::class, 'register');
 $routing->post('/register/company', SecurityController::class, 'registerCompany');
 $routing->post('/login',SecurityController::class, 'login');
