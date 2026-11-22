@@ -29,7 +29,6 @@ final class ErrorController extends AppController
         401 => [
             'code' => 'login_required',
             'message' => 'error.login_required',
-            'view' => 'errors/403',
         ],
         403 => [
             'code' => 'forbidden',
@@ -39,7 +38,7 @@ final class ErrorController extends AppController
         404 => [
             'code' => 'not_found',
             'message' => 'error.not_found',
-            'view' => 'not-found',
+            'view' => 'errors/404',
         ],
     ];
 
@@ -86,7 +85,7 @@ final class ErrorController extends AppController
             return;
         }
 
-        if (!$this->viewExists($error['view'])) {
+        if (!isset($error['view']) || !$this->viewExists($error['view'])) {
             header('Content-Type: text/plain; charset=utf-8');
             echo $status . ' ' . $error['message'];
 
