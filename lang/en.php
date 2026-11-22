@@ -75,6 +75,43 @@ return [
     'register.success' => 'Your account has been created. Welcome to MotoBid!',
     'register_company.success' => 'Your company account has been created. It is waiting for administrator approval.',
 
+    // Account form fields
+    'field.name' => 'Full name',
+    'field.contact_name' => 'Contact person full name',
+    'field.email' => 'E-mail address',
+    'field.email_login_hint' => 'Used as your login',
+    'field.password' => 'Password',
+    'field.password_hint' => 'At least 8 characters',
+    'field.password_repeat' => 'Repeat password',
+    'field.company_name' => 'Company name',
+    'field.city' => 'City',
+    'field.phone' => 'Phone (optional)',
+    'field.phone_hint' => 'E.g. +48 600 100 200',
+
+    // Login screen
+    'login.title' => 'Log in to MotoBid',
+    'login.badge' => 'Car auctions from the USA and Europe',
+    'login.lead' => 'Enter your details to bid on vehicles',
+    'login.submit' => 'Log in',
+    'login.no_account' => 'Don\'t have an account?',
+    'login.register' => 'Sign up',
+
+    // Registration screens
+    'register.title' => 'Create your MotoBid account',
+    'register.lead' => 'Create a buyer account and start bidding on vehicles',
+    'register.submit' => 'Create account',
+    'register.type_label' => 'Account type',
+    'register.type_buyer' => 'Buyer',
+    'register.type_company' => 'Company',
+    'register.have_account' => 'Already have an account?',
+    'register.login' => 'Log in',
+    'register_company.title' => 'Register a company account',
+    'register_company.lead' => 'List cars for auction. An administrator approves company accounts.',
+    'register_company.section_account' => 'Account details',
+    'register_company.section_company' => 'Company details',
+    'register_company.submit' => 'Register company account',
+    'register_company.login' => 'Go to login',
+
     // Administrator panel
     'admin.eyebrow' => 'Administrator',
     'admin.title' => 'Company account approval',

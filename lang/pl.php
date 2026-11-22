@@ -75,6 +75,43 @@ return [
     'register.success' => 'Konto zostało utworzone. Witaj w MotoBid!',
     'register_company.success' => 'Konto firmy zostało utworzone. Czeka na zatwierdzenie przez administratora.',
 
+    // Pola formularzy kont
+    'field.name' => 'Imię i nazwisko',
+    'field.contact_name' => 'Imię i nazwisko osoby kontaktowej',
+    'field.email' => 'Adres e-mail',
+    'field.email_login_hint' => 'Służy jako login',
+    'field.password' => 'Hasło',
+    'field.password_hint' => 'Minimum 8 znaków',
+    'field.password_repeat' => 'Powtórz hasło',
+    'field.company_name' => 'Nazwa firmy',
+    'field.city' => 'Miasto',
+    'field.phone' => 'Telefon (opcjonalnie)',
+    'field.phone_hint' => 'Np. +48 600 100 200',
+
+    // Ekran logowania
+    'login.title' => 'Zaloguj się do MotoBid',
+    'login.badge' => 'Licytacje aut z USA i Europy',
+    'login.lead' => 'Wprowadź swoje dane, aby licytować pojazdy',
+    'login.submit' => 'Zaloguj się',
+    'login.no_account' => 'Nie masz konta?',
+    'login.register' => 'Zarejestruj się',
+
+    // Ekrany rejestracji
+    'register.title' => 'Utwórz konto w MotoBid',
+    'register.lead' => 'Załóż konto kupującego i zacznij licytować pojazdy',
+    'register.submit' => 'Załóż konto',
+    'register.type_label' => 'Rodzaj konta',
+    'register.type_buyer' => 'Kupujący',
+    'register.type_company' => 'Firma',
+    'register.have_account' => 'Masz już konto?',
+    'register.login' => 'Zaloguj się',
+    'register_company.title' => 'Zarejestruj konto firmowe',
+    'register_company.lead' => 'Wystawiaj auta na licytacje. Konto firmy zatwierdza administrator.',
+    'register_company.section_account' => 'Dane konta',
+    'register_company.section_company' => 'Dane firmy',
+    'register_company.submit' => 'Zarejestruj konto firmowe',
+    'register_company.login' => 'Przejdź do logowania',
+
     // Panel administratora
     'admin.eyebrow' => 'Administrator',
     'admin.title' => 'Zatwierdzanie kont firm',
