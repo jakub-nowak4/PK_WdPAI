@@ -109,4 +109,21 @@ return [
     'company_status.pending' => 'Pending',
     'company_status.approved' => 'Approved',
     'company_status.rejected' => 'Rejected',
+
+    // Company account awaiting approval
+    'pending.title' => 'Company account is awaiting approval',
+    'pending.title_rejected' => 'Company application was rejected',
+    'pending.lead' => 'An administrator will review your company details, usually within 24 hours. After approval you will see the company panel when you log in.',
+    'pending.lead_rejected' => 'The company application was rejected. Contact the administrator.',
+    'pending.info' => 'After approval you will see the company panel when you log in.',
+    'pending.steps' => 'Application progress',
+    'pending.step_sent' => 'Application submitted',
+    'pending.step_review' => 'Administrator review',
+    'pending.step_active' => 'Account activation',
+    'pending.state_done' => 'Completed',
+    'pending.state_current' => 'In progress',
+    'pending.state_rejected' => 'Rejected',
+    'pending.state_waiting' => 'Waiting',
+    'pending.refresh' => 'Check status',
+    'pending.to_auctions' => 'Go to auctions',
 ];

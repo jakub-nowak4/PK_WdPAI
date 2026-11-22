@@ -109,4 +109,21 @@ return [
     'company_status.pending' => 'Oczekuje',
     'company_status.approved' => 'Zatwierdzone',
     'company_status.rejected' => 'Odrzucone',
+
+    // Konto firmy czeka na zatwierdzenie
+    'pending.title' => 'Konto firmy czeka na zatwierdzenie',
+    'pending.title_rejected' => 'Zgłoszenie firmy zostało odrzucone',
+    'pending.lead' => 'Administrator sprawdzi dane Twojej firmy, zwykle w ciągu 24 godzin. Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
+    'pending.lead_rejected' => 'Zgłoszenie firmy zostało odrzucone. Skontaktuj się z administratorem.',
+    'pending.info' => 'Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
+    'pending.steps' => 'Postęp zgłoszenia',
+    'pending.step_sent' => 'Zgłoszenie przesłane',
+    'pending.step_review' => 'Weryfikacja przez administratora',
+    'pending.step_active' => 'Aktywacja konta',
+    'pending.state_done' => 'Ukończono',
+    'pending.state_current' => 'W trakcie',
+    'pending.state_rejected' => 'Odrzucono',
+    'pending.state_waiting' => 'Oczekuje',
+    'pending.refresh' => 'Sprawdź status',
+    'pending.to_auctions' => 'Przejdź do aukcji',
 ];
