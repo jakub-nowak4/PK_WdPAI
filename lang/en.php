@@ -46,6 +46,9 @@ return [
     'error.404.label' => 'HTTP error 404 • resource unavailable',
     'error.404.title' => 'Page not found',
     'error.404.description' => 'The auction may have ended or been removed.',
+    'error.browse_auctions' => 'Browse auctions',
+    'error.back_home' => 'Back to home page',
+    'company.error.has_bids' => 'You cannot delete an auction that has bids.',
 
     // Form validation
     'validation.required' => 'This field is required.',

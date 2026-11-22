@@ -13,8 +13,9 @@ Odpowiedzi błędów 400, 401, 403 i 404. Dla ścieżek /api/* zwraca JSON w for
 docs/api.md (sekcja 3), dla pozostałych stronę HTML.
 401 w HTML nie jest stroną błędu: gość dostaje 303 na /login (GET: z ?next=<ścieżka>,
 POST: komunikat "Sesja wygasła"), w JSON zwykłe 401 login_required (docs/api.md, 1.3 i 1.5).
-Domyślne komunikaty pochodzą z katalogu tłumaczeń (klucze error.*); własny komunikat
-403 z wyjątku zostaje bez zmian.
+Domyślne komunikaty pochodzą z katalogu tłumaczeń (klucze error.*). Komunikat 403
+z wyjątku to klucz tłumaczenia (np. company.error.has_bids), nieznany klucz daje
+error.forbidden. Tytuł strony (<title>) to przetłumaczone error.<status>.title.
 */
 final class ErrorController extends AppController
 {
@@ -29,7 +30,6 @@ final class ErrorController extends AppController
         401 => [
             'code' => 'login_required',
             'message' => 'error.login_required',
-            'view' => 'errors/403',
         ],
         403 => [
             'code' => 'forbidden',
@@ -39,7 +39,7 @@ final class ErrorController extends AppController
         404 => [
             'code' => 'not_found',
             'message' => 'error.not_found',
-            'view' => 'not-found',
+            'view' => 'errors/404',
         ],
     ];
 
@@ -70,13 +70,13 @@ final class ErrorController extends AppController
             $error['message'] = self::CODE_MESSAGES[$exceptionCode] ?? $error['message'];
         }
 
-        // Własny komunikat z wyjątku dotyczy tylko 403 (reguły biznesowe po polsku).
+        // Własny komunikat z wyjątku dotyczy tylko 403 i jest kluczem tłumaczenia
+        // (reguły biznesowe); klucz spoza katalogu wraca do domyślnego error.forbidden.
         // Komunikaty routera dla 400/404 są techniczne i po angielsku, więc ich nie pokazujemy.
-        if ($status === 403 && $exception->getMessage() !== '') {
-            $error['message'] = $exception->getMessage();
-        } else {
-            $error['message'] = $this->translator->translate($error['message']);
-        }
+        $messageKey = $status === 403 && $this->translator->has($exception->getMessage())
+            ? $exception->getMessage()
+            : $error['message'];
+        $error['message'] = $this->translator->translate($messageKey);
 
         http_response_code($status);
 
@@ -86,7 +86,7 @@ final class ErrorController extends AppController
             return;
         }
 
-        if (!$this->viewExists($error['view'])) {
+        if (!isset($error['view']) || !$this->viewExists($error['view'])) {
             header('Content-Type: text/plain; charset=utf-8');
             echo $status . ' ' . $error['message'];
 
@@ -94,7 +94,7 @@ final class ErrorController extends AppController
         }
 
         $this->render($error['view'], [
-            'pageTitle' => (string) $status,
+            'pageTitle' => $this->translator->translate('error.' . $status . '.title'),
             'errorMessage' => $error['message'],
         ]);
     }

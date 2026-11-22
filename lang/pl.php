@@ -46,6 +46,9 @@ return [
     'error.404.label' => 'Błąd HTTP 404 • zasób niedostępny',
     'error.404.title' => 'Nie znaleziono strony',
     'error.404.description' => 'Aukcja mogła zostać zakończona lub usunięta.',
+    'error.browse_auctions' => 'Przeglądaj aukcje',
+    'error.back_home' => 'Wróć do strony głównej',
+    'company.error.has_bids' => 'Nie można usunąć aukcji, w której są oferty.',
 
     // Walidacja formularzy
     'validation.required' => 'To pole jest wymagane.',
