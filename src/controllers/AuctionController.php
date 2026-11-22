@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Request;
-use App\Service\DemoUser;
 
 final class AuctionController extends AppController
 {
