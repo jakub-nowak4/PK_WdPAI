@@ -65,6 +65,7 @@ return [
 
     // Logowanie
     'auth.invalid_credentials' => 'Nieprawidłowy e-mail lub hasło.',
+    'auth.logged_out' => 'Wylogowano.',
 
     // Rejestracja
     'register.success' => 'Konto zostało utworzone. Witaj w MotoBid!',

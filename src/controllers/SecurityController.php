@@ -73,13 +73,24 @@ final class SecurityController extends AppController
     }
 
     /*
-    POST /logout: tylko CSRF (przycisk w nagłówku i dolnej nawigacji to formularz POST),
-    potem zniszczenie sesji i 303 na stronę główną.
+    POST /logout (docs/api.md, 2.4): gość (brak zalogowanego) dostaje 303 na "/" bez CSRF, bo
+    wylogowanie jest idempotentne. Zalogowany: CSRF (zły token to 403), zniszczenie sesji,
+    nowa sesja tylko na komunikat "Wylogowano." (flash) i 303 na stronę główną.
     */
     public function logout(Request $request): void
     {
+        if ($this->currentUserId() === null) {
+            $this->redirect('/');
+
+            return;
+        }
+
         $this->verifyCsrf($request);
         $this->logOutUser();
+
+        // Stary identyfikator jest już nieważny (use_strict_mode), więc ta sesja dostaje nowy.
+        session_start();
+        $this->addFlash('info', 'auth.logged_out');
         $this->redirect('/');
     }
 
