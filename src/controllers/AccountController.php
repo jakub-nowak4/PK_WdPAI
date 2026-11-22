@@ -4,12 +4,24 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Exception\HttpException;
 use App\Model\Role;
+use App\Repository\CompanyRepository;
 use App\Request;
+use App\Service\CurrentUserProvider;
+use App\Service\Translator;
 
 final class AccountController extends AppController
 {
     private const BID_STATUSES = ['all', 'leading', 'outbid', 'won', 'lost'];
+
+    public function __construct(
+        Translator $translator,
+        CurrentUserProvider $currentUsers,
+        private readonly CompanyRepository $companies,
+    ) {
+        parent::__construct($translator, $currentUsers);
+    }
 
     public function myBids(Request $request): void
     {
@@ -36,14 +48,30 @@ final class AccountController extends AppController
         ]);
     }
 
+    /*
+    GET /account/pending (docs/api.md, 2.4): tylko DEALER (gość 303 na /login, inna rola 403).
+    Status firmy czytamy z bazy: pending i rejected to 200 z odpowiednim ekranem, zatwierdzona
+    firma dostaje 303 na /company (od tego zależy strona startowa firmy z homePathFor()).
+    */
     public function pending(): void
     {
-        // Tylko rola; status firmy (pending/rejected/approved) dołoży T-021.
-        $this->requireRole(Role::Dealer);
+        $userId = $this->requireRole(Role::Dealer);
+        $company = $this->companies->findByUserId($userId);
 
-        // MAKIETA: tresc statyczna; status firmy do czasu T-021.
+        // Konto DEALER zawsze ma profil firmy; jego brak to niespójne dane, nie dostęp do panelu.
+        if ($company === null) {
+            throw HttpException::forbidden();
+        }
+
+        if ($company->isApproved()) {
+            $this->redirect('/company');
+
+            return;
+        }
+
         $this->render('account/pending', [
             'pageTitle' => 'Konto czeka na zatwierdzenie',
+            'companyStatus' => $company->getStatus()->value,
         ]);
     }
 }
