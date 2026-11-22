@@ -8,7 +8,7 @@
  * @var int $total
  * @var array<string,string> $filters
  */
-$perPage = 12;
+$perPage = (int) ($perPage ?? 12);
 $from = ($page - 1) * $perPage + 1;
 $to = min($page * $perPage, $total);
 $pageUrl = static function (int $n) use ($filters): string {
@@ -27,7 +27,7 @@ sort($numbers);
 <nav class="pagination" aria-label="<?= $e($t('pagination.label', 'Strony wyników')) ?>">
     <p class="pagination__summary">
         <?= $e($t('pagination.shown', 'Pokazano')) ?> <?= $e((string) $from) ?>–<?= $e((string) $to) ?>
-        <?= $e($t('pagination.of', 'z')) ?> <?= $e((string) $total) ?> <?= $e($t('auction.bids', 'ofert')) ?>
+        <?= $e($t('pagination.of', 'z')) ?> <?= $e((string) $total) ?> <?= $e($t('pagination.results', 'wyników')) ?>
     </p>
     <ul class="pagination__list">
         <li>
