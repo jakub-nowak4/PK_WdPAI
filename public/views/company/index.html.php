@@ -34,7 +34,7 @@ $statusLabels = [
     </header>
 
     <?php if ($isMock): ?>
-        <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
+        <p class="alert alert--info" role="note"><?= $e($t('common.mock_notice', 'MAKIETA: dane przykładowe, nie pochodzą z bazy.')) ?></p>
     <?php endif; ?>
 
     <section class="card company-auctions" aria-labelledby="company-auctions-title">
