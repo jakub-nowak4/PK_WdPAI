@@ -24,12 +24,17 @@ final class SecurityController extends AppController
     }
 
     /*
-    GET /register: formularz. POST /register: CSRF, rejestracja w AuthService (walidacja
+    GET /register: formularz (zalogowany: 303 na stronę roli). POST /register: CSRF, rejestracja w AuthService (walidacja
     tylko tam), auto-logowanie i Post/Redirect/Get na /auctions. Błąd reguł to 422,
     zajęty e-mail 409: ten sam widok z błędami przy polach i bez hasła w polach.
     */
     public function register(Request $request): void
     {
+        // Trasa dla gościa: zalogowany (GET i POST) wraca na stronę startową roli, przed CSRF.
+        if ($this->redirectIfLoggedIn()) {
+            return;
+        }
+
         if (!$request->isPost()) {
             $this->render('security/register', [
                 'pageTitle' => 'Rejestracja',

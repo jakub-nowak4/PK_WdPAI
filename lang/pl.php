@@ -50,8 +50,9 @@ return [
     // Walidacja formularzy
     'validation.required' => 'To pole jest wymagane.',
     'validation.email' => 'Podaj poprawny adres e-mail.',
-    'validation.min_length' => 'Wpisz co najmniej {min} znaków.',
-    'validation.max_length' => 'Wpisz co najwyżej {max} znaków.',
+    'validation.min_length' => 'Minimalna liczba znaków: {min}.',
+    'validation.max_length' => 'Maksymalna liczba znaków: {max}.',
+    'validation.password_max_bytes' => 'Hasło może mieć najwyżej {max} bajty.',
     'validation.password_mismatch' => 'Hasła nie są takie same.',
     'validation.number' => 'Podaj poprawną liczbę.',
     'validation.min_value' => 'Wartość nie może być mniejsza niż {min}.',

@@ -92,6 +92,38 @@ abstract class AppController
     }
 
     /*
+    Strona startowa roli (docs/api.md, 1.5): czysta mapa bez bazy. Firma w każdym
+    statusie trafia na /account/pending, a zatwierdzoną przekierowuje dalej
+    AccountController::pending (T-021).
+    */
+    protected function homePathFor(Role $role): string
+    {
+        return match ($role) {
+            Role::Buyer => '/auctions',
+            Role::Dealer => '/account/pending',
+            Role::Admin => '/admin',
+        };
+    }
+
+    /*
+    Trasy tylko dla gościa (/login, /register…): zalogowany dostaje 303 na stronę
+    startową roli. Zwraca true, gdy przekierowanie zostało ustawione, a wywołujący
+    ma wtedy zakończyć akcję (przed CSRF i walidacją).
+    */
+    protected function redirectIfLoggedIn(): bool
+    {
+        $role = $this->currentRole();
+
+        if ($role === null) {
+            return false;
+        }
+
+        $this->redirect($this->homePathFor($role));
+
+        return true;
+    }
+
+    /*
     Jedyne miejsce, które loguje użytkownika (docs/api.md, 1.5): wołają je rejestracja
     i logowanie. Kolejność ma znaczenie: nowy identyfikator sesji (session fixation),
     potem usunięcie starego tokenu CSRF (nowy powstanie przy następnym renderze),

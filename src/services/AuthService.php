@@ -100,7 +100,7 @@ final class AuthService
         } elseif ($passwordLength < self::PASSWORD_MIN) {
             $errors['password'] = $this->translator->translate('validation.min_length', ['min' => self::PASSWORD_MIN]);
         } elseif ($passwordLength > self::PASSWORD_MAX) {
-            $errors['password'] = $this->translator->translate('validation.max_length', ['max' => self::PASSWORD_MAX]);
+            $errors['password'] = $this->translator->translate('validation.password_max_bytes', ['max' => self::PASSWORD_MAX]);
         } elseif (str_contains($password, "\0")) {
             $errors['password'] = $this->translator->translate('validation.invalid_format');
         }

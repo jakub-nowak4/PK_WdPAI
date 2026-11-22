@@ -50,8 +50,9 @@ return [
     // Form validation
     'validation.required' => 'This field is required.',
     'validation.email' => 'Enter a valid e-mail address.',
-    'validation.min_length' => 'Enter at least {min} characters.',
-    'validation.max_length' => 'Enter at most {max} characters.',
+    'validation.min_length' => 'Minimum number of characters: {min}.',
+    'validation.max_length' => 'Maximum number of characters: {max}.',
+    'validation.password_max_bytes' => 'The password can be at most {max} bytes long.',
     'validation.password_mismatch' => 'Passwords do not match.',
     'validation.number' => 'Enter a valid number.',
     'validation.min_value' => 'The value cannot be lower than {min}.',
