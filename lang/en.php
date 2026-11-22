@@ -268,4 +268,20 @@ return [
     'pending.state_waiting' => 'Waiting',
     'pending.refresh' => 'Check status',
     'pending.to_auctions' => 'Go to auctions',
+
+    // Page titles (<title>), pageTitle from controllers
+    'page.home.title' => 'My application',
+    'page.auctions.title' => 'Auctions',
+    'page.auction_show.title' => 'Auction details',
+    'page.auction_won.title' => 'Auction won',
+    'page.my_bids.title' => 'My bids',
+    'page.notifications.title' => 'Notifications',
+    'page.pending.title' => 'Account awaiting approval',
+    'page.login.title' => 'Log in',
+    'page.register.title' => 'Sign up',
+    'page.register_company.title' => 'Company sign-up',
+    'page.company.title' => 'Company panel',
+    'page.company_create.title' => 'Add auction',
+    'page.company_delete.title' => 'Delete auction',
+    'page.admin.title' => 'Administrator panel',
 ];

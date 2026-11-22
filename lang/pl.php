@@ -268,4 +268,20 @@ return [
     'pending.state_waiting' => 'Oczekuje',
     'pending.refresh' => 'Sprawdź status',
     'pending.to_auctions' => 'Przejdź do aukcji',
+
+    // Tytuły stron (<title>), pageTitle z kontrolerów
+    'page.home.title' => 'Moja aplikacja',
+    'page.auctions.title' => 'Aukcje',
+    'page.auction_show.title' => 'Szczegóły aukcji',
+    'page.auction_won.title' => 'Aukcja wygrana',
+    'page.my_bids.title' => 'Moje oferty',
+    'page.notifications.title' => 'Powiadomienia',
+    'page.pending.title' => 'Konto czeka na zatwierdzenie',
+    'page.login.title' => 'Logowanie',
+    'page.register.title' => 'Rejestracja',
+    'page.register_company.title' => 'Rejestracja firmy',
+    'page.company.title' => 'Panel firmy',
+    'page.company_create.title' => 'Dodaj aukcję',
+    'page.company_delete.title' => 'Usuń aukcję',
+    'page.admin.title' => 'Panel administratora',
 ];
