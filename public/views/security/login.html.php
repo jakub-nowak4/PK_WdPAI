@@ -21,7 +21,7 @@ $csrfToken = (string) ($csrfToken ?? '');
 
         <?php require __DIR__ . '/../partials/form-errors.html.php'; ?>
 
-        <form class="auth-card__form" method="post" action="/login" novalidate>
+        <form class="auth-card__form" method="post" action="/login" data-validate novalidate>
             <input type="hidden" name="csrfToken" value="<?= $e($csrfToken) ?>">
             <input type="hidden" name="next" value="<?= $e($next) ?>">
 
@@ -45,4 +45,5 @@ $csrfToken = (string) ($csrfToken ?? '');
                 <a href="/register"><?= $e($t('login.register', 'Zarejestruj się')) ?></a></p>
         </footer>
     </section>
+    <?php require __DIR__ . '/../partials/validation-messages.html.php'; ?>
 </main>

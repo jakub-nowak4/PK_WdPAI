@@ -20,7 +20,7 @@ $accountType = 'buyer';
 
         <?php require __DIR__ . '/../partials/form-errors.html.php'; ?>
 
-        <form class="auth-card__form" method="post" action="/register" novalidate>
+        <form class="auth-card__form" method="post" action="/register" data-validate novalidate>
             <input type="hidden" name="csrfToken" value="<?= $e($csrfToken) ?>">
 
             <?php
@@ -53,4 +53,5 @@ $accountType = 'buyer';
                 <a href="/login"><?= $e($t('register.login', 'Zaloguj się')) ?></a></p>
         </footer>
     </section>
+    <?php require __DIR__ . '/../partials/validation-messages.html.php'; ?>
 </main>
