@@ -53,7 +53,7 @@ $activeExact = $activeHref !== null && $pathOnly === strtok($activeHref, '?');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $e($pageTitle ?? 'MotoBid') ?></title>
+    <title><?= $e(trim((string) ($pageTitle ?? '')) !== '' ? trim((string) $pageTitle) . ' · MotoBid' : 'MotoBid') ?></title>
     <meta name="csrf-token" content="<?= $e($csrfToken) ?>">
     <script>
         (function () {
