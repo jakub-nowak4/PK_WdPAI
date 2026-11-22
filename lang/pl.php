@@ -63,6 +63,9 @@ return [
     'validation.invalid_format' => 'Niepoprawny format.',
     'validation.email_taken' => 'Konto z tym adresem e-mail już istnieje.',
 
+    // Logowanie
+    'auth.invalid_credentials' => 'Nieprawidłowy e-mail lub hasło.',
+
     // Rejestracja
     'register.success' => 'Konto zostało utworzone. Witaj w MotoBid!',
 ];
