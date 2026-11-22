@@ -82,6 +82,14 @@ return [
     // Registration
     'register.success' => 'Your account has been created. Welcome to MotoBid!',
     'register_company.success' => 'Your company account has been created. It is waiting for administrator approval.',
+    'register.success_mail_failed' => 'Your account has been created. We could not send the welcome e-mail.',
+    'register_company.success_mail_failed' => 'Your company account has been created and is waiting for administrator approval. We could not send the welcome e-mail.',
+
+    // E-mails (message text in the account language)
+    'mail.welcome.subject' => 'Welcome to MotoBid',
+    'mail.welcome.body' => "Hi {name},\n\nYour MotoBid account has been created. You can now browse car auctions and place bids.\n\nGo to the auctions: {url}\n\nThe MotoBid team",
+    'mail.welcome_company.subject' => 'Welcome to MotoBid: your company account is awaiting approval',
+    'mail.welcome_company.body' => "Hi {name},\n\nYour MotoBid company account has been created and is waiting for administrator approval, usually within 24 hours. Once approved, you can log in to the company panel and add your first auction.\n\nApplication status: {url}\n\nThe MotoBid team",
 
     // Account form fields
     'field.name' => 'Full name',
