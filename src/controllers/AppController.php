@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Exception\HttpException;
 use App\Model\Role;
+use App\Model\User;
 use App\Request;
 use App\Service\Translator;
 
@@ -88,6 +89,21 @@ abstract class AppController
         $role = $_SESSION['role'] ?? null;
 
         return is_string($role) ? Role::tryFrom($role) : null;
+    }
+
+    /*
+    Jedyne miejsce, które loguje użytkownika (docs/api.md, 1.5): wołają je rejestracja
+    i logowanie. Kolejność ma znaczenie: nowy identyfikator sesji (session fixation),
+    potem usunięcie starego tokenu CSRF (nowy powstanie przy następnym renderze),
+    na końcu w sesji tylko id i rola. Nazwę i status firmy czytamy z bazy przy żądaniu.
+    */
+    protected function logInUser(User $user): void
+    {
+        session_regenerate_id(true);
+        unset($_SESSION['csrf']);
+
+        $_SESSION['userId'] = $user->getId();
+        $_SESSION['role'] = $user->getRole()->value;
     }
 
     /*
