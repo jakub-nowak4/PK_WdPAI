@@ -54,9 +54,9 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
          data-status="<?= $e($status) ?>"
          data-viewer-state="<?= $e($panelState) ?>"
          data-viewer-status="<?= $e($viewerStatus) ?>"
-         data-price="<?= $e((string) ((int) $auction['price'] * 100)) ?>"
-         data-min-increment="<?= $e((string) ((int) $auction['minIncrement'] * 100)) ?>"
-         data-min-next-bid="<?= $e((string) ((int) $auction['minNextBid'] * 100)) ?>">
+         data-price-grosze="<?= $e((string) ((int) $auction['price'] * 100)) ?>"
+         data-min-increment-grosze="<?= $e((string) ((int) $auction['minIncrement'] * 100)) ?>"
+         data-min-next-bid-grosze="<?= $e((string) ((int) $auction['minNextBid'] * 100)) ?>">
     <h2 class="visually-hidden" id="bid-panel-title"><?= $e($t('bids.panel', 'Panel licytacji')) ?></h2>
 
     <?php if ($panelState === 'ended'): ?>
@@ -153,6 +153,7 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
     <?php if ($panelState === 'buyer'): ?>
         <p class="alert alert--danger" role="alert" data-outbid-alert hidden><?= $e($t('bids.outbid_title', 'Zostałeś przebity')) ?></p>
     <?php endif; ?>
+    <div class="bid-panel__message bid-panel__message--error" role="alert" data-bid-error hidden></div>
     <div class="bid-panel__message" id="bid-message" role="status" data-bid-message hidden></div>
 
     <p class="alert alert--warning bid-panel__rule" data-anti-sniping-rule<?= $panelState === 'ended' ? ' hidden' : '' ?>><?= $e($antiSniping) ?></p>
