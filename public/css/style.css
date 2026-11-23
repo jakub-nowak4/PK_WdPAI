@@ -2411,6 +2411,19 @@ body:has(.bid-panel[aria-busy="true"]) .bid-bar__submit:disabled::before {
     color: var(--color-accent-text);
 }
 
+/* Okno potwierdzenia i historia ofert (T-042). */
+.dialog__hint::before {
+    content: "✓ ";
+}
+
+.dialog__footer .button:disabled {
+    cursor: not-allowed;
+}
+
+.bid-history__item--you.bid-history__item--leader {
+    border-inline-start: 4px solid var(--color-success);
+}
+
 /* ---------- Animacje ---------- */
 @keyframes spin {
     to {
