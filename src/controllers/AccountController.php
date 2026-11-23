@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Exception\HttpException;
+use App\Model\MyBidStatus;
 use App\Model\Role;
 use App\Repository\CompanyRepository;
 use App\Request;
 use App\Service\CurrentUserProvider;
+use App\Service\MyBidsService;
 use App\Service\Translator;
 
 final class AccountController extends AppController
@@ -19,6 +21,7 @@ final class AccountController extends AppController
         Translator $translator,
         CurrentUserProvider $currentUsers,
         private readonly CompanyRepository $companies,
+        private readonly MyBidsService $myBids,
     ) {
         parent::__construct($translator, $currentUsers);
     }
@@ -26,15 +29,22 @@ final class AccountController extends AppController
     public function myBids(Request $request): void
     {
         // Guard z tabeli 2.1 (docs/api.md, 1.5): gość 303 na /login, inna rola 403.
-        $this->requireRole(Role::Buyer);
+        $userId = $this->requireRole(Role::Buyer);
 
-        // Zły status w query to 400 (docs/api.md).
+        // Zły status w query to 400 (docs/api.md); "all" to brak filtra.
         $status = $request->queryOneOf('status', self::BID_STATUSES, 'all');
+        $overview = $this->myBids->forUser($userId, MyBidStatus::tryFrom((string) $status));
 
-        // MAKIETA: dane z partials/mock-my-bids.php, do czasu repozytorium (naglowek: zalogowany uzytkownik z sesji).
+        // MAKIETA (T-009): widok nadal rysuje wiersze z partials/mock-my-bids.php, dopóki T-039 go nie podłączy.
+        // Dane z bazy dla widoku: $myBids (list<MyBid>, po filtrze), $statusCounts (all, leading, outbid, won, lost),
+        // $runningTotal (Money, suma ofert w trwających aukcjach), $serverTime (DateTimeImmutable).
         $this->render('account/my-bids', [
             'pageTitle' => $this->translator->translate('page.my_bids.title'),
             'status' => $status,
+            'myBids' => $overview->getBids(),
+            'statusCounts' => $overview->getCounts(),
+            'runningTotal' => $overview->getRunningTotal(),
+            'serverTime' => $overview->getServerTime(),
         ]);
     }
 
