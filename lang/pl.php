@@ -63,6 +63,15 @@ return [
     'error.back_home' => 'Wróć do strony głównej',
     'company.error.has_bids' => 'Nie można usunąć aukcji, w której są oferty.',
 
+    // Oferta: błędy BidService (docs/api.md 3.2 i słownik w sekcji 4)
+    'auction.error.not_found' => 'Nie znaleziono aukcji.',
+    'bid.error.forbidden_role' => 'Tylko konto kupującego może składać oferty.',
+    'bid.error.own_auction' => 'Nie możesz licytować własnej aukcji.',
+    'bid.error.not_active' => 'Ta aukcja nie przyjmuje już ofert.',
+    'bid.error.already_leading' => 'Twoja oferta już prowadzi w tej aukcji.',
+    'bid.error.amount_invalid' => 'Podaj poprawną kwotę oferty.',
+    'bid.error.too_low' => 'Oferta jest za niska. Minimalna oferta: {min}.',
+
     // Walidacja formularzy
     'validation.required' => 'To pole jest wymagane.',
     'validation.email' => 'Podaj poprawny adres e-mail.',

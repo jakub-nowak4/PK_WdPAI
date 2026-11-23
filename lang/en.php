@@ -63,6 +63,15 @@ return [
     'error.back_home' => 'Back to home page',
     'company.error.has_bids' => 'You cannot delete an auction that has bids.',
 
+    // Bids: BidService errors (docs/api.md 3.2 and the table in section 4)
+    'auction.error.not_found' => 'Auction not found.',
+    'bid.error.forbidden_role' => 'Only a buyer account can place bids.',
+    'bid.error.own_auction' => 'You cannot bid on your own auction.',
+    'bid.error.not_active' => 'This auction no longer accepts bids.',
+    'bid.error.already_leading' => 'Your bid is already leading in this auction.',
+    'bid.error.amount_invalid' => 'Enter a valid bid amount.',
+    'bid.error.too_low' => 'Your bid is too low. Minimum bid: {min}.',
+
     // Form validation
     'validation.required' => 'This field is required.',
     'validation.email' => 'Enter a valid e-mail address.',
