@@ -1,13 +1,18 @@
 <?php
 /**
  * Zmienne bloku listy aukcji (docs/api.md 1.8 i 2.2).
- * Z kontrolera (T-028): $auctions (list<AuctionSummary>), $brands (slug => nazwa albo list<Brand>),
+ * Z kontrolera (T-028): $auctionCards (list<AuctionSummary>), $brandOptions (list<Brand>),
  * $filters (q, brand, priceMax, sort), $page, $pages, $total; opcjonalnie $perPage (domyslnie 12) i $now.
- * Gdy kontroler nie przekazal $auctions, uzywana jest MAKIETA z mock-auctions.php (T-009; do usuniecia
- * po scaleniu T-028) i ustawiane jest $isMock.
+ * Gdy kontroler nie przekazal $auctionCards, uzywana jest MAKIETA z mock-auctions.php (T-009)
+ * i ustawiane jest $isMock.
  * Ustawia: $auctions, $brands, $filters, $page, $pages, $total, $perPage, $isMock.
  */
 $isMock = false;
+// Nazwy zmiennych z AuctionController/DefaultController (T-028): $auctionCards i $brandOptions.
+if (isset($auctionCards)) {
+    $auctions = $auctionCards;
+    $brands = $brandOptions ?? [];
+}
 if (!isset($auctions)) {
     $mock = require __DIR__ . '/mock-auctions.php';
     $auctions = $mock['auctions'];
