@@ -32,7 +32,7 @@ final class SecurityController extends AppController
 
         if (!$request->isPost()) {
             $this->render('security/login', [
-                'pageTitle' => 'Logowanie',
+                'pageTitle' => $this->translator->translate('page.login.title'),
                 'next' => $this->safeNext($request->query('next')) ?? '',
             ]);
 
@@ -49,7 +49,7 @@ final class SecurityController extends AppController
         } catch (ValidationException $exception) {
             http_response_code($exception->statusCode());
             $this->render('security/login', [
-                'pageTitle' => 'Logowanie',
+                'pageTitle' => $this->translator->translate('page.login.title'),
                 'errors' => $exception->errors(),
                 'old' => ['email' => $email],
                 'next' => $next ?? '',
@@ -59,7 +59,7 @@ final class SecurityController extends AppController
         } catch (InvalidCredentialsException $exception) {
             http_response_code(401);
             $this->render('security/login', [
-                'pageTitle' => 'Logowanie',
+                'pageTitle' => $this->translator->translate('page.login.title'),
                 'formError' => $exception->getMessage(),
                 'old' => ['email' => $email],
                 'next' => $next ?? '',
@@ -108,7 +108,7 @@ final class SecurityController extends AppController
 
         if (!$request->isPost()) {
             $this->render('security/register', [
-                'pageTitle' => 'Rejestracja',
+                'pageTitle' => $this->translator->translate('page.register.title'),
             ]);
 
             return;
@@ -130,7 +130,7 @@ final class SecurityController extends AppController
         } catch (ValidationException $exception) {
             http_response_code($exception->statusCode());
             $this->render('security/register', [
-                'pageTitle' => 'Rejestracja',
+                'pageTitle' => $this->translator->translate('page.register.title'),
                 'errors' => $exception->errors(),
                 'old' => ['name' => $name, 'email' => $email],
             ]);
@@ -163,7 +163,7 @@ final class SecurityController extends AppController
 
         if (!$request->isPost()) {
             $this->render('security/register-company', [
-                'pageTitle' => 'Rejestracja firmy',
+                'pageTitle' => $this->translator->translate('page.register_company.title'),
             ]);
 
             return;
@@ -193,7 +193,7 @@ final class SecurityController extends AppController
         } catch (ValidationException $exception) {
             http_response_code($exception->statusCode());
             $this->render('security/register-company', [
-                'pageTitle' => 'Rejestracja firmy',
+                'pageTitle' => $this->translator->translate('page.register_company.title'),
                 'errors' => $exception->errors(),
                 'old' => $old,
             ]);

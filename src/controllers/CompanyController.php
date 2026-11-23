@@ -27,7 +27,7 @@ final class CompanyController extends AppController
 
         // MAKIETA: tresc statyczna, do czasu panelu firmy.
         $this->render('company/index', [
-            'pageTitle' => 'Panel firmy',
+            'pageTitle' => $this->translator->translate('page.company.title'),
         ]);
     }
 
@@ -37,7 +37,7 @@ final class CompanyController extends AppController
 
         // MAKIETA: tresc statyczna, do czasu panelu firmy.
         $this->render('company/create', [
-            'pageTitle' => 'Dodaj aukcję',
+            'pageTitle' => $this->translator->translate('page.company_create.title'),
         ]);
     }
 
@@ -54,7 +54,7 @@ final class CompanyController extends AppController
 
         // MAKIETA: tresc statyczna, do czasu panelu firmy.
         $this->render('company/delete', [
-            'pageTitle' => 'Usuń aukcję',
+            'pageTitle' => $this->translator->translate('page.company_delete.title'),
             'auctionId' => $id,
         ]);
     }
