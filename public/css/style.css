@@ -131,6 +131,11 @@ body {
     line-height: var(--line-height-base);
 }
 
+/* Atrybut hidden przełączany przez JS (T-034) ma wygrywać z każdym display ustawionym przez klasę. */
+[hidden] {
+    display: none !important;
+}
+
 h1,
 h2,
 h3,
