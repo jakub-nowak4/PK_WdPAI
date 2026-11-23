@@ -71,6 +71,11 @@ return [
     'bid.error.already_leading' => 'Your bid is already leading in this auction.',
     'bid.error.amount_invalid' => 'Enter a valid bid amount.',
     'bid.error.too_low' => 'Your bid is too low. Minimum bid: {min}.',
+    'bid.success' => 'Bid accepted. You are leading.',
+    'bid.success_extended' => 'Bid accepted. You are leading. The auction was extended by {seconds} s.',
+    'bids.bidder' => 'Bidder',
+    'error.invalid_id' => 'Invalid identifier.',
+    'error.invalid_json' => 'Invalid request data.',
 
     // Form validation
     'validation.required' => 'This field is required.',
