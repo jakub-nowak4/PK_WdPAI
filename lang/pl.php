@@ -71,6 +71,11 @@ return [
     'bid.error.already_leading' => 'Twoja oferta już prowadzi w tej aukcji.',
     'bid.error.amount_invalid' => 'Podaj poprawną kwotę oferty.',
     'bid.error.too_low' => 'Oferta jest za niska. Minimalna oferta: {min}.',
+    'bid.success' => 'Oferta przyjęta. Prowadzisz w licytacji.',
+    'bid.success_extended' => 'Oferta przyjęta. Prowadzisz w licytacji. Aukcja przedłużona o {seconds} s.',
+    'bids.bidder' => 'Licytujący',
+    'error.invalid_id' => 'Nieprawidłowy identyfikator.',
+    'error.invalid_json' => 'Nieprawidłowe dane żądania.',
 
     // Walidacja formularzy
     'validation.required' => 'To pole jest wymagane.',
