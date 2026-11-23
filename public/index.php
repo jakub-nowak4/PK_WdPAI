@@ -107,6 +107,7 @@ $routing = new Routing([
         new AuctionRepository($database->getConnection()),
         new BidRepository($database->getConnection()),
         new CompanyRepository($database->getConnection()),
+        new NotificationRepository($database->getConnection()),
         $database->getConnection(),
         $translator,
     ),
