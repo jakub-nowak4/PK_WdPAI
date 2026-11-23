@@ -76,6 +76,14 @@ return [
     'validation.invalid_format' => 'Invalid format.',
     'validation.email_taken' => 'An account with this e-mail address already exists.',
 
+    // Photo upload
+    'upload.required' => 'Choose at least one photo.',
+    'upload.too_many' => 'You can add at most {max} photos.',
+    'upload.too_large' => 'The file is too large. The maximum photo size is {max} MB.',
+    'upload.invalid_type' => 'Only JPEG, PNG or WebP photos are allowed.',
+    'upload.invalid_extension' => 'The file extension must be jpg, jpeg, png or webp and match the file content.',
+    'upload.failed' => 'The photo could not be saved. Please try again.',
+
     // Login
     'auth.invalid_credentials' => 'Invalid e-mail or password.',
     'auth.logged_out' => 'You have been logged out.',
