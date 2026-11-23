@@ -11,13 +11,14 @@ use App\Repository\UserRepository;
 use App\Request;
 use App\Service\AuctionStateService;
 use App\Service\BidService;
+use App\Service\OutbidNotifier;
 use App\Service\Translator;
 
 /*
 Endpointy JSON licytacji (docs/api.md 3.1 i 3.2): GET /api/auctions/{id}/state (publiczny, polling) i
 POST /api/auctions/{id}/bids (kupujący, CSRF w nagłówku X-CSRF-Token). Kontroler tylko sprawdza dostęp,
 czyta wejście i zamienia wynik albo BidException na JSON; reguły oferty są w BidService, stan składa
-AuctionStateService. Błędy 400/401/403/404 spoza BidException zgłasza HttpException, a dla /api/*
+AuctionStateService; e-mail o przebiciu wysyła po odpowiedzi OutbidNotifier. Błędy 400/401/403/404 spoza BidException zgłasza HttpException, a dla /api/*
 zamienia je na JSON ErrorController.
 */
 final class BidApiController extends AppController
@@ -27,6 +28,7 @@ final class BidApiController extends AppController
         private readonly BidService $bidService,
         private readonly AuctionStateService $states,
         private readonly UserRepository $users,
+        private readonly OutbidNotifier $outbidNotifier,
     ) {
         parent::__construct($translator);
     }
@@ -83,7 +85,22 @@ final class BidApiController extends AppController
             'state' => $this->states->build($id, $userId, $user->getRole()),
         ], ['Location' => '/api/auctions/' . $id . '/state']);
 
-        // MIEJSCE NA T-036: powiadomienie i e-mail dla $result->getOutbidUserId() (po COMMIT, błąd poczty tylko w logu).
+        // E-mail dla przebitego (T-036): po COMMIT i po wysłaniu odpowiedzi, więc wolny SMTP nie opóźnia 201.
+        // Powiadomienie w serwisie zapisał już BidService w transakcji; błąd poczty trafia tylko do logu.
+        $this->finishResponse();
+        $this->outbidNotifier->notifyByEmail($result->getOutbidUserId(), $id, $bid->getAmount());
+    }
+
+    // Oddaje odpowiedź klientowi przed dalszą pracą (PHP-FPM) i zwalnia blokadę sesji; poza FPM nic nie robi.
+    private function finishResponse(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
     }
 
     // Błąd reguły oferty: status i kod z wyjątku; przy 409/422 dokładamy aktualny stan, żeby JS odświeżył cenę.

@@ -8,17 +8,20 @@ use App\Exception\BidException;
 use App\Model\Auction;
 use App\Model\Bid;
 use App\Model\Money;
+use App\Model\NotificationType;
 use App\Model\Role;
 use App\Model\User;
 use App\Repository\AuctionRepository;
 use App\Repository\BidRepository;
 use App\Repository\CompanyRepository;
+use App\Repository\NotificationRepository;
 
 /*
 Składanie oferty (docs/api.md 3.2, reguły 2-5). Cała operacja to jedna transakcja PostgreSQL: SELECT ... FOR UPDATE
 na wierszu aukcji serializuje oferty (druga czeka, a po zwolnieniu blokady widzi już nową cenę), czas bierze z bazy
-po uzyskaniu blokady, a odrzucenie albo błąd wycofuje wszystko. Powiadomienie i e-mail dla przebitego robi
-osobna karta (T-036) na podstawie BidResult::getOutbidUserId(), już po COMMIT.
+po uzyskaniu blokady, a odrzucenie albo błąd wycofuje wszystko. Powiadomienie 'outbid' dla przebitego prowadzącego
+powstaje w tej samej transakcji co oferta; e-mail wysyła dopiero po COMMIT OutbidNotifier na podstawie
+BidResult::getOutbidUserId() (T-036).
 Granice kwoty są stałymi modelu Money; kontroler ich nie powtarza (docs/api.md 1.7).
 */
 final class BidService
@@ -32,6 +35,7 @@ final class BidService
         private readonly AuctionRepository $auctions,
         private readonly BidRepository $bids,
         private readonly CompanyRepository $companies,
+        private readonly NotificationRepository $notifications,
         private readonly \PDO $pdo,
         private readonly Translator $translator,
     ) {
@@ -109,7 +113,15 @@ final class BidService
             ? $this->auctions->extendEndsAt($auctionId, self::EXTEND_SECONDS)
             : $auction->getEndsAt();
 
-        return new BidResult($bid, $endsAt, $extended, $leading?->getUserId());
+        // Przebity prowadzący dostaje powiadomienie w tej samej transakcji (docs/api.md 3.2). Prowadzący różny od
+        // składającego jest gwarantowany wyżej (already_leading), więc nikt nie przebija samego siebie.
+        $outbidUserId = $leading?->getUserId();
+
+        if ($outbidUserId !== null) {
+            $this->notifications->create($outbidUserId, $auctionId, NotificationType::Outbid);
+        }
+
+        return new BidResult($bid, $endsAt, $extended, $outbidUserId);
     }
 
     // Pierwsza oferta musi osiągnąć cenę wywoławczą, kolejne: cena prowadzącego + minimalny krok (reguła 2).
