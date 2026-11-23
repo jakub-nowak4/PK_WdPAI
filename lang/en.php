@@ -35,6 +35,7 @@ return [
     'theme.to_dark' => 'Switch to dark theme',
     'common.cancel' => 'Cancel',
     'common.close' => 'Close',
+    'common.mock_notice' => 'MOCK-UP: sample data, not from the database.',
     'error.back_to_auctions' => 'Back to auctions',
 
     // HTTP errors and security
@@ -75,6 +76,14 @@ return [
     'validation.invalid_format' => 'Invalid format.',
     'validation.email_taken' => 'An account with this e-mail address already exists.',
 
+    // Photo upload
+    'upload.required' => 'Choose at least one photo.',
+    'upload.too_many' => 'You can add at most {max} photos.',
+    'upload.too_large' => 'The file is too large. The maximum photo size is {max} MB.',
+    'upload.invalid_type' => 'Only JPEG, PNG or WebP photos are allowed.',
+    'upload.invalid_extension' => 'The file extension must be jpg, jpeg, png or webp and match the file content.',
+    'upload.failed' => 'The photo could not be saved. Please try again.',
+
     // Login
     'auth.invalid_credentials' => 'Invalid e-mail or password.',
     'auth.logged_out' => 'You have been logged out.',
@@ -89,7 +98,7 @@ return [
     'mail.welcome.subject' => 'Welcome to MotoBid',
     'mail.welcome.body' => "Hi {name},\n\nYour MotoBid account has been created. You can now browse car auctions and place bids.\n\nGo to the auctions: {url}\n\nThe MotoBid team",
     'mail.welcome_company.subject' => 'Welcome to MotoBid: your company account is awaiting approval',
-    'mail.welcome_company.body' => "Hi {name},\n\nYour MotoBid company account has been created and is waiting for administrator approval, usually within 24 hours. Once approved, you can log in to the company panel and add your first auction.\n\nApplication status: {url}\n\nThe MotoBid team",
+    'mail.welcome_company.body' => "Hi {name},\n\nYour MotoBid company account has been created and is waiting for administrator approval. Once approved, you can log in to the company panel and add your first auction.\n\nApplication status: {url}\n\nThe MotoBid team",
 
     // Account form fields
     'field.name' => 'Full name',
@@ -255,7 +264,7 @@ return [
     // Company account awaiting approval
     'pending.title' => 'Company account is awaiting approval',
     'pending.title_rejected' => 'Company application was rejected',
-    'pending.lead' => 'An administrator will review your company details, usually within 24 hours. After approval you will see the company panel when you log in.',
+    'pending.lead' => 'An administrator will review your company details. After approval you will see the company panel when you log in.',
     'pending.lead_rejected' => 'The company application was rejected. Contact the administrator.',
     'pending.info' => 'After approval you will see the company panel when you log in.',
     'pending.steps' => 'Application progress',
@@ -268,4 +277,20 @@ return [
     'pending.state_waiting' => 'Waiting',
     'pending.refresh' => 'Check status',
     'pending.to_auctions' => 'Go to auctions',
+
+    // Page titles (<title>), pageTitle from controllers
+    'page.home.title' => 'My application',
+    'page.auctions.title' => 'Auctions',
+    'page.auction_show.title' => 'Auction details',
+    'page.auction_won.title' => 'Auction won',
+    'page.my_bids.title' => 'My bids',
+    'page.notifications.title' => 'Notifications',
+    'page.pending.title' => 'Account awaiting approval',
+    'page.login.title' => 'Log in',
+    'page.register.title' => 'Sign up',
+    'page.register_company.title' => 'Company sign-up',
+    'page.company.title' => 'Company panel',
+    'page.company_create.title' => 'Add auction',
+    'page.company_delete.title' => 'Delete auction',
+    'page.admin.title' => 'Administrator panel',
 ];

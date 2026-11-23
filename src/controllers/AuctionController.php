@@ -5,29 +5,37 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Request;
+use App\Service\AuctionListService;
+use App\Service\CurrentUserProvider;
+use App\Service\Translator;
 
 final class AuctionController extends AppController
 {
     private const PREVIEW_STATES = ['confirm', 'leading', 'error', 'outbid'];
 
-    private const SORTS = ['ending', 'newest', 'price_asc', 'price_desc'];
+    public function __construct(
+        Translator $translator,
+        CurrentUserProvider $currentUsers,
+        private readonly AuctionListService $auctionList,
+    ) {
+        parent::__construct($translator, $currentUsers);
+    }
 
     public function index(Request $request): void
     {
-        // Zła wartość w query to 400 (docs/api.md 2.2); pusty parametr = domyślna.
-        $filters = [
-            'q' => (string) $request->queryString('q', '/\A.{1,100}\z/su', ''),
-            'brand' => (string) $request->queryString('brand', '/\A[a-z0-9-]{1,40}\z/', ''),
-            'priceMax' => (string) $request->queryInt('priceMax', 1, 100000000, null),
-            'sort' => (string) $request->queryOneOf('sort', self::SORTS, 'ending'),
-        ];
-        $page = (int) $request->queryInt('page', 1, 100000, 1);
+        // Walidację query (400 przy złym formacie), filtry i paginację robi serwis (docs/api.md 2.2).
+        $list = $this->auctionList->fromRequest($request);
 
-        // MAKIETA (T-009): lista z partials/mock-auctions.php, do czasu repozytorium.
+        // MAKIETA (T-009): widok nadal rysuje karty z partials/mock-auctions.php, dopóki T-030 go nie podłączy.
+        // $filters, $page czyta już formularz i paginacja widoku; $auctionCards i $brandOptions to dane z bazy dla T-030.
         $this->render('auctions/index', [
-            'pageTitle' => 'Aukcje',
-            'filters' => $filters,
-            'page' => $page,
+            'pageTitle' => $this->translator->translate('page.auctions.title'),
+            'auctionCards' => $list->getAuctions(),
+            'brandOptions' => $list->getBrands(),
+            'filters' => $list->getFilters(),
+            'page' => $list->getPage(),
+            'pages' => $list->getPages(),
+            'total' => $list->getTotal(),
         ]);
     }
 
@@ -38,7 +46,7 @@ final class AuctionController extends AppController
 
         // MAKIETA: dane aukcji statyczne, do czasu repozytorium.
         $this->render('auctions/show', [
-            'pageTitle' => 'Szczegóły aukcji',
+            'pageTitle' => $this->translator->translate('page.auction_show.title'),
             'auctionId' => $id,
             'previewState' => $state,
         ]);
@@ -51,7 +59,7 @@ final class AuctionController extends AppController
 
         // MAKIETA (T-009): ekran 08 jako osobna strona; docelowo tylko zwycięzca (403/404 inaczej).
         $this->render('auctions/won', [
-            'pageTitle' => 'Aukcja wygrana',
+            'pageTitle' => $this->translator->translate('page.auction_won.title'),
             'auctionId' => $id,
         ]);
     }

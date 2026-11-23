@@ -35,6 +35,7 @@ return [
     'theme.to_dark' => 'Włącz ciemny motyw',
     'common.cancel' => 'Anuluj',
     'common.close' => 'Zamknij',
+    'common.mock_notice' => 'MAKIETA: dane przykładowe, nie pochodzą z bazy.',
     'error.back_to_auctions' => 'Wróć do aukcji',
 
     // Błędy HTTP i bezpieczeństwo
@@ -75,6 +76,14 @@ return [
     'validation.invalid_format' => 'Niepoprawny format.',
     'validation.email_taken' => 'Konto z tym adresem e-mail już istnieje.',
 
+    // Upload zdjęć
+    'upload.required' => 'Wybierz co najmniej jedno zdjęcie.',
+    'upload.too_many' => 'Możesz dodać najwyżej {max} zdjęć.',
+    'upload.too_large' => 'Plik jest za duży. Maksymalny rozmiar zdjęcia to {max} MB.',
+    'upload.invalid_type' => 'Dozwolone są tylko zdjęcia JPEG, PNG lub WebP.',
+    'upload.invalid_extension' => 'Rozszerzenie pliku musi być jpg, jpeg, png lub webp i pasować do jego zawartości.',
+    'upload.failed' => 'Nie udało się zapisać zdjęcia. Spróbuj ponownie.',
+
     // Logowanie
     'auth.invalid_credentials' => 'Nieprawidłowy e-mail lub hasło.',
     'auth.logged_out' => 'Wylogowano.',
@@ -89,7 +98,7 @@ return [
     'mail.welcome.subject' => 'Witaj w MotoBid',
     'mail.welcome.body' => "Cześć {name},\n\nTwoje konto w MotoBid zostało utworzone. Możesz już przeglądać aukcje samochodów i licytować.\n\nPrzejdź do aukcji: {url}\n\nZespół MotoBid",
     'mail.welcome_company.subject' => 'Witaj w MotoBid: konto firmy czeka na zatwierdzenie',
-    'mail.welcome_company.body' => "Cześć {name},\n\nTwoje konto firmowe w MotoBid zostało utworzone i czeka na zatwierdzenie przez administratora, zwykle w ciągu 24 godzin. Po zatwierdzeniu zalogujesz się do panelu firmy i dodasz pierwszą aukcję.\n\nStatus zgłoszenia: {url}\n\nZespół MotoBid",
+    'mail.welcome_company.body' => "Cześć {name},\n\nTwoje konto firmowe w MotoBid zostało utworzone i czeka na zatwierdzenie przez administratora. Po zatwierdzeniu zalogujesz się do panelu firmy i dodasz pierwszą aukcję.\n\nStatus zgłoszenia: {url}\n\nZespół MotoBid",
 
     // Pola formularzy kont
     'field.name' => 'Imię i nazwisko',
@@ -255,7 +264,7 @@ return [
     // Konto firmy czeka na zatwierdzenie
     'pending.title' => 'Konto firmy czeka na zatwierdzenie',
     'pending.title_rejected' => 'Zgłoszenie firmy zostało odrzucone',
-    'pending.lead' => 'Administrator sprawdzi dane Twojej firmy, zwykle w ciągu 24 godzin. Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
+    'pending.lead' => 'Administrator sprawdzi dane Twojej firmy. Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
     'pending.lead_rejected' => 'Zgłoszenie firmy zostało odrzucone. Skontaktuj się z administratorem.',
     'pending.info' => 'Po zatwierdzeniu zobaczysz panel firmy po zalogowaniu.',
     'pending.steps' => 'Postęp zgłoszenia',
@@ -268,4 +277,20 @@ return [
     'pending.state_waiting' => 'Oczekuje',
     'pending.refresh' => 'Sprawdź status',
     'pending.to_auctions' => 'Przejdź do aukcji',
+
+    // Tytuły stron (<title>), pageTitle z kontrolerów
+    'page.home.title' => 'Moja aplikacja',
+    'page.auctions.title' => 'Aukcje',
+    'page.auction_show.title' => 'Szczegóły aukcji',
+    'page.auction_won.title' => 'Aukcja wygrana',
+    'page.my_bids.title' => 'Moje oferty',
+    'page.notifications.title' => 'Powiadomienia',
+    'page.pending.title' => 'Konto czeka na zatwierdzenie',
+    'page.login.title' => 'Logowanie',
+    'page.register.title' => 'Rejestracja',
+    'page.register_company.title' => 'Rejestracja firmy',
+    'page.company.title' => 'Panel firmy',
+    'page.company_create.title' => 'Dodaj aukcję',
+    'page.company_delete.title' => 'Usuń aukcję',
+    'page.admin.title' => 'Panel administratora',
 ];

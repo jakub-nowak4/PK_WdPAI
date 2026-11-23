@@ -89,7 +89,7 @@ final class ErrorController extends AppController
         // Firma pending/rejected na trasie firmy: 403 z ekranem "konto czeka na zatwierdzenie" (docs/api.md, 1.5).
         if ($status === 403 && $exceptionCode === 'company_not_approved') {
             $this->render('account/pending', [
-                'pageTitle' => 'Konto czeka na zatwierdzenie',
+                'pageTitle' => $this->translator->translate('page.pending.title'),
                 'companyStatus' => $exception->getMessage(),
             ]);
 

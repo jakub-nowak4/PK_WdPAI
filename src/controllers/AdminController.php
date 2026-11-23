@@ -77,7 +77,7 @@ final class AdminController extends AppController
     private function renderPanel(string $status, string $formError = ''): void
     {
         $this->render('admin/index', [
-            'pageTitle' => 'Panel administratora',
+            'pageTitle' => $this->translator->translate('page.admin.title'),
             'status' => $status,
             'companies' => array_map($this->toRow(...), $this->review->applications($status)),
             'stats' => $this->review->stats(),
