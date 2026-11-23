@@ -5,7 +5,7 @@
  * @var callable $e
  * @var callable $money
  * @var array<string,mixed> $auction bidCount, startPrice
- * @var list<array{bidder:string,isYou:bool,amount:int,diff:int,when:string,badge?:string}> badge: leader|outbid (opcjonalnie) $bids
+ * @var list<array{bidder:string,isYou:bool,amount:int,diff:?int,when:string,badge?:string}> badge: leader|outbid (opcjonalnie) $bids
  */
 ?>
 <section class="bid-history" aria-labelledby="bid-history-title" data-bid-history>
@@ -23,7 +23,7 @@
                     <span class="bid-history__bidder"><?= $e($bid['isYou'] ? $t('bids.you', 'Ty') : $bid['bidder']) ?></span>
                     <span class="bid-history__when"><?= $e($bid['when']) ?></span>
                     <strong class="bid-history__amount"><?= $e($money($bid['amount'])) ?></strong>
-                    <span class="bid-history__diff">+<?= $e($money($bid['diff'])) ?></span>
+                    <?php if ($bid['diff'] !== null): ?><span class="bid-history__diff">+<?= $e($money($bid['diff'])) ?></span><?php endif; ?>
                     <?php if (($bid['badge'] ?? '') === 'leader'): ?>
                         <span class="status-label status-label--leading"><?= $e($t('bids.leader', 'LIDER')) ?></span>
                     <?php elseif (($bid['badge'] ?? '') === 'outbid'): ?>

@@ -18,7 +18,7 @@
 
         <section class="dialog__vehicle" aria-label="<?= $e($t('bids.vehicle', 'Pojazd')) ?>">
             <p><strong><?= $e($auction['title']) ?></strong></p>
-            <p><?= $e($t('auction.vin', 'VIN')) ?>: <code><?= $e($auction['vin']) ?></code></p>
+            <?php if (!empty($auction['vin'])): ?><p><?= $e($t('auction.vin', 'VIN')) ?>: <code><?= $e($auction['vin']) ?></code></p><?php endif; ?>
         </section>
 
         <dl class="dialog__amounts">
