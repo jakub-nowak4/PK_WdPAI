@@ -52,7 +52,11 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
          data-server-time="<?= $e($auction['serverTime']) ?>"
          data-seconds-left="<?= $e((string) $auction['secondsLeft']) ?>"
          data-status="<?= $e($status) ?>"
-         data-viewer-state="<?= $e($panelState) ?>">
+         data-viewer-state="<?= $e($panelState) ?>"
+         data-viewer-status="<?= $e($viewerStatus) ?>"
+         data-price="<?= $e((string) ((int) $auction['price'] * 100)) ?>"
+         data-min-increment="<?= $e((string) ((int) $auction['minIncrement'] * 100)) ?>"
+         data-min-next-bid="<?= $e((string) ((int) $auction['minNextBid'] * 100)) ?>">
     <h2 class="visually-hidden" id="bid-panel-title"><?= $e($t('bids.panel', 'Panel licytacji')) ?></h2>
 
     <?php if ($panelState === 'ended'): ?>
@@ -64,30 +68,36 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
             <?= $e($t('auction.remaining', 'Pozostało')) ?>:
             <time data-countdown aria-live="off"><?= $e($auction['timeLeft']) ?></time>
         </p>
-        <p class="bid-panel__end"><?= $e($t('auction.ends', 'Koniec')) ?>: <?= $e($auction['endsAtLabel']) ?></p>
+        <p class="bid-panel__end"><?= $e($t('auction.ends', 'Koniec')) ?>: <span data-ends-at-label><?= $e($auction['endsAtLabel']) ?></span></p>
     <?php endif; ?>
 
-    <p class="bid-panel__label">
+    <p class="bid-panel__label" data-price-label>
         <?= $e($panelState === 'ended' ? $t('auction.final_price', 'Cena końcowa') : $t('auction.highest_bid', 'Aktualnie najwyższa oferta')) ?>
     </p>
     <p class="bid-panel__price" aria-live="polite" data-current-price><?= $e($money($auction['price'])) ?></p>
-    <?php if ($viewerStatus === 'leading'): ?>
-        <p class="bid-panel__leader status-label status-label--leading"><?= $e($t('bids.you_lead', 'Prowadzisz w licytacji')) ?></p>
-        <p class="bid-panel__leader-name"><?= $e($t('bids.leader_is', 'Lider licytacji')) ?>: <?= $e($t('bids.you', 'Ty')) ?></p>
+
+    <?php if ($panelState === 'buyer' || $panelState === 'ended'): ?>
+        <div data-leading-block tabindex="-1"<?= $viewerStatus === 'leading' ? '' : ' hidden' ?>>
+            <p class="bid-panel__leader status-label status-label--leading"><?= $e($t('bids.you_lead', 'Prowadzisz w licytacji')) ?></p>
+            <p class="bid-panel__leader-name"><?= $e($t('bids.leader_is', 'Lider licytacji')) ?>: <?= $e($t('bids.you', 'Ty')) ?></p>
+        </div>
     <?php endif; ?>
 
-    <?php if ($isOutbid): ?>
-        <p class="bid-panel__leader status-label status-label--outbid"><?= $e($t('bids.outbid', 'Przebita')) ?></p>
-        <p class="bid-panel__leader-name"><?= $e($t('bids.outbid_yours', 'Przebito Twoje')) ?> <?= $e($money($auction['viewerBid'])) ?></p>
-    <?php endif; ?>
+    <?php if ($panelState === 'buyer'): ?>
+        <div data-outbid-block<?= $isOutbid ? '' : ' hidden' ?>>
+            <p class="bid-panel__leader status-label status-label--outbid"><?= $e($t('bids.outbid', 'Przebita')) ?></p>
+            <p class="bid-panel__leader-name"><?= $e($t('bids.outbid_yours', 'Przebito Twoje')) ?> <span data-outbid-amount><?= $isOutbid ? $e($money($auction['viewerBid'])) : '' ?></span></p>
+        </div>
 
-    <?php if ($isLeading): ?>
-        <p class="bid-panel__step"><?= $e($t('bids.next_min', 'Kolejne min')) ?>: <?= $e($money($auction['minNextBid'])) ?></p>
-        <button class="button button--accent button--block bid-panel__submit" type="button" disabled>
-            <?= $e($t('bids.leading_wait', 'Prowadzisz – poczekaj na przebicie')) ?>
-        </button>
-    <?php elseif ($panelState === 'buyer'): ?>
-        <p class="bid-panel__step"><?= $e($t('bids.min_step', 'Minimalny krok')) ?>: +<?= $e($money($auction['minIncrement'])) ?></p>
+        <div data-leading-wait<?= $isLeading ? '' : ' hidden' ?>>
+            <p class="bid-panel__step"><?= $e($t('bids.next_min', 'Kolejne min')) ?>: <span data-min-next-bid><?= $e($money($auction['minNextBid'])) ?></span></p>
+            <button class="button button--accent button--block bid-panel__submit" type="button" disabled>
+                <?= $e($t('bids.leading_wait', 'Prowadzisz – poczekaj na przebicie')) ?>
+            </button>
+        </div>
+
+        <div data-bid-controls<?= $isLeading ? ' hidden' : '' ?>>
+        <p class="bid-panel__step"><?= $e($t('bids.min_step', 'Minimalny krok')) ?>: +<span data-min-increment><?= $e($money($auction['minIncrement'])) ?></span></p>
 
         <form class="bid-panel__form" method="post" action="/auctions/<?= $e((string) $auctionId) ?>" data-bid-form novalidate>
             <input type="hidden" name="csrfToken" value="<?= $e($csrfToken) ?>">
@@ -121,13 +131,15 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
                     <p class="form-field__error" id="bid-amount-error"><?= $e($t('bids.must_exceed', 'Oferta musi być wyższa niż')) ?> <?= $e($money($auction['price'])) ?> (<?= $e($t('bids.min_step_lc', 'minimalny krok')) ?> <?= $e($money($auction['minIncrement'])) ?>)</p>
                     <p class="bid-panel__suggested"><?= $e($t('bids.suggested', 'Sugerowana minimalna oferta')) ?>: <strong><?= $e($money($auction['minNextBid'])) ?></strong></p>
                 <?php endif; ?>
+                <p class="form-field__error" id="bid-amount-js-error" role="alert" data-amount-error hidden></p>
                 <p class="form-field__hint" id="bid-amount-hint"><?= $e($t('bids.min', 'Minimum')) ?>: <span data-min-next-bid><?= $e($money($auction['minNextBid'])) ?></span></p>
             </div>
-            <button class="button button--accent button--block bid-panel__submit" type="submit" data-bid-open>
+            <button class="button button--accent button--block bid-panel__submit" type="submit" data-bid-open data-place-label>
                 <?= $e($placeLabel) ?>
             </button>
             <noscript><p class="alert alert--warning"><?= $e($t('bids.noscript', 'Licytacja wymaga JavaScript.')) ?></p></noscript>
         </form>
+        </div>
     <?php elseif ($panelState === 'guest'): ?>
         <a class="button button--accent button--block bid-panel__submit" href="/login?next=<?= $e(rawurlencode('/auctions/' . $auctionId)) ?>">
             <?= $e($t('bids.login_to_bid', 'Zaloguj się, aby licytować')) ?>
@@ -138,11 +150,42 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
         <a class="button button--accent button--block" href="/auctions/<?= $e((string) $auctionId) ?>/won"><?= $e($t('bids.see_win', 'Zobacz wygraną')) ?></a>
     <?php endif; ?>
 
+    <?php if ($panelState === 'buyer'): ?>
+        <p class="alert alert--danger" role="alert" data-outbid-alert hidden><?= $e($t('bids.outbid_title', 'Zostałeś przebity')) ?></p>
+    <?php endif; ?>
     <div class="bid-panel__message" id="bid-message" role="status" data-bid-message hidden></div>
 
-    <?php if ($panelState !== 'ended'): ?>
-        <p class="alert alert--warning bid-panel__rule"><?= $e($antiSniping) ?></p>
-    <?php endif; ?>
+    <p class="alert alert--warning bid-panel__rule" data-anti-sniping-rule<?= $panelState === 'ended' ? ' hidden' : '' ?>><?= $e($antiSniping) ?></p>
+
+    <?php
+    // Teksty dla public/js/live-bidding.js (kontrakt: klucz => tekst w biezacym jezyku, bez kodowania w JS).
+    $bidI18n = [
+        'you' => $t('bids.you', 'Ty'),
+        'bidder' => $t('bids.bidder', 'Licytujący'),
+        'leader' => $t('bids.leader', 'LIDER'),
+        'outbid' => $t('bids.outbid', 'Przebita'),
+        'place' => $t('bids.place', 'Złóż ofertę'),
+        'outbidCta' => $t('bids.outbid_cta', 'Przebij ofertę'),
+        'leadingWait' => $t('bids.leading_wait', 'Prowadzisz – poczekaj na przebicie'),
+        'sending' => $t('bids.sending', 'Wysyłanie oferty…'),
+        'retry' => $t('bids.retry', 'Spróbuj ponownie'),
+        'networkError' => $t('bids.network_error', 'Brak połączenia. Oferta nie została wysłana.'),
+        'offline' => $t('bids.offline', 'Brak połączenia. Ponawiam próbę…'),
+        'loginToBid' => $t('bids.login_to_bid', 'Zaloguj się, aby licytować'),
+        'outbidTitle' => $t('bids.outbid_title', 'Zostałeś przebity'),
+        'ended' => $t('auction.ended', 'Aukcja zakończona'),
+        'finalPrice' => $t('auction.final_price', 'Cena końcowa'),
+        'extended' => $t('bids.extended', 'Aukcja przedłużona o 30 s'),
+        'amountInvalid' => $t('bid.error.amount_invalid', 'Podaj poprawną kwotę oferty.'),
+        'tooLow' => $t('bid.error.too_low', 'Oferta jest za niska. Minimalna oferta: {min}.'),
+        'serverError' => $t('error.server', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie za chwilę.'),
+        'day' => $t('time.day_short', 'd'),
+        'hour' => $t('time.hour_short', 'h'),
+        'minute' => $t('time.minute_short', 'min'),
+        'second' => $t('time.second_short', 's'),
+    ];
+    ?>
+    <script type="application/json" id="bid-i18n"><?= json_encode($bidI18n, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR) ?></script>
 </section>
 
 <?php if ($panelState === 'buyer'): ?>
@@ -151,15 +194,12 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
             <span><?= $e($t('auction.remaining', 'Pozostało')) ?>: <time data-countdown aria-live="off"><?= $e($auction['timeLeft']) ?></time></span>
             <span><?= $e($t('auction.current', 'Aktualna')) ?>: <strong data-current-price><?= $e($money($auction['price'])) ?></strong></span>
         </p>
-        <?php if ($isLeading): ?>
-            <button class="button button--accent button--block bid-bar__submit" type="button" disabled>
-                <?= $e($t('bids.leading_wait', 'Prowadzisz – poczekaj na przebicie')) ?>
-            </button>
-        <?php else: ?>
-            <button class="button button--accent button--block bid-bar__submit" type="button" data-bid-open-bar>
-                <?= $e($placeLabel) ?> (<?= $e($money($auction['minNextBid'])) ?>)
-            </button>
-        <?php endif; ?>
+        <button class="button button--accent button--block bid-bar__submit" type="button" disabled data-bar-leading<?= $isLeading ? '' : ' hidden' ?>>
+            <?= $e($t('bids.leading_wait', 'Prowadzisz – poczekaj na przebicie')) ?>
+        </button>
+        <button class="button button--accent button--block bid-bar__submit" type="button" data-bid-open-bar<?= $isLeading ? ' hidden' : '' ?>>
+            <span data-place-label><?= $e($placeLabel) ?></span> (<span data-min-next-bid><?= $e($money($auction['minNextBid'])) ?></span>)
+        </button>
         <p class="bid-bar__rule"><?= $e($antiSniping) ?></p>
     </div>
 <?php endif; ?>

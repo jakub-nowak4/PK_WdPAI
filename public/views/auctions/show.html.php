@@ -196,9 +196,7 @@ $specLabels = [
                 <?php endif; ?>
                 <ul class="auction-detail__tags">
                     <li class="status-label"><?= $e($auction['origin']) ?></li>
-                    <?php if ($record->isExtended()): ?>
-                        <li class="status-label"><?= $e($t('auction.extended', 'Aukcja przedłużona')) ?></li>
-                    <?php endif; ?>
+                    <li class="status-label" data-extended-tag<?= $record->isExtended() ? '' : ' hidden' ?>><?= $e($t('auction.extended', 'Aukcja przedłużona')) ?></li>
                 </ul>
             </header>
 
@@ -259,6 +257,9 @@ $specLabels = [
     </div>
 
     <?php require __DIR__ . '/../partials/bid-confirm-dialog.html.php'; ?>
+    <?php if (!$isPreview && $status !== 'ended'): ?>
+        <script type="module" src="/js/live-bidding.js"></script>
+    <?php endif; ?>
     <?php if ($isPreview && $previewState === 'confirm'): ?>
         <script type="module" src="/js/bid-preview.js"></script>
     <?php endif; ?>
