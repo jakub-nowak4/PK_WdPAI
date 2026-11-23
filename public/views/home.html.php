@@ -1,8 +1,8 @@
 <?php
 /**
  * Strona glowna: baner + lista aukcji z filtrami (ekran 01).
- * Oczekiwane zmienne od kontrolera (na razie brak, uzywana jest MAKIETA z partials/mock-auctions.php):
- * $auctions, $brands, $filters, $page, $pages, $total; opcjonalnie $t, $e.
+ * Zmienne od kontrolera (T-028): $auctionCards, $brandOptions, $filters, $page, $pages, $total; opcjonalnie $t, $e.
+ * Bez $auctionCards uzywana jest MAKIETA z partials/mock-auctions.php.
  */
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
