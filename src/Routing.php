@@ -154,7 +154,7 @@ final class Routing
         }
 
         throw $invalidParameter
-            ? HttpException::badRequest('Invalid path parameter')
+            ? HttpException::badRequest('Invalid path parameter', 'invalid_id')
             : HttpException::notFound('Route not found');
     }
 

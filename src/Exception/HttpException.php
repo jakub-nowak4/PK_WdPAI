@@ -21,9 +21,10 @@ final class HttpException extends \RuntimeException
         parent::__construct($message, $statusCode);
     }
 
-    public static function badRequest(string $message = 'Bad request'): self
+    // errorCode to kod z JSON-a, np. invalid_id (zły {id} w ścieżce) albo invalid_json (docs/api.md, sekcja 4).
+    public static function badRequest(string $message = 'Bad request', ?string $errorCode = null): self
     {
-        return new self(400, $message);
+        return new self(400, $message, $errorCode);
     }
 
     /*
@@ -62,9 +63,10 @@ final class HttpException extends \RuntimeException
         return new self(403, '', 'csrf_invalid');
     }
 
-    public static function notFound(string $message = 'Not found'): self
+    // errorCode np. auction_not_found (docs/api.md, sekcja 4); bez niego JSON dostaje ogólne not_found.
+    public static function notFound(string $message = 'Not found', ?string $errorCode = null): self
     {
-        return new self(404, $message);
+        return new self(404, $message, $errorCode);
     }
 
     public function statusCode(): int
