@@ -76,6 +76,14 @@ return [
     'validation.invalid_format' => 'Niepoprawny format.',
     'validation.email_taken' => 'Konto z tym adresem e-mail już istnieje.',
 
+    // Upload zdjęć
+    'upload.required' => 'Wybierz co najmniej jedno zdjęcie.',
+    'upload.too_many' => 'Możesz dodać najwyżej {max} zdjęć.',
+    'upload.too_large' => 'Plik jest za duży. Maksymalny rozmiar zdjęcia to {max} MB.',
+    'upload.invalid_type' => 'Dozwolone są tylko zdjęcia JPEG, PNG lub WebP.',
+    'upload.invalid_extension' => 'Rozszerzenie pliku musi być jpg, jpeg, png lub webp i pasować do jego zawartości.',
+    'upload.failed' => 'Nie udało się zapisać zdjęcia. Spróbuj ponownie.',
+
     // Logowanie
     'auth.invalid_credentials' => 'Nieprawidłowy e-mail lub hasło.',
     'auth.logged_out' => 'Wylogowano.',
