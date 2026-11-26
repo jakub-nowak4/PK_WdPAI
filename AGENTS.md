@@ -14,16 +14,19 @@ Aktualnie aplikacja obsluguje:
 - ekran „konto czeka na zatwierdzenie" (`/account/pending`) ze statusem firmy z bazy (zatwierdzona firma dostaje 303 na `/company`); uzytkownika w naglowku layoutu dostarcza `App\Service\CurrentUserProvider` (z bazy, tylko dla zalogowanego),
 - e-mail powitalny po rejestracji (`App\Service\MailService`: wlasny klient SMTP, lokalnie Mailpit; tresc w `WelcomeMailService`); blad poczty nie cofa konta, tylko flash `info` i linia `mail=failed` w logu,
 - panel administratora z bazy (`/admin?status=`, `POST /admin/companies/{id}/approve|reject` przez `CompanyReviewService`, decyzja w transakcji, 409 gdy firma juz rozpatrzona),
-- strone glowna `/` i liste aukcji `/auctions` z bazy (`AuctionListService`: query `q`, `brand`, `priceMax`, `sort`, `page`, zly format 400) oraz szczegoly aukcji `/auctions/{id}` z bazy (`AuctionDetailsService`, brak aukcji 404); szczegoly przyjmuja jeszcze makietowy `?state=` (podglad ekranow 04-07, do usuniecia),
-- licytacje na zywo przez Fetch API: `GET /api/auctions/{id}/state` (polling, `AuctionStateService`) i `POST /api/auctions/{id}/bids` (`BidApiController` -> `BidService`: transakcja z `SELECT ... FOR UPDATE`, czas z bazy, anti-sniping 30 s, CSRF w naglowku `X-CSRF-Token`, bledy regul jako `BidException` -> JSON 403/404/409/422); modul JS `public/js/live-bidding.js` + `public/js/bidding/`; przebity dostaje powiadomienie w bazie (w tej samej transakcji) i e-mail (`OutbidNotifier`, wysylany po oddaniu odpowiedzi przez `fastcgi_finish_request()`),
-- „Moje oferty" (`/my-bids?status=`): kontroler podaje dane z bazy (`MyBidsService`), ale widok jeszcze rysuje makiete,
-- `UploadService` (kontrola rozmiaru, MIME z `finfo`, rozszerzenia, `getimagesize()`, losowa nazwa w `public/uploads/auctions/`) jest gotowy, ale nie jest jeszcze podlaczony do zadnej trasy,
-- ekrany, ktore sa jeszcze makietami ze statycznymi danymi: aukcja wygrana (`/auctions/{id}/won`), powiadomienia (`/notifications`), panel firmy (`/company`, dodaj i usun aukcje); makiety maja juz guardy dostepu (gosc: 303 na `/login`, zla rola: 403, firma niezatwierdzona: 403 z ekranem „konto czeka"); pelna lista tras w `public/index.php`,
+- strone glowna `/` i liste aukcji `/auctions` z bazy (`AuctionListService`: query `q`, `brand`, `priceMax`, `sort`, `page`, zly format 400) oraz szczegoly aukcji `/auctions/{id}` z bazy (`AuctionDetailsService`, brak aukcji 404); szczegoly przyjmuja jeszcze makietowy `?state=` (podglad ekranow 04-07, `public/js/bid-preview.js`; do usuniecia),
+- licytacje na zywo przez Fetch API: `GET /api/auctions/{id}/state` (polling, `AuctionStateService`; router zwalnia blokade sesji przed polaczeniem z baza) i `POST /api/auctions/{id}/bids` (`BidApiController` -> `BidService`: transakcja z `SELECT ... FOR UPDATE`, czas z bazy, anti-sniping 30 s, CSRF w naglowku `X-CSRF-Token`, bledy regul jako `BidException` -> JSON 403/404/409/422, 422 z fraza `Unprocessable Content`); modul JS `public/js/live-bidding.js` + `public/js/bidding/`; przebity dostaje powiadomienie w bazie (w tej samej transakcji) i e-mail (`OutbidNotifier`, wysylany po oddaniu odpowiedzi przez `fastcgi_finish_request()`),
+- „Moje oferty" (`/my-bids?status=`, `MyBidsService`) z bazy,
+- aukcje wygrana (`/auctions/{id}/won`, `WonAuctionService::forWinner()`): 200 tylko dla zwyciezcy aukcji zamknietej przez CRON; brak aukcji albo aukcja niezamknieta 404, kazdy inny zalogowany (takze przy aukcji bez ofert) 403 `not_winner`,
+- powiadomienia (`/notifications`, `NotificationService`: 50 najnowszych) i oznaczanie wszystkich jako przeczytane (`POST /notifications/read`, CSRF, flash),
+- panel firmy z bazy (`/company`, `CompanyPanelService`), dodawanie aukcji ze zdjeciami (`GET /company/auctions/new`, `POST /company/auctions`: `AuctionFormValidator`, `AuctionCreationService`, `UploadService`, aukcja i zdjecia w jednej transakcji, bledy 422 z zachowanymi polami) oraz usuwanie aukcji bez ofert (`GET|POST /company/auctions/{id}/delete`: `AuctionDeletionService`, aukcja z ofertami 403 juz przy GET, pliki zdjec kasowane po `COMMIT`); trasy firmy wymagaja zatwierdzonej firmy (pending/rejected: 403 z ekranem „konto czeka"),
+- `UploadService` (kontrola kodu bledu PHP, rozmiaru, MIME z `finfo`, rozszerzenia zgodnego z MIME, `getimagesize()`, losowa nazwa w `public/uploads/auctions/`, w bazie tylko sciezka),
+- CRON zamykajacy aukcje (`bin/close-auctions.php` co minute w usludze `cron`, `App\Service\AuctionCloser`): zwyciezca (`winning_bid_id`), powiadomienia `won`/`auction_ended`, e-mail „Wygrales" (`WonNotifier`), aktywacja aukcji zaplanowanych, idempotentny, log jedna linia na zdarzenie (`LineLogger`); pelna lista tras w `public/index.php`,
 - przelacznik jezyka PL/EN (`POST /language`, teksty w `lang/pl.php` i `lang/en.php`) oraz przelacznik motywu jasny/ciemny (bez opcji „systemowy"),
 - odpowiedzi bledow 400 (zly format `{id}` lub query param, niepoprawny UTF-8, zly JSON), 401 (w HTML przekierowanie na `/login`), 403, 404 (nieznana trasa lub zasob) i 500 (nieoczekiwany wyjatek, szczegoly tylko w logu) przez `ErrorController`, dla `/api/*` w JSON,
 - schemat SQL z widokiem `auction_summary` (`docker/db/01-schema.sql`) i dane demo (`docker/db/02-demo-data.sql`), ladowane przy pierwszym starcie pustego wolumenu bazy, oraz modele i repozytoria dla wszystkich tabel.
 
-Jeszcze nie istnieje: CRON zamykajacy aukcje (katalog `bin/`; do tego czasu aukcja po czasie jest traktowana jako zakonczona tylko na czasie serwera, ale nie ma ustawionego zwyciezcy), dodawanie i usuwanie aukcji, oznaczanie powiadomien jako przeczytane, testy jednostkowe (`tests/`), konfiguracja produkcyjna.
+Jeszcze nie istnieje: testy jednostkowe (`tests/`, PHPUnit), konfiguracja produkcyjna i wdrozenie, zarzadzanie kontami przez Fetch API (router zna tylko GET i POST), limit prob logowania, HTTPS lokalnie, opcja motywu „systemowy". Pozostalosci makiet bez wplywu na dane: galezie `$isMock` i pliki `public/views/partials/mock-*.php` w widokach listy, powiadomien i panelu firmy (kontrolery zawsze podaja dane, wiec sie nie wykonuja) oraz `?state=` w szczegolach aukcji.
 
 ## Stack technologiczny
 
@@ -39,10 +42,13 @@ Jeszcze nie istnieje: CRON zamykajacy aukcje (katalog `bin/`; do tego czasu aukc
 
 ```text
 .
+├── bin/
+│   └── close-auctions.php     # skrypt CLI dla CRON (zamykanie aukcji)
 ├── docker/
 │   ├── nginx/                 # obraz i konfiguracja Nginx
-│   ├── php/                   # obraz PHP-FPM i rozszerzenia PHP
-│   └── db/                    # obraz PostgreSQL
+│   ├── php/                   # obraz PHP-FPM, rozszerzenia i limity PHP (tez dla uslugi cron)
+│   ├── cron/crontab           # harmonogram uslugi `cron`
+│   └── db/                    # obraz PostgreSQL, schemat i dane demo
 ├── public/                    # jedyny publicznie dostepny katalog
 │   ├── index.php              # front controller i definicje tras
 │   └── views/                 # szablony HTML renderowane przez kontrolery
@@ -53,11 +59,11 @@ Jeszcze nie istnieje: CRON zamykajacy aukcje (katalog `bin/`; do tego czasu aukc
 │   ├── services/              # logika aplikacji (App\Service)
 │   ├── Exception/             # wyjatki aplikacji (App\Exception): HttpException, ValidationException, BidException, MailException
 │   ├── Database.php           # polaczenie PDO z PostgreSQL
-│   ├── Request.php            # niezmienny obiekt zadania (query, post, naglowki, ciasteczka, cialo JSON)
+│   ├── Request.php            # niezmienny obiekt zadania (query, post, pliki, naglowki, ciasteczka, cialo JSON)
 │   └── Routing.php            # rejestracja i obsluga tras
 ├── config.php                 # konfiguracja ze zmiennych srodowiskowych
 ├── composer.json              # konfiguracja autoloadingu
-└── docker-compose.yaml        # uslugi `server`, `php`, `db`, `mailpit`, `pgadmin-wdpai`
+└── docker-compose.yaml        # uslugi `server`, `php`, `cron`, `db`, `mailpit`, `pgadmin-wdpai`
 ```
 
 Nie umieszczaj logiki aplikacji ani danych wrazliwych w `public/`. Ten katalog jest document rootem Nginx i sluzy tylko jako punkt wejscia oraz miejsce na widoki i zasoby publiczne.
@@ -79,7 +85,7 @@ przegladarka
 
 ### Front Controller
 
-`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, konfiguruje i uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`, `Database`, `CurrentUserProvider`), tworzy `MailService` i `WelcomeMailService` (polaczenie SMTP dopiero przy wysylce), rejestruje w `Routing` serwisy korzystajace z bazy (`CompanyRepository`, `UserRepository`, `AuthService`, `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `BidService`, `OutbidNotifier`, `MyBidsService`, `CompanyReviewService`) jako leniwe fabryki (polaczenie otwiera sie dopiero przy tworzeniu kontrolera, ktory ich potrzebuje), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 401, 403, 404) obsluguje `ErrorController::handle()`, a kazdy inny wyjatek (`\Throwable`) jest logowany jedna linia i konczy sie odpowiedzia 500 z `ErrorController::handleServerError()` (bez bazy i bez tresci wyjatku).
+`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, konfiguruje i uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`, `Database`, `CurrentUserProvider`), tworzy `MailService` i `WelcomeMailService` (polaczenie SMTP dopiero przy wysylce), rejestruje w `Routing` serwisy korzystajace z bazy (`CompanyRepository`, `UserRepository`, `BrandRepository`, `AuthService`, `AuctionListService`, `AuctionDetailsService`, `WonAuctionService`, `AuctionCreationService`, `AuctionDeletionService`, `CompanyPanelService`, `AuctionStateService`, `BidService`, `OutbidNotifier`, `MyBidsService`, `NotificationService`, `CompanyReviewService`) jako leniwe fabryki (polaczenie otwiera sie dopiero przy tworzeniu kontrolera, ktory ich potrzebuje), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 401, 403, 404) obsluguje `ErrorController::handle()`, a kazdy inny wyjatek (`\Throwable`) jest logowany jedna linia i konczy sie odpowiedzia 500 z `ErrorController::handleServerError()` (bez bazy i bez tresci wyjatku).
 
 Nowe trasy dodawaj w tym pliku w postaci:
 
@@ -96,6 +102,12 @@ Przyklad: `/auctions/{id}` wywoluje `AuctionController::show(int $id, Request $r
 
 Router obsluguje obecnie metody GET i POST. Nie dodawaj logiki biznesowej do routera.
 
+Trasa GET, ktora tylko czyta sesje, moze byc zarejestrowana z `releaseSession: true` (dzis tylko `GET /api/auctions/{id}/state`): router wola wtedy `session_write_close()` zaraz po dopasowaniu trasy, przed utworzeniem kontrolera i polaczeniem z baza, wiec polling nie blokuje innych zadan tej samej przegladarki. Zapisy do `$_SESSION` w takiej akcji przepadaja.
+
+```php
+$routing->get('/api/auctions/{id}/state', BidApiController::class, 'state', releaseSession: true);
+```
+
 ### Controller
 
 Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Controller` i dziedzicza po `AppController`. Ich zadaniem jest:
@@ -107,24 +119,34 @@ Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Cont
 
 Kontroler powinien byc cienki. Nie umieszczaj w nim rozbudowanych zapytan do bazy, HTML ani stylow.
 
-Obecnie istnieja kontrolery (aukcja wygrana, powiadomienia i panel firmy to na razie makiety ze statycznymi danymi, ale z guardami dostepu):
+Obecnie istnieja kontrolery (wszystkie korzystaja z danych z bazy):
 
 - `AppController` — klasa bazowa: `render()`, `redirect()`, `addFlash()`, `currentUserId()`, `currentRole()`, `requireLogin()`, `requireRole()`, `verifyCsrf()`, `csrfToken()`, `logInUser()`, `logOutUser()`, `homePathFor()`, `redirectIfLoggedIn()`,
 - `DefaultController` — `index()` (strona glowna: baner i pierwsza strona listy aukcji z `AuctionListService`),
-- `AuctionController` — `index(Request)` (lista aukcji z bazy, filtry w query przez `AuctionListService`), `show(int $id, Request)` (szczegoly aukcji z `AuctionDetailsService`; makietowy `?state=` do usuniecia), `won(int $id)` (makieta aukcji wygranej, tylko zalogowany),
+- `AuctionController` — `index(Request)` (lista aukcji z bazy, filtry w query przez `AuctionListService`), `show(int $id, Request)` (szczegoly aukcji z `AuctionDetailsService`; makietowy `?state=` do usuniecia), `won(int $id)` (aukcja wygrana z `WonAuctionService::forWinner()`: zalogowany, potem 404 przed 403),
 - `BidApiController` — `state(int $id)` (`GET /api/auctions/{id}/state`, publiczny, JSON z `AuctionStateService`), `placeBid(int $id, Request)` (`POST /api/auctions/{id}/bids`, kupujacy, CSRF w naglowku; `BidService` w transakcji, po odpowiedzi e-mail `OutbidNotifier`),
-- `AccountController` — `myBids(Request)` (tylko kupujacy, filtr `?status=`, dane z `MyBidsService`; widok jeszcze makieta), `notifications()` (makieta, zalogowany), `pending()` (firma; status z bazy, zatwierdzona dostaje 303 na `/company`),
+- `AccountController` — `myBids(Request)` (tylko kupujacy, filtr `?status=`, dane z `MyBidsService`), `notifications()` (zalogowany, `NotificationService`, zmienna widoku `notificationItems`), `readNotifications(Request)` (`POST /notifications/read`, CSRF, flash, 303 na `/notifications`), `pending()` (firma; status z bazy, zatwierdzona dostaje 303 na `/company`),
 - `SecurityController` — `login()`, `register()`, `registerCompany()` (GET formularz, POST przez `AuthService`), `logout()` (`POST /logout`),
-- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (ekran usuwania aukcji); wszystko makiety; kazda akcja zaczyna od prywatnego `requireApprovedCompany()` (firma `pending`/`rejected`: `HttpException::companyNotApproved()`, 403 z ekranem „konto czeka"),
+- `CompanyController` — `index()` (panel firmy z `CompanyPanelService`), `create()` (formularz „Dodaj aukcje"), `store(Request)` (`POST /company/auctions`: odrzucone cialo POST 422 przed CSRF, potem CSRF i `AuctionCreationService`; sukces 303 na `/company`), `confirmDelete(int $id)` (GET, ekran potwierdzenia, niczego nie usuwa), `delete(int $id, Request)` (POST, CSRF, `AuctionDeletionService`); kazda akcja zaczyna od prywatnego `requireApprovedCompany()` (firma `pending`/`rejected`: `HttpException::companyNotApproved()`, 403 z ekranem „konto czeka"),
 - `AdminController` — `index(Request)` (tylko administrator, filtr `?status=`), `approve(int $id, Request)`, `reject(int $id, Request)` (`CompanyReviewService`, CSRF, 404/409),
 - `LanguageController` — `change()` (zmiana jezyka, `POST /language` z CSRF),
-- `ErrorController` — `handle()` (400/401/403/404; 401 w HTML to 303 na `/login`, kod `company_not_approved` renderuje `account/pending`; dla `/api/*` JSON), `handleServerError()` (500, bez bazy).
+- `ErrorController` — `handle()` (400/401/403/404; 401 w HTML to 303 na `/login`, kod `company_not_approved` renderuje `account/pending`; widoki bledow dostaja `errorMessage` i `errorCode`; dla `/api/*` JSON), `handleServerError()` (500, bez bazy).
 
-Serwisy (`src/services/`, `App\Service`): `AuthService` (+ `RegistrationResult`), `CurrentUserProvider`, `LanguageService`, `Translator`, `MailerInterface`/`MailService`, `WelcomeMailService`, `CompanyReviewService`, `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `BidService` (+ `BidResult`), `OutbidNotifier`, `MyBidsService`, `UploadService`. Kontrakt tras, JSON i kolejnosci sprawdzen jest w prywatnym `docs/api.md`.
+Serwisy (`src/services/`, `App\Service`):
+
+- konta i layout: `AuthService` (+ `RegistrationResult`), `CurrentUserProvider`, `LanguageService`, `Translator`,
+- poczta: `MailerInterface`/`MailService` (SMTP przez `fsockopen`), `WelcomeMailService`, `OutbidNotifier` (przebicie), `WonNotifier` (wygrana, wolany przez CRON); kazdy blad poczty to jedna linia logu `mail=failed type=welcome|outbid|won ...`, bez adresu i tresci,
+- aukcje: `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `WonAuctionService`, `MyBidsService`, `NotificationService`,
+- oferty: `BidService` (+ `BidResult`),
+- firma: `CompanyPanelService`, `AuctionFormValidator` (reguly formularza aukcji jako stale klasy), `AuctionCreationService`, `AuctionDeletionService`, `UploadService`,
+- administrator: `CompanyReviewService`,
+- CRON: `AuctionCloser` (+ `ClosedAuction`, `CloseReport`), `LineLogger` (log CLI: jedna linia na zdarzenie na stdout).
+
+Transakcje PostgreSQL prowadza serwisy (`BidService`, `AuctionCreationService`, `AuctionDeletionService`, `AuctionCloser`, `CompanyReviewService`, rejestracja firmy w `AuthService`), nie repozytoria. Kontrakt tras, JSON i kolejnosci sprawdzen jest w prywatnym `docs/api.md`.
 
 ### Model
 
-Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele (`src/models/`) i repozytoria (`src/repositories/`) istnieja dla wszystkich tabel. Z bazy korzystaja dzis konta (rejestracja, logowanie, `CurrentUserProvider` w layoucie), status firmy, panel administratora, lista i szczegoly aukcji oraz API licytacji; ekrany aukcji wygranej, powiadomien i panelu firmy nadal pokazuja dane statyczne, a widok „Moje oferty" rysuje makiete mimo danych z kontrolera. Nie udawaj, ze dane widoczne w tych widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
+Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele (`src/models/`) i repozytoria (`src/repositories/`) istnieja dla wszystkich tabel. Z bazy korzystaja wszystkie ekrany: konta (rejestracja, logowanie, `CurrentUserProvider` w layoucie), status firmy, panel administratora, lista i szczegoly aukcji, API licytacji, „Moje oferty", aukcja wygrana, powiadomienia i panel firmy (lista, dodawanie, usuwanie). Pliki `public/views/partials/mock-*.php` i galezie `$isMock` w widokach to martwe pozostalosci makiet (kontrolery zawsze podaja dane); nie dodawaj nowych i nie opieraj sie na nich. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
 
 `composer.json` ma dokladne mapowania PSR-4 dla katalogow pisanych malymi literami:
 
@@ -195,6 +217,8 @@ docker compose ps
 docker compose logs -f
 docker compose exec php php -l src/Routing.php
 docker compose exec php composer dump-autoload
+docker compose exec php php bin/close-auctions.php   # jeden przebieg CRON recznie
+docker compose logs -f cron                          # log CRON (co minute)
 docker compose down
 ```
 
@@ -209,6 +233,9 @@ Warto wiedziec:
 - `vendor/` nie jest w repozytorium, wiec na czystym klonie po `docker compose up --build -d` trzeba raz wykonac `docker compose exec php composer install`.
 - Nazwy wolumenu bazy i sieci nie sa sztywne: Compose dodaje prefiks nazwy projektu (katalog albo opcja `-p`), np. `<projekt>_app` i `<projekt>_app-network`. Dzieki temu `-p` izoluje zasoby kilku kopii projektu. Stary wolumen o nazwie `app` nie jest juz uzywany; nowy startuje pusty i wykonuje `01-schema.sql` oraz `02-demo-data.sql`.
 - Nginx wykonuje PHP wylacznie przez `/index.php`; zadanie o inny plik `.php` (widok, partial) dostaje 404. `display_errors` jest wylaczone, a bledy PHP trafiaja do logow kontenera: `docker compose logs php`.
+- Usluga `cron` uzywa tego samego obrazu, kodu i zmiennych srodowiskowych co `php`, ale zamiast PHP-FPM uruchamia BusyBox `crond` z harmonogramem z `docker/cron/crontab` (znaki CR z pliku sa usuwane przy starcie). Skrypt `bin/close-auctions.php` konczy sie kodem 0 (sukces, takze gdy e-mail nie wyszedl), 1 (blad przy czesci aukcji) albo 2 (blad krytyczny, np. baza niedostepna).
+- Limity uploadu w `docker/php/Dockerfile`: `upload_max_filesize = 5M`, `post_max_size = 45M`, `max_file_uploads = 20` (celowo wiecej niz 8: limit 8 zdjec pilnuje `AuctionFormValidator`, a przy limicie PHP rownym 8 dziewiaty plik znikalby po cichu). Nginx: `client_max_body_size 50M`.
+- Usluga `php` ma `dns_opt` (`timeout:1`, `attempts:1`): zatrzymany kontener (np. `mailpit`) nie ma wpisu w DNS Dockera, a domyslne rozwiazywanie nazwy trwalo ok. 3 s. `MailService` ma osobny limit polaczenia 2 s i 5 s na odpowiedz serwera.
 
 ## Weryfikacja zmian
 
