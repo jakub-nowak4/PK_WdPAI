@@ -6,12 +6,14 @@ namespace App\Controller;
 
 use App\Exception\HttpException;
 use App\Exception\ValidationException;
+use App\Model\AuctionSummary;
 use App\Model\Company;
 use App\Model\Role;
 use App\Repository\BrandRepository;
 use App\Repository\CompanyRepository;
 use App\Request;
 use App\Service\AuctionCreationService;
+use App\Service\AuctionDeletionService;
 use App\Service\CurrentUserProvider;
 use App\Service\Translator;
 use App\Service\UploadService;
@@ -30,6 +32,7 @@ final class CompanyController extends AppController
         private readonly CompanyRepository $companies,
         private readonly BrandRepository $brands,
         private readonly AuctionCreationService $auctionCreation,
+        private readonly AuctionDeletionService $auctionDeletion,
     ) {
         parent::__construct($translator, $currentUsers);
     }
@@ -94,22 +97,53 @@ final class CompanyController extends AppController
         $this->redirect('/company');
     }
 
-    public function delete(int $id): void
+    /*
+    GET /company/auctions/{id}/delete (docs/api.md 2.5): ekran potwierdzenia, niczego nie usuwa. Kolejność:
+    format id (router, 400) -> gość (303) -> rola i firma zatwierdzona (403) -> aukcja istnieje (404) ->
+    właściciel (403) -> brak ofert (403, komunikat company.error.has_bids).
+    */
+    public function confirmDelete(int $id): void
     {
-        // Guard przed regułą biznesową: gość 303 na /login, kupujący 403, firma niezatwierdzona 403.
-        $this->requireApprovedCompany();
+        $company = $this->requireApprovedCompany();
+        $summary = $this->auctionDeletion->findForConfirmation($company, $id);
 
-        // MAKIETA, do zastąpienia sprawdzeniem w repozytorium: aukcja nr 1 ma oferty
-        // w danych przykładowych, więc jej usunięcie daje 403 (reguła biznesowa 1).
-        if ($id === 1) {
-            throw HttpException::forbidden('company.error.has_bids');
-        }
-
-        // MAKIETA: tresc statyczna, do czasu panelu firmy.
         $this->render('company/delete', [
             'pageTitle' => $this->translator->translate('page.company_delete.title'),
-            'auctionId' => $id,
+            'auction' => $this->deletionView($summary),
         ]);
+    }
+
+    /*
+    POST /company/auctions/{id}/delete: te same sprawdzenia co GET, a CSRF (403) tuż po guardzie roli, przed
+    sprawdzeniem aukcji. Usunięcie to transakcja w AuctionDeletionService (FOR UPDATE, brak ofert, DELETE,
+    potem pliki zdjęć). Sukces: 303 na /company z komunikatem (Post/Redirect/Get).
+    */
+    public function delete(int $id, Request $request): void
+    {
+        $company = $this->requireApprovedCompany();
+        $this->verifyCsrf($request);
+
+        $this->auctionDeletion->delete($company, $id);
+
+        $this->addFlash('success', 'company.auction_deleted');
+        $this->redirect('/company');
+    }
+
+    /**
+     * Dane ekranu potwierdzenia dla widoku (kwota w pełnych złotych, jak w pozostałych widokach firmy).
+     *
+     * @return array{id: int, title: string, startPrice: int, bidCount: int}
+     */
+    private function deletionView(AuctionSummary $summary): array
+    {
+        $auction = $summary->getAuction();
+
+        return [
+            'id' => $auction->getId(),
+            'title' => $auction->getTitle(),
+            'startPrice' => intdiv($auction->getStartingPrice()->grosze(), 100),
+            'bidCount' => $summary->getBidCount(),
+        ];
     }
 
     /**
