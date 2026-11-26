@@ -320,7 +320,8 @@ final class AuctionRepository extends BaseRepository
             (string) $row['brand_name'],
             (string) $row['brand_slug'],
             new Money((int) $row['current_price']),
-            new Money((int) $row['min_next_bid']),
+            // Obrona w głąb: current_price + min_increment z widoku nie może wywrócić list aukcji (500) przy kwocie przy MAX.
+            new Money(min((int) $row['min_next_bid'], Money::MAX_GROSZE)),
             (int) $row['bid_count'],
             $row['leader_user_id'] === null ? null : (int) $row['leader_user_id'],
             $row['cover_path'] === null ? null : (string) $row['cover_path'],
