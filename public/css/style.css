@@ -1286,11 +1286,20 @@ button {
 /* Bez zawijania listy: separator zawsze stoi w tej samej linii co swój element (T-047). */
 .breadcrumbs__list li {
     display: flex;
-    flex: 0 1 auto;
+    flex: none;
     align-items: center;
     min-height: var(--touch-target);
+    white-space: nowrap;
+}
+
+/* Skraca się tylko ostatni element (tytuł), reszta nie łamie słów. */
+.breadcrumbs__list li:last-child {
+    display: block;
+    flex: 0 1 auto;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow: hidden;
+    line-height: var(--touch-target);
+    text-overflow: ellipsis;
 }
 
 .breadcrumbs__list li + li::before {
@@ -3524,8 +3533,8 @@ textarea.form-field__control {
 
 .stat-tile__value {
     color: var(--color-primary);
-    font-size: 1.375rem;
-    overflow-wrap: anywhere;
+    font-size: clamp(1.125rem, 5.5vw, 1.375rem);
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
     font-weight: 800;
     line-height: 1.1;
@@ -3548,7 +3557,6 @@ textarea.form-field__control {
 
     .stat-tile__value {
         font-size: 2.25rem;
-        overflow-wrap: normal;
     }
 }
 
@@ -4220,7 +4228,7 @@ textarea.form-field__control {
 /* ---------- T-047: podgląd zdjęć, błędy pól formularza ---------- */
 .photo-preview {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 10rem));
     gap: var(--space-md);
     padding: 0;
     margin: var(--space-sm) 0 0;
