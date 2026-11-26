@@ -17,6 +17,10 @@ kodowane jako =?UTF-8?B?...?= (CR/LF w nich nie da się wstrzyknąć jako nowego
 treść idzie jako quoted-printable z "dot-stuffingiem" (linia zaczynająca się od kropki
 dostaje drugą kropkę, żeby nie zakończyła DATA). Komunikaty wyjątków zawierają etap i
 kod odpowiedzi, bez adresów i treści, bo trafiają do logu.
+
+Limity czasu: samo połączenie ma krótszy limit (CONNECT_TIMEOUT_SECONDS), żeby niedostępny
+serwer poczty nie wstrzymywał żądania (rejestracja wysyła list w trakcie żądania, bo użytkownik
+ma zobaczyć komunikat o błędzie poczty); odpowiedzi serwera mają dłuższy limit.
 */
 final class MailService implements MailerInterface
 {
@@ -24,13 +28,14 @@ final class MailService implements MailerInterface
     // Najdłuższy kawałek tematu/nazwy przed kodowaniem: 45 B -> 60 znaków base64 + 12 znaków otoczki < 76.
     private const ENCODED_WORD_BYTES = 45;
     private const HELO_NAME = 'localhost';
+    private const CONNECT_TIMEOUT_SECONDS = 2.0;
 
     public function __construct(
         private readonly string $host,
         private readonly int $port,
         private readonly string $fromEmail,
         private readonly string $fromName,
-        private readonly float $timeoutSeconds = 5.0,
+        private readonly float $responseTimeoutSeconds = 5.0,
     ) {
     }
 
@@ -43,14 +48,14 @@ final class MailService implements MailerInterface
 
         $errorNumber = 0;
         $errorMessage = '';
-        $socket = @fsockopen($this->host, $this->port, $errorNumber, $errorMessage, $this->timeoutSeconds);
+        $socket = @fsockopen($this->host, $this->port, $errorNumber, $errorMessage, min(self::CONNECT_TIMEOUT_SECONDS, $this->responseTimeoutSeconds));
 
         if ($socket === false) {
             throw new MailException(sprintf('SMTP connect failed (errno %d)', $errorNumber));
         }
 
         try {
-            stream_set_timeout($socket, (int) ceil($this->timeoutSeconds));
+            stream_set_timeout($socket, (int) ceil($this->responseTimeoutSeconds));
 
             $this->expect($socket, [220], 'greeting');
             $this->command($socket, 'EHLO ' . self::HELO_NAME, [250], 'EHLO');
