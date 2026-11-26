@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Request;
+use App\Service\AuctionDetailsService;
 use App\Service\AuctionListService;
 use App\Service\CurrentUserProvider;
 use App\Service\Translator;
@@ -17,6 +18,7 @@ final class AuctionController extends AppController
         Translator $translator,
         CurrentUserProvider $currentUsers,
         private readonly AuctionListService $auctionList,
+        private readonly AuctionDetailsService $auctionDetails,
     ) {
         parent::__construct($translator, $currentUsers);
     }
@@ -44,11 +46,22 @@ final class AuctionController extends AppController
         // MAKIETA (T-009): ?state=confirm|leading|error|outbid pokazuje ekrany 04-07; zła wartość to 400.
         $state = $request->queryOneOf('state', self::PREVIEW_STATES);
 
-        // MAKIETA: dane aukcji statyczne, do czasu repozytorium.
+        // Brak aukcji to HttpException 404 z serwisu; strona jest publiczna, id zalogowanego służy tylko do isYou.
+        $details = $this->auctionDetails->find($id, $this->currentUserId());
+
+        // MAKIETA (T-009): widok nadal rysuje dane statyczne, dopóki frontend go nie podłączy. Zmienne poniżej
+        // to dane z bazy dla widoku: $auctionSummary (AuctionSummary), $images, $recentBids, $auctionStatus
+        // (efektywny, na czasie serwera), $secondsLeft i $serverTime (do data-server-time).
         $this->render('auctions/show', [
             'pageTitle' => $this->translator->translate('page.auction_show.title'),
             'auctionId' => $id,
             'previewState' => $state,
+            'auctionSummary' => $details->getSummary(),
+            'images' => $details->getImages(),
+            'recentBids' => $details->getRecentBids(),
+            'auctionStatus' => $details->getStatus(),
+            'secondsLeft' => $details->getSecondsLeft(),
+            'serverTime' => $details->getServerTime(),
         ]);
     }
 
