@@ -29,6 +29,7 @@ RUN apk add --no-cache \
 
 # Limity uploadu zgodne z regula 9 i docs/api.md 2.5: do 8 zdjec po max 5 MB.
 # post_max_size = 8 x 5 MB + zapas na pola formularza i naglowki multipart.
+# Nginx ma client_max_body_size rowny post_max_size (docker/nginx/nginx.conf): wiekszego ciala PHP-FPM w ogole nie dostaje (T-110).
 # max_file_uploads jest celowo wiekszy niz 8: limit 8 zdjec pilnuje AuctionFormValidator (422 upload.too_many).
 # Przy limicie PHP rownym 8 dziewiaty plik znikalby po cichu, zanim trafi do $_FILES.
 RUN { \
