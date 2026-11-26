@@ -47,4 +47,7 @@ RUN { \
       echo 'error_log = /proc/self/fd/2'; \
     } > /usr/local/etc/php/conf.d/errors.ini
 
+# Nie ujawniaj wersji PHP (naglowek X-Powered-By).
+RUN echo 'expose_php = Off' > /usr/local/etc/php/conf.d/security.ini
+
 WORKDIR /app
