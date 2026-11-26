@@ -13,6 +13,7 @@ use App\Service\AuctionStateService;
 use App\Service\BidService;
 use App\Service\OutbidNotifier;
 use App\Service\Translator;
+use App\Support\LocalTime;
 
 /*
 Endpointy JSON licytacji (docs/api.md 3.1 i 3.2): GET /api/auctions/{id}/state (publiczny, polling) i
@@ -80,9 +81,7 @@ final class BidApiController extends AppController
                 'id' => $bid->getId(),
                 'amount' => $bid->getAmount()->grosze(),
                 'amountFormatted' => $bid->getAmount()->format(),
-                'placedAt' => $bid->getCreatedAt()
-                    ->setTimezone(new \DateTimeZone('Europe/Warsaw'))
-                    ->format(\DATE_ATOM),
+                'placedAt' => LocalTime::iso($bid->getCreatedAt()),
             ],
             'extended' => $result->isExtended(),
             'message' => $this->translator->translate($messageKey, ['seconds' => BidService::EXTEND_SECONDS]),

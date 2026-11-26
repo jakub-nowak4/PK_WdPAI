@@ -8,6 +8,7 @@ use App\Model\AuctionStatus;
 use App\Model\AuctionSummary;
 use App\Model\Company;
 use App\Repository\AuctionRepository;
+use App\Support\LocalTime;
 
 /*
 Panel firmy (docs/api.md 2.5): aukcje zatwierdzonej firmy jednym zapytaniem do widoku auction_summary
@@ -18,8 +19,6 @@ Status "ended" także wtedy, gdy ends_at już minął, a CRON jeszcze nie zamkn�
 */
 final class CompanyPanelService
 {
-    private const TIMEZONE = 'Europe/Warsaw';
-
     public function __construct(private readonly AuctionRepository $auctions)
     {
     }
@@ -61,9 +60,7 @@ final class CompanyPanelService
             'price' => intdiv($summary->getCurrentPrice()->grosze(), 100),
             'minIncrement' => intdiv($auction->getMinIncrement()->grosze(), 100),
             'bidCount' => $summary->getBidCount(),
-            'endsAtLabel' => $auction->getEndsAt()
-                ->setTimezone(new \DateTimeZone(self::TIMEZONE))
-                ->format('d.m.Y, H:i'),
+            'endsAtLabel' => LocalTime::format($auction->getEndsAt()),
             'canDelete' => $summary->getBidCount() === 0,
         ];
     }
