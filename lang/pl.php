@@ -74,6 +74,7 @@ return [
     'bid.error.not_active' => 'Ta aukcja nie przyjmuje już ofert.',
     'bid.error.already_leading' => 'Twoja oferta już prowadzi w tej aukcji.',
     'bid.error.amount_invalid' => 'Podaj poprawną kwotę oferty.',
+    'bid.error.amount_too_high' => 'Oferta jest za wysoka. Maksymalna oferta: {max}.',
     'bid.error.too_low' => 'Oferta jest za niska. Minimalna oferta: {min}.',
     'bid.success' => 'Oferta przyjęta. Prowadzisz w licytacji.',
     'bid.success_extended' => 'Oferta przyjęta. Prowadzisz w licytacji. Aukcja przedłużona o {seconds} s.',
