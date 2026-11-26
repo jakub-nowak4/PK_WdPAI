@@ -50,6 +50,27 @@ final class AuctionRepository extends BaseRepository
         return $row === false ? null : $this->mapRow($row);
     }
 
+    // Bieżący czas serwera bazy (reguła 3: koniec aukcji liczy serwer, nigdy przeglądarka). clock_timestamp() zamiast
+    // now(), bo now() to początek transakcji, a w ofercie liczy się chwila po uzyskaniu blokady FOR UPDATE.
+    public function currentTime(): DateTimeImmutable
+    {
+        return new DateTimeImmutable((string) $this->pdo->query('SELECT clock_timestamp()')->fetchColumn());
+    }
+
+    // Anti-sniping (reguła 4): przesuwa koniec o $seconds od dotychczasowego końca i zwraca nowy ends_at.
+    // Wywołuje serwis w transakcji oferty, po findForUpdate(); decyzję, czy przedłużać, podejmuje serwis.
+    public function extendEndsAt(int $id, int $seconds): DateTimeImmutable
+    {
+        $statement = $this->pdo->prepare(
+            "UPDATE auctions SET ends_at = ends_at + CAST(:seconds AS INTEGER) * INTERVAL '1 second'
+             WHERE id = :id
+             RETURNING ends_at"
+        );
+        $statement->execute(['seconds' => $seconds, 'id' => $id]);
+
+        return new DateTimeImmutable((string) $statement->fetchColumn());
+    }
+
     // Aukcja z cena, liczba ofert, liderem i okładką z widoku auction_summary: jedno zapytanie, bez N+1.
     public function findSummaryById(int $id): ?AuctionSummary
     {
