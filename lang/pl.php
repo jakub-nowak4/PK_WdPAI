@@ -387,7 +387,7 @@ return [
     'time.second_short' => 's',
 
     // Tytuły stron (<title>), pageTitle z kontrolerów
-    'page.home.title' => 'Moja aplikacja',
+    'page.home.title' => 'Aukcje samochodów na żywo',
     'page.auctions.title' => 'Aukcje',
     'page.auction_show.title' => 'Szczegóły aukcji',
     'page.auction_won.title' => 'Aukcja wygrana',

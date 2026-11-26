@@ -387,7 +387,7 @@ return [
     'time.second_short' => 's',
 
     // Page titles (<title>), pageTitle from controllers
-    'page.home.title' => 'My application',
+    'page.home.title' => 'Live car auctions',
     'page.auctions.title' => 'Auctions',
     'page.auction_show.title' => 'Auction details',
     'page.auction_won.title' => 'Auction won',
