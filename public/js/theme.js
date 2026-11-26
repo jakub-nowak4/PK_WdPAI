@@ -31,10 +31,14 @@ function syncThemeToggle() {
 
     themeToggles.forEach((toggle) => {
         toggle.setAttribute('aria-pressed', String(isDark));
-        toggle.setAttribute(
-            'aria-label',
-            isDark ? 'Włącz jasny motyw' : 'Włącz ciemny motyw'
-        );
+        // Etykieta w języku interfejsu: teksty przychodzą z serwera (data-*).
+        const label = isDark
+            ? toggle.dataset.labelToLight
+            : toggle.dataset.labelToDark;
+        if (label) {
+            toggle.setAttribute('aria-label', label);
+            toggle.setAttribute('title', label);
+        }
 
         // Ikona pokazuje działanie: księżyc włącza dark, słońce włącza light.
         const icon = toggle.querySelector('.theme-toggle__icon');

@@ -21,7 +21,9 @@
 </form>
 
 <button class="theme-toggle" type="button" data-theme-toggle
+        data-label-to-dark="<?= $e($t('theme.to_dark', 'Włącz ciemny motyw')) ?>"
+        data-label-to-light="<?= $e($t('theme.to_light', 'Włącz jasny motyw')) ?>"
         aria-label="<?= $e($t('theme.to_dark', 'Włącz ciemny motyw')) ?>"
-        aria-pressed="false" title="<?= $e($t('theme.toggle', 'Zmień motyw')) ?>">
+        aria-pressed="false" title="<?= $e($t('theme.to_dark', 'Włącz ciemny motyw')) ?>">
     <span class="theme-toggle__icon" aria-hidden="true">🌙</span>
 </button>
