@@ -176,6 +176,21 @@ $specLabels = [
         </section>
     <?php endif; ?>
 
+    <?php if (!$isPreview): ?>
+        <?php // Banery wyniku oferty (ekrany 05 i 06) wypelnia public/js/bidding/banner.js po odpowiedzi API. ?>
+        <section class="alert alert--success bid-banner" role="status" data-bid-banner="success" hidden>
+            <h2 class="bid-banner__title" data-banner-title></h2>
+            <p class="bid-banner__text"><?= $e($t('bids.success_text', 'Jesteś obecnie liderem licytacji. Otrzymasz powiadomienie w razie przebicia.')) ?></p>
+            <p class="bid-banner__text" data-banner-extended hidden><?= $e($t('bids.extended', 'Aukcja przedłużona o 30 s')) ?></p>
+            <p class="status-label status-label--leading"><?= $e($t('bids.leading_label', 'Prowadzisz')) ?></p>
+        </section>
+        <section class="alert alert--danger bid-banner" data-bid-banner="error" hidden>
+            <h2 class="bid-banner__title"><?= $e($t('bids.error_title', 'Nie udało się złożyć oferty')) ?></h2>
+            <p class="bid-banner__text" data-banner-text></p>
+            <button class="button button--icon" type="button" data-banner-dismiss aria-label="<?= $e($t('common.close', 'Zamknij')) ?>">×</button>
+        </section>
+    <?php endif; ?>
+
     <div class="auction-detail">
         <div class="auction-detail__main">
             <header class="auction-detail__header">

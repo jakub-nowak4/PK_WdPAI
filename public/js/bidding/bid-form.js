@@ -4,7 +4,7 @@ import { NetworkError, postBid } from './api.js';
 import { all, one, setHidden, setText } from './dom.js';
 import { fillTemplate, money } from './format.js';
 
-export function createBidForm(root, i18n, messages, { view, applyState, claimSequence }) {
+export function createBidForm(root, i18n, messages, banner, { view, applyState, claimSequence }) {
     const form = one('[data-bid-form]', root);
     if (!form) {
         return;
@@ -95,6 +95,7 @@ export function createBidForm(root, i18n, messages, { view, applyState, claimSeq
         setBusy(true);
         messages.clearError();
         messages.clearStatus();
+        banner.hide();
         clearFieldError();
         let result;
         try {
@@ -108,22 +109,23 @@ export function createBidForm(root, i18n, messages, { view, applyState, claimSeq
             retry.className = 'button button--link';
             retry.textContent = i18n.retry;
             retry.addEventListener('click', () => submit(grosze));
-            messages.showError(i18n.networkError, retry);
+            banner.showError(i18n.networkError, { extra: retry });
             setBusy(false);
             return;
         }
-        handleResult(result);
+        handleResult(result, grosze);
         setBusy(false);
     }
 
-    function handleResult({ status, ok, data }) {
+    function handleResult({ status, ok, data }, grosze) {
         const state = data?.state;
         if (state?.auction) {
             claimSequence();
             applyState(state, { fromBid: true });
         }
         if (ok) {
-            messages.showStatus(data?.message ?? '', 'success');
+            // Sukces ogłasza baner (role="status"); drugi komunikat w panelu podwoiłby odczyt czytnika ekranu.
+            banner.showSuccess(data?.bid?.amountFormatted ?? money(grosze), data?.extended === true);
             const focusTarget = one('[data-leading-block]', root);
             if (focusTarget && !focusTarget.hidden) {
                 focusTarget.focus();
@@ -132,16 +134,20 @@ export function createBidForm(root, i18n, messages, { view, applyState, claimSeq
         }
         const error = data?.error;
         const text = error?.message || i18n.serverError;
-        if (error?.field === 'amount') {
+        if (error?.code === 'bid_too_low' && Number.isInteger(error.details?.minNextBid)) {
+            input.value = String(Math.ceil(error.details.minNextBid / 100)); // podpowiedz poprawnej kwoty
+        }
+        if (error?.field === 'amount' || error?.code === 'bid_too_low' || error?.code === 'amount_invalid') {
             showFieldError(text);
+            banner.showError(i18n.errorTitle, { announce: false });
             input.focus();
         } else if (status === 401) {
             const link = document.createElement('a');
             link.href = '/login?next=' + encodeURIComponent('/auctions/' + root.dataset.auctionId);
             link.textContent = i18n.loginToBid;
-            messages.showError(text, link);
+            banner.showError(text, { extra: link });
         } else {
-            messages.showError(text);
+            banner.showError(text);
         }
     }
 

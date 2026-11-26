@@ -1,5 +1,6 @@
 // Licytacja na zywo na /auctions/{id}: polling stanu (GET), odliczanie wg czasu serwera, skladanie oferty (POST).
 // Moduly: bidding/api.js, poller.js, panel.js, countdown.js, history.js, bid-form.js, messages.js, format.js, dom.js.
+import { createBanner } from './bidding/banner.js';
 import { createBidForm } from './bidding/bid-form.js';
 import { syncHidden } from './bidding/dom.js';
 import { createMessages } from './bidding/messages.js';
@@ -31,7 +32,9 @@ if (root && i18nElement) {
         }
     }
 
-    createBidForm(root, i18n, messages, {
+    const banner = createBanner(i18n, () => document.getElementById('bid-amount'));
+
+    createBidForm(root, i18n, messages, banner, {
         view: panel.view,
         applyState: handleState,
         claimSequence: () => poller.claimSequence(),
