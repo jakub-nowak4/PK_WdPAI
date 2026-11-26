@@ -40,7 +40,7 @@ services:
       dockerfile: docker/php/Dockerfile
     volumes:
       - .:/app
-    environment:
+    environment: &php-environment
       APP_ENV: ${APP_ENV:-development}
       APP_URL: ${APP_URL:-http://localhost:8080}
       DB_HOST: ${DB_HOST:-db}
@@ -52,6 +52,24 @@ services:
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_FROM: ${SMTP_FROM:-no-reply@motobid.local}
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-MotoBid}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # CRON (kryterium 32): ten sam obraz i kod co `php`, ale zamiast PHP-FPM działa BusyBox crond (jest w Alpine).
+  # Harmonogram jest w docker/cron/crontab (co minutę: bin/close-auctions.php); wyjście zadania idzie do logów
+  # kontenera: docker compose logs cron. Zadania crond dziedziczą zmienne środowiskowe kontenera. `tr` usuwa
+  # znaki CR, bo na Windows plik crontab może mieć zakończenia linii CRLF, których crond nie rozumie.
+  cron:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    command: ["sh", "-c", "tr -d '\\r' < /app/docker/cron/crontab > /etc/crontabs/root && exec crond -f -l 8"]
+    volumes:
+      - .:/app
+    environment: *php-environment
     depends_on:
       db:
         condition: service_healthy
