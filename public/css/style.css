@@ -1273,7 +1273,7 @@ button {
 /* ---------- Szczegóły aukcji (ekran 03): układ, okruszki, nagłówek ---------- */
 .breadcrumbs__list {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0 var(--space-sm);
     padding: 0;
@@ -1283,8 +1283,10 @@ button {
     list-style: none;
 }
 
+/* Bez zawijania listy: separator zawsze stoi w tej samej linii co swój element (T-047). */
 .breadcrumbs__list li {
     display: flex;
+    flex: 0 1 auto;
     align-items: center;
     min-height: var(--touch-target);
     min-width: 0;
@@ -1293,6 +1295,7 @@ button {
 
 .breadcrumbs__list li + li::before {
     content: "›";
+    flex: none;
     margin-right: var(--space-sm);
     color: var(--color-text-subtle);
 }
