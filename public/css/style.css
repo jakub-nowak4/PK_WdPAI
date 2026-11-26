@@ -131,6 +131,11 @@ body {
     line-height: var(--line-height-base);
 }
 
+/* Atrybut hidden przełączany przez JS (T-034) ma wygrywać z każdym display ustawionym przez klasę. */
+[hidden] {
+    display: none !important;
+}
+
 h1,
 h2,
 h3,
@@ -1597,7 +1602,8 @@ button {
     border-inline-start: 4px solid var(--color-primary);
 }
 
-.bid-panel--ended {
+.bid-panel--ended,
+.bid-panel[data-status="ended"] {
     background: var(--color-surface-muted);
     border-color: var(--color-border-strong);
 }
@@ -1614,7 +1620,8 @@ button {
     line-height: 1.3;
 }
 
-.bid-panel--ended .bid-panel__timer {
+.bid-panel--ended .bid-panel__timer,
+.bid-panel[data-status="ended"] .bid-panel__timer {
     border-color: var(--color-border-strong);
     background: var(--color-surface);
     color: var(--color-text);
@@ -1842,7 +1849,7 @@ button {
 }
 
 /* Miejsce na pasek, żeby nie zasłaniał stopki. */
-body:has(.bid-bar) .site-footer {
+body:has(.bid-bar:not([hidden])) .site-footer {
     padding-bottom: 9rem;
 }
 
@@ -1851,7 +1858,7 @@ body:has(.bid-bar) .site-footer {
         display: none;
     }
 
-    body:has(.bid-bar) .site-footer {
+    body:has(.bid-bar:not([hidden])) .site-footer {
         padding-bottom: var(--space-lg);
     }
 }
@@ -2051,7 +2058,7 @@ body:has(.bid-bar) .site-footer {
     font-weight: 700;
 }
 
-.bid-panel--error .form-field__error::before {
+.bid-panel .form-field__error::before {
     content: "! ";
     font-weight: 800;
 }
@@ -2252,6 +2259,169 @@ body:has(dialog[open]) {
         max-height: calc(100dvh - var(--header-height) - 2 * var(--space-md));
         overflow-y: auto;
     }
+}
+
+/* ---------- Licytacja na żywo (T-042): stany ustawiane przez JS (hidden, aria-*, klasy BEM) ---------- */
+/* Grupy przełączane przez hidden: układ kolumnowy, gdy widoczne. */
+[data-leading-block],
+[data-outbid-block],
+[data-leading-wait],
+[data-bid-controls] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+/* Prowadzisz: zielony akcent i kwota w kolorze sukcesu (etykieta ma też ikonę i tekst). */
+.bid-panel--leading .bid-panel__price,
+.bid-panel[data-viewer-status="won"] .bid-panel__price {
+    color: var(--color-success);
+}
+
+.bid-panel[data-viewer-status="won"] {
+    border-color: var(--color-success-border);
+    border-inline-start: 4px solid var(--color-success);
+}
+
+[data-leading-block]:focus-visible {
+    border-radius: var(--radius-md);
+}
+
+/* Przebity: komunikat [data-outbid-alert] (role="alert") z ikoną i grubą krawędzią. */
+.bid-panel > [data-outbid-alert] {
+    border-inline-start: 4px solid var(--color-danger);
+    font-weight: var(--font-weight-bold);
+}
+
+.bid-panel > [data-outbid-alert]::before {
+    content: "⚠ ";
+}
+
+.bid-panel--outbid .bid-panel__price {
+    color: var(--color-danger);
+}
+
+/* Błąd oferty ([data-bid-error]), offline i potwierdzenie ([data-bid-message]). */
+.bid-panel__message {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--space-sm);
+}
+
+.bid-panel__message::before {
+    content: "ℹ";
+    font-weight: 800;
+}
+
+.bid-panel__message--error {
+    border-inline-start: 4px solid var(--color-danger);
+}
+
+.bid-panel__message--error::before {
+    content: "!";
+}
+
+.bid-panel__message--success {
+    border-inline-start: 4px solid var(--color-success);
+}
+
+.bid-panel__message--success::before {
+    content: "✓";
+}
+
+.bid-panel__message a,
+.bid-panel__message .button--link {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+.bid-panel__message .button--link {
+    min-height: var(--touch-target);
+    padding: 0 var(--space-xs);
+}
+
+/* Błąd pola kwoty: aria-invalid (też z JS, bez klasy --error), ikona „!” w komunikacie. */
+.bid-panel .form-field__control[aria-invalid="true"] {
+    border: 1.5px solid var(--color-danger);
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+    font-weight: 700;
+}
+
+.bid-panel .form-field__error {
+    font-size: 0.8125rem;
+}
+
+/* Wysyłanie: aria-busy na panelu, przyciski disabled ze spinnerem przy „Wysyłanie…”. */
+.bid-panel[aria-busy="true"] {
+    cursor: progress;
+}
+
+.bid-panel[aria-busy="true"] .bid-panel__submit:disabled::before,
+body:has(.bid-panel[aria-busy="true"]) .bid-bar__submit:disabled::before {
+    content: "";
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentcolor;
+    border-right-color: transparent;
+    border-radius: var(--radius-pill);
+    animation: spin 0.8s linear infinite;
+}
+
+/* Zaplanowana i zakończona. */
+.bid-panel[data-status="scheduled"] .bid-panel__timer {
+    border-color: var(--color-border-strong);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-size: 1.125rem;
+}
+
+.bid-panel[data-status="ended"] .bid-panel__price {
+    color: var(--color-text);
+}
+
+/* Ostatnie 30 s: JS dodaje klasę bid-panel--ending i bid-bar--ending (kontrakt dla frontendu, T-042). */
+.bid-panel--ending .bid-panel__timer {
+    border: 2px solid var(--color-danger);
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+
+.bid-panel--ending .bid-panel__timer::before {
+    content: "⏱ ";
+    display: inline-block;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.bid-bar--ending {
+    border-top: 2px solid var(--color-danger);
+}
+
+.bid-bar--ending .bid-bar__info time {
+    color: var(--color-danger);
+    font-weight: 800;
+}
+
+/* Znacznik „Aukcja przedłużona” (JS zmienia tylko hidden). */
+[data-extended-tag] {
+    border-color: var(--color-accent-border);
+    background: var(--color-accent-soft);
+    color: var(--color-accent-text);
+}
+
+/* Okno potwierdzenia i historia ofert (T-042). */
+.dialog__hint::before {
+    content: "✓ ";
+}
+
+.dialog__footer .button:disabled {
+    cursor: not-allowed;
+}
+
+.bid-history__item--you.bid-history__item--leader {
+    border-inline-start: 4px solid var(--color-success);
 }
 
 /* ---------- Animacje ---------- */
