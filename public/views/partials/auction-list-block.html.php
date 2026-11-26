@@ -13,7 +13,7 @@
  */
 ?>
 <?php if ($isMock): ?>
-    <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
+    <p class="alert alert--info" role="note"><?= $e($t('common.mock_notice', 'MAKIETA: dane przykładowe, nie pochodzą z bazy.')) ?></p>
 <?php endif; ?>
 
 <div class="auction-list-layout">
@@ -24,7 +24,7 @@
     <section class="auction-list" aria-labelledby="auction-list-title">
         <header class="auction-list__header">
             <h2 id="auction-list-title"><?= $e($t('auction.found', 'Znaleziono')) ?>: <?= $e((string) $total) ?> <?= $e($t('auction.active', 'aktywnych aukcji')) ?></h2>
-            <span class="status-label status-label--active"><span class="status-label__dot" aria-hidden="true"></span>LIVE 24/7</span>
+            <span class="status-label status-label--active"><span class="status-label__dot" aria-hidden="true"></span><?= $e($t('auction.live', 'LIVE 24/7')) ?></span>
         </header>
 
         <?php if ($auctions === []): ?>
