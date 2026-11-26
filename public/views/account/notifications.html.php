@@ -26,7 +26,7 @@ if ($isMock) {
         $rows[] = [
             'type' => $item->getNotification()->getType()->value,
             'title' => $summary->getAuction()->getTitle(),
-            'dateLabel' => $item->getNotification()->getCreatedAt()->format('d.m.Y, H:i'),
+            'dateLabel' => \App\Support\LocalTime::format($item->getNotification()->getCreatedAt()),
             'unread' => !$item->getNotification()->isRead(),
             'price' => $summary->getCurrentPrice()->format(),
             'brand' => $summary->getBrandName(),
