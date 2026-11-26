@@ -47,7 +47,7 @@ $descriptionDescribedBy = trim('field-description-hint' . ($descriptionError !==
         </div>
     </header>
 
-    <form class="card auction-form" method="post" action="/company/auctions" enctype="multipart/form-data" novalidate>
+    <form class="card auction-form" method="post" action="/company/auctions" enctype="multipart/form-data" novalidate data-auction-form>
         <input type="hidden" name="csrfToken" value="<?= $e($csrfToken) ?>">
         <?php require __DIR__ . '/../partials/form-errors.html.php'; ?>
 
@@ -125,6 +125,7 @@ $descriptionDescribedBy = trim('field-description-hint' . ($descriptionError !==
                 <?php if ($photoError !== ''): ?>
                     <p class="form-field__error" id="field-photos-error" role="alert"><?= $e($photoError) ?></p>
                 <?php endif; ?>
+                <ul class="photo-preview" data-photo-preview aria-label="<?= $e($t('create.photos_preview', 'Podgląd wybranych zdjęć')) ?>"></ul>
             </div>
         </fieldset>
 
@@ -157,4 +158,5 @@ $descriptionDescribedBy = trim('field-description-hint' . ($descriptionError !==
             <button class="button button--accent" type="submit"><?= $e($t('create.submit', 'Opublikuj aukcję')) ?></button>
         </footer>
     </form>
+    <?php require __DIR__ . '/../partials/auction-form-messages.html.php'; ?>
 </main>
