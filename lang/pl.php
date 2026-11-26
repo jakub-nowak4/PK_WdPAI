@@ -505,4 +505,22 @@ return [
     'won.step2_text' => 'Podpisz umowę i opłać pojazd zgodnie z ustaleniami.',
     'won.step3_title' => 'Odbiór pojazdu',
     'won.step3_text' => 'Odbierz auto osobiście albo zamów transport.',
+
+    // Powiadomienia (widok account/notifications)
+    'notifications.eyebrow' => 'Panel licytującego',
+    'notifications.page_title' => 'Powiadomienia',
+    'notifications.page_lead' => 'Przebicia ofert i wyniki aukcji, w których bierzesz udział.',
+    'notifications.mark_read' => 'Oznacz wszystkie jako przeczytane',
+    'notifications.list_title' => 'Lista powiadomień',
+    'notifications.empty' => 'Nie masz jeszcze powiadomień',
+    'notifications.unread' => 'Nowe',
+    'notifications.type_outbid' => 'Przebity',
+    'notifications.type_won' => 'Wygrana',
+    'notifications.type_ended' => 'Zakończona',
+    'notifications.outbid' => 'Ktoś przebił Twoją ofertę w aukcji',
+    'notifications.won' => 'Wygrałeś aukcję',
+    'notifications.ended' => 'Zakończyła się aukcja',
+    'notifications.outbid_cta' => 'Przebij ofertę',
+    'notifications.won_cta' => 'Zobacz wygraną',
+    'notifications.ended_cta' => 'Szczegóły aukcji',
 ];

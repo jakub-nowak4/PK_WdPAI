@@ -505,4 +505,22 @@ return [
     'won.step2_text' => 'Sign the contract and pay for the vehicle as agreed.',
     'won.step3_title' => 'Vehicle pickup',
     'won.step3_text' => 'Pick the car up in person or order transport.',
+
+    // Notifications (view account/notifications)
+    'notifications.eyebrow' => 'Bidder panel',
+    'notifications.page_title' => 'Notifications',
+    'notifications.page_lead' => 'Outbid alerts and results of the auctions you take part in.',
+    'notifications.mark_read' => 'Mark all as read',
+    'notifications.list_title' => 'Notification list',
+    'notifications.empty' => 'You have no notifications yet',
+    'notifications.unread' => 'New',
+    'notifications.type_outbid' => 'Outbid',
+    'notifications.type_won' => 'Won',
+    'notifications.type_ended' => 'Ended',
+    'notifications.outbid' => 'Someone outbid you in the auction',
+    'notifications.won' => 'You won the auction',
+    'notifications.ended' => 'The auction has ended',
+    'notifications.outbid_cta' => 'Raise your bid',
+    'notifications.won_cta' => 'View your win',
+    'notifications.ended_cta' => 'Auction details',
 ];
