@@ -35,9 +35,13 @@ final class BidApiController extends AppController
 
     public function state(int $id): void
     {
-        $state = $this->states->build($id, $this->currentUserId(), $this->currentRole());
+        // Polling co 3 s: z sesji tylko odczyt id i roli, potem od razu zwalniamy blokadę pliku sesji,
+        // żeby poller nie czekał na inne żądania tej przeglądarki (ani one na niego) w trakcie zapytań do bazy.
+        $userId = $this->currentUserId();
+        $role = $this->currentRole();
+        $this->releaseSession();
 
-        $this->json(200, $state);
+        $this->json(200, $this->states->build($id, $userId, $role));
     }
 
     public function placeBid(int $id, Request $request): void
@@ -91,12 +95,19 @@ final class BidApiController extends AppController
         $this->outbidNotifier->notifyByEmail($result->getOutbidUserId(), $id, $bid->getAmount());
     }
 
-    // Oddaje odpowiedź klientowi przed dalszą pracą (PHP-FPM) i zwalnia blokadę sesji; poza FPM nic nie robi.
-    private function finishResponse(): void
+    // Zapisuje i zamyka sesję (zwalnia blokadę pliku). $_SESSION zostaje do odczytu, ale zapisy po tym
+    // wywołaniu przepadają, więc wołać dopiero, gdy akcja niczego już w sesji nie zmienia (flash, CSRF).
+    private function releaseSession(): void
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_write_close();
         }
+    }
+
+    // Oddaje odpowiedź klientowi przed dalszą pracą (PHP-FPM) i zwalnia blokadę sesji; poza FPM nic nie robi.
+    private function finishResponse(): void
+    {
+        $this->releaseSession();
 
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
