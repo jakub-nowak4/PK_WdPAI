@@ -109,6 +109,7 @@ final class ErrorController extends AppController
         $this->render($error['view'], [
             'pageTitle' => $this->translator->translate('error.' . $status . '.title'),
             'errorMessage' => $error['message'],
+            'errorCode' => $error['code'],
         ]);
     }
 
