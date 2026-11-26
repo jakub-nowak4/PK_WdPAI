@@ -36,6 +36,7 @@ use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
 use App\Service\MailService;
 use App\Service\MyBidsService;
+use App\Service\NotificationService;
 use App\Service\OutbidNotifier;
 use App\Service\Translator;
 use App\Service\UploadService;
@@ -158,6 +159,11 @@ $routing = new Routing([
         new BidRepository($database->getConnection()),
         new AuctionRepository($database->getConnection()),
     ),
+    // Powiadomienia: lista 50 najnowszych z aukcjami (2 zapytania) i oznaczanie jako przeczytane.
+    NotificationService::class => static fn (): NotificationService => new NotificationService(
+        new NotificationRepository($database->getConnection()),
+        new AuctionRepository($database->getConnection()),
+    ),
     AuctionStateService::class => static fn (): AuctionStateService => new AuctionStateService(
         new AuctionDetailsService(
             new AuctionRepository($database->getConnection()),
@@ -193,7 +199,8 @@ $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
 $routing->get('/api/auctions/{id}/state', BidApiController::class, 'state');
 $routing->post('/api/auctions/{id}/bids', BidApiController::class, 'placeBid');
-$routing->post('/company/auctions', CompanyController::class, 'store');
+$routing->post('/notifications/read', AccountController::class, 'readNotifications');
+$routing->post('/company/auctions',CompanyController::class, 'store');
 $routing->post('/company/auctions/{id}/delete', CompanyController::class, 'delete');
 $routing->post('/admin/companies/{id}/approve', AdminController::class, 'approve');
 $routing->post('/admin/companies/{id}/reject', AdminController::class, 'reject');
