@@ -7,9 +7,12 @@ export function createBanner(i18n, focusTarget) {
     const success = one('[data-bid-banner="success"]');
     const failure = one('[data-bid-banner="error"]');
 
+    let errorKind = '';
+
     function hideAll() {
         setHidden(success, true);
         setHidden(failure, true);
+        errorKind = '';
     }
 
     one('[data-banner-dismiss]', failure ?? document)?.addEventListener('click', () => {
@@ -33,11 +36,21 @@ export function createBanner(i18n, focusTarget) {
             setHidden(success, false);
         },
         // announce=false dla bledow pola: komunikat czyta juz alert przy polu, baner nie dubluje.
-        showError(text, { announce = true, extra = null } = {}) {
+        // Usuwa baner bledu tylko danego rodzaju (np. "network" po powrocie sieci); walidacji nie rusza.
+        hideError(kind) {
+            if (errorKind !== kind) {
+                return;
+            }
+            setHidden(failure, true);
+            errorKind = '';
+        },
+        // kind pozwala pozniej usunac wylacznie ten rodzaj bledu (patrz hideError).
+        showError(text, { announce = true, extra = null, kind = '' } = {}) {
             if (!failure) {
                 return;
             }
             hideAll();
+            errorKind = kind;
             if (announce) {
                 failure.setAttribute('role', 'alert');
             } else {

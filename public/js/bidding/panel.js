@@ -17,7 +17,13 @@ export function createPanel(root, i18n, { onNeedSync }) {
         minNextBid: Number(root.dataset.minNextBidGrosze),
         endsAt: root.dataset.endsAt,
     };
-    const countdown = createCountdown(all('[data-countdown]'), i18n, onNeedSync);
+    // Ostatnie 30 s wg czasu serwera (licznik opiera sie na serverTime z /state); po przedluzeniu klasa znika.
+    const setEnding = (seconds) => {
+        const ending = view.status === 'active' && seconds > 0 && seconds <= 30;
+        root.classList.toggle('bid-panel--ending', ending);
+        bar?.classList.toggle('bid-bar--ending', ending);
+    };
+    const countdown = createCountdown(all('[data-countdown]'), i18n, onNeedSync, setEnding);
     countdown.sync(root.dataset.endsAt, root.dataset.serverTime);
 
     const placeLabel = () => (view.viewerStatus === 'outbid' ? i18n.outbidCta : i18n.place);
@@ -71,6 +77,12 @@ export function createPanel(root, i18n, { onNeedSync }) {
         countdown.stop();
         root.dataset.status = 'ended';
         view.status = 'ended';
+        setEnding(0);
+        const badge = one('[data-live-badge]');
+        if (badge) {
+            badge.className = 'status-label status-label--ended';
+            badge.textContent = i18n.ended;
+        }
         const timer = one('.bid-panel__timer', root);
         if (timer) {
             timer.textContent = i18n.ended;
