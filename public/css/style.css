@@ -1273,7 +1273,7 @@ button {
 /* ---------- Szczegóły aukcji (ekran 03): układ, okruszki, nagłówek ---------- */
 .breadcrumbs__list {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0 var(--space-sm);
     padding: 0;
@@ -1283,16 +1283,28 @@ button {
     list-style: none;
 }
 
+/* Bez zawijania listy: separator zawsze stoi w tej samej linii co swój element (T-047). */
 .breadcrumbs__list li {
     display: flex;
+    flex: none;
     align-items: center;
     min-height: var(--touch-target);
+    white-space: nowrap;
+}
+
+/* Skraca się tylko ostatni element (tytuł), reszta nie łamie słów. */
+.breadcrumbs__list li:last-child {
+    display: block;
+    flex: 0 1 auto;
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow: hidden;
+    line-height: var(--touch-target);
+    text-overflow: ellipsis;
 }
 
 .breadcrumbs__list li + li::before {
     content: "›";
+    flex: none;
     margin-right: var(--space-sm);
     color: var(--color-text-subtle);
 }
@@ -2035,6 +2047,19 @@ body:has(.bid-bar:not([hidden])) .site-footer {
 
 .bid-banner.alert--success {
     border-inline-start: 4px solid var(--color-success);
+}
+
+/* Ikona ✓ stoi przy tytule, a nie jako osobny element siatki (T-047). */
+.bid-banner.alert--success::before {
+    content: none;
+}
+
+.bid-banner.alert--success .bid-banner__title::before {
+    content: "✓ ";
+}
+
+.bid-banner[hidden] {
+    display: none;
 }
 
 .bid-banner.alert--danger {
@@ -3482,7 +3507,7 @@ textarea.form-field__control {
     flex-direction: column;
     gap: var(--space-xs);
     min-width: 0;
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
     background: var(--color-surface);
@@ -3508,7 +3533,8 @@ textarea.form-field__control {
 
 .stat-tile__value {
     color: var(--color-primary);
-    font-size: 1.75rem;
+    font-size: clamp(1.125rem, 5.5vw, 1.375rem);
+    white-space: nowrap;
     font-variant-numeric: tabular-nums;
     font-weight: 800;
     line-height: 1.1;
@@ -3951,49 +3977,6 @@ textarea.form-field__control {
     font-size: 0.875rem;
 }
 
-.won-summary__contacts {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    width: 100%;
-}
-
-.won-summary__contacts a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-md);
-    min-height: var(--touch-target);
-    padding: var(--space-sm) var(--space-md);
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius);
-    background: var(--color-surface-muted);
-    color: var(--color-primary);
-    font-weight: 700;
-    overflow-wrap: break-word;
-    text-decoration: none;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.won-summary__contacts li {
-    min-width: 0;
-}
-
-.won-summary__contacts a:focus-visible {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
-}
-
-.won-summary__contacts a::after {
-    content: "→";
-    flex: none;
-}
-
-.won-summary__contacts a:hover {
-    border-color: var(--color-primary);
-    background: var(--color-primary-soft);
-}
-
 .won-summary__steps {
     display: flex;
     flex-direction: column;
@@ -4235,10 +4218,75 @@ textarea.form-field__control {
     .skeleton,
     .button,
     .auction-card,
-    .tabs__item,
-    .won-summary__contacts a {
+    .tabs__item {
         animation: none;
         transition: none;
         scroll-behavior: auto;
     }
+}
+
+/* ---------- T-047: podgląd zdjęć, błędy pól formularza ---------- */
+.photo-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 10rem));
+    gap: var(--space-md);
+    padding: 0;
+    margin: var(--space-sm) 0 0;
+    list-style: none;
+}
+
+.photo-preview:empty {
+    display: none;
+}
+
+.photo-preview__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+}
+
+.photo-preview__image {
+    display: block;
+    width: 100%;
+    max-width: 160px;
+    height: auto;
+    aspect-ratio: 160 / 107;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    object-fit: cover;
+}
+
+.photo-preview__name {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+}
+
+.auction-form .form-field__control[aria-invalid="true"] {
+    background: var(--color-danger-soft);
+}
+
+/* ---------- T-047: zdjęcie w podsumowaniu wygranej aukcji ---------- */
+.won-summary__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 18rem;
+    border-radius: var(--radius);
+    object-fit: cover;
+}
+
+.won-summary__image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 8rem;
+    padding: var(--space-md);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius);
+    background: var(--color-surface-muted);
+    color: var(--color-text-muted);
+    font-weight: 600;
 }
