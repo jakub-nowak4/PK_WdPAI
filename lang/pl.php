@@ -65,6 +65,7 @@ return [
 
     // Oferta: błędy BidService (docs/api.md 3.2 i słownik w sekcji 4)
     'auction.error.not_found' => 'Nie znaleziono aukcji.',
+    'auction.won.error.not_winner' => 'Ten ekran widzi tylko zwycięzca aukcji.',
     'bid.error.forbidden_role' => 'Tylko konto kupującego może składać oferty.',
     'bid.error.own_auction' => 'Nie możesz licytować własnej aukcji.',
     'bid.error.not_active' => 'Ta aukcja nie przyjmuje już ofert.',
