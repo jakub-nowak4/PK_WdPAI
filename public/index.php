@@ -197,7 +197,8 @@ $routing->get('/company/auctions/new', CompanyController::class, 'create');
 $routing->get('/company/auctions/{id}/delete', CompanyController::class, 'confirmDelete');
 $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
-$routing->get('/api/auctions/{id}/state', BidApiController::class, 'state');
+// Polling co 3 s tylko czyta sesję (id i rola): router zwalnia jej blokadę przed połączeniem z bazą.
+$routing->get('/api/auctions/{id}/state', BidApiController::class, 'state', releaseSession: true);
 $routing->post('/api/auctions/{id}/bids', BidApiController::class, 'placeBid');
 $routing->post('/notifications/read', AccountController::class, 'readNotifications');
 $routing->post('/company/auctions', CompanyController::class, 'store');

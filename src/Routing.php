@@ -21,7 +21,7 @@ final class Routing
 {
     private const MAX_ID = 2147483647;
 
-    /** @var list<array{method: string, pattern: string, static: bool, controller: class-string<AppController>, action: string}> */
+    /** @var list<array{method: string, pattern: string, static: bool, controller: class-string<AppController>, action: string, releaseSession: bool}> */
     private array $routes = [];
 
     /** @var array<class-string, object> usługi utworzone z fabryk (zapamiętane po pierwszym użyciu) */
@@ -51,11 +51,15 @@ final class Routing
     }
 
     /**
+     * $releaseSession: trasa tylko do odczytu sesji (np. polling stanu aukcji). Router zamyka wtedy sesję
+     * zaraz po dopasowaniu trasy, przed utworzeniem kontrolera (łączenie z bazą), więc blokada pliku sesji
+     * nie szereguje równoległych żądań tej przeglądarki. $_SESSION zostaje do odczytu, zapisy przepadają.
+     *
      * @param class-string<AppController> $controller
      */
-    public function get(string $path, string $controller, string $action): void
+    public function get(string $path, string $controller, string $action, bool $releaseSession = false): void
     {
-        $this->add('GET', $path, $controller, $action);
+        $this->add('GET', $path, $controller, $action, $releaseSession);
     }
 
     /**
@@ -71,6 +75,7 @@ final class Routing
         string $path,
         string $controller,
         string $action,
+        bool $releaseSession = false,
     ): void {
         if (!is_subclass_of($controller, AppController::class)) {
             throw new \InvalidArgumentException('Invalid controller: ' . $controller);
@@ -88,6 +93,7 @@ final class Routing
             'static' => !str_contains($path, '{'),
             'controller' => $controller,
             'action' => $action,
+            'releaseSession' => $releaseSession,
         ];
     }
 
@@ -145,6 +151,10 @@ final class Routing
                 if ($parameters === null) {
                     $invalidParameter = true;
                     continue;
+                }
+
+                if ($route['releaseSession'] && session_status() === PHP_SESSION_ACTIVE) {
+                    session_write_close();
                 }
 
                 $this->invoke($route['controller'], $route['action'], $parameters, $request);
