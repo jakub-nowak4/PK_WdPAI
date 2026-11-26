@@ -93,6 +93,14 @@ return [
     'validation.max_value' => 'Wartość nie może być większa niż {max}.',
     'validation.invalid_format' => 'Niepoprawny format.',
     'validation.email_taken' => 'Konto z tym adresem e-mail już istnieje.',
+    'validation.invalid_choice' => 'Wybierz wartość z listy.',
+    'validation.datetime' => 'Podaj poprawną datę i godzinę.',
+
+    // Dodawanie aukcji (docs/api.md 2.5)
+    'auction.error.starts_in_past' => 'Początek aukcji nie może być w przeszłości.',
+    'auction.error.ends_too_soon' => 'Aukcja musi trwać co najmniej godzinę.',
+    'auction.error.ends_too_late' => 'Aukcja może trwać najwyżej 30 dni.',
+    'company.auction_created' => 'Aukcja została dodana.',
 
     // Upload zdjęć
     'upload.required' => 'Wybierz co najmniej jedno zdjęcie.',
@@ -101,6 +109,7 @@ return [
     'upload.invalid_type' => 'Dozwolone są tylko zdjęcia JPEG, PNG lub WebP.',
     'upload.invalid_extension' => 'Rozszerzenie pliku musi być jpg, jpeg, png lub webp i pasować do jego zawartości.',
     'upload.failed' => 'Nie udało się zapisać zdjęcia. Spróbuj ponownie.',
+    'upload.post_too_large' => 'Pliki są za duże. Łączny rozmiar zdjęć nie może przekraczać 40 MB.',
 
     // Logowanie
     'auth.invalid_credentials' => 'Nieprawidłowy e-mail lub hasło.',
