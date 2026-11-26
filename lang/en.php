@@ -115,6 +115,8 @@ return [
     'mail.welcome_company.body' => "Hi {name},\n\nYour MotoBid company account has been created and is waiting for administrator approval. Once approved, you can log in to the company panel and add your first auction.\n\nApplication status: {url}\n\nThe MotoBid team",
     'mail.outbid.subject' => 'You have been outbid: {title}',
     'mail.outbid.body' => "Hi {name},\n\nSomeone placed a higher bid in the auction “{title}”. The current price is {price}. Place a higher bid to take the lead back.\n\nGo to the auction: {url}\n\nThe MotoBid team",
+    'mail.won.subject' => 'You won the auction: {title}',
+    'mail.won.body' => "Hi {name},\n\nCongratulations! You won the auction “{title}” with a final price of {price}.\n\nSee the auction summary: {url}\n\nThe MotoBid team",
 
     // Account form fields
     'field.name' => 'Full name',
