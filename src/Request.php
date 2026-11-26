@@ -21,6 +21,8 @@ final class Request
      * @param array<string, mixed> $post
      * @param array<string, mixed> $cookies
      * @param array<string, string> $headers klucze małymi literami, np. x-csrf-token
+     * @param array<string, mixed> $files surowe $_FILES (normalizuje je UploadService::normalizeFiles)
+     * @param bool $bodyDiscarded PHP odrzucił ciało POST (przekroczony post_max_size)
      */
     public function __construct(
         private readonly string $method,
@@ -31,6 +33,8 @@ final class Request
         private readonly bool $secure = false,
         private readonly array $headers = [],
         private readonly string $body = '',
+        private readonly array $files = [],
+        private readonly bool $bodyDiscarded = false,
     ) {
     }
 
@@ -56,6 +60,9 @@ final class Request
             $headers,
             // Ciało czytamy z limitem: JSON oferty ma kilkadziesiąt bajtów, więcej to nadużycie.
             (string) file_get_contents('php://input', false, null, 0, self::MAX_BODY_BYTES + 1),
+            $_FILES,
+            // Przy przekroczonym post_max_size PHP zostawia Content-Length > 0 i puste $_POST oraz $_FILES.
+            ((int) ($_SERVER['CONTENT_LENGTH'] ?? 0)) > 0 && $_POST === [] && $_FILES === [],
         );
     }
 
@@ -152,6 +159,26 @@ final class Request
     public function post(string $name): string|array|null
     {
         return $this->utf8Checked($this->post[$name] ?? null, $name);
+    }
+
+    /*
+    Pole plikowe w surowym kształcie $_FILES (name[], tmp_name[]...) albo [] gdy go brak.
+    Kontrolę plików robi UploadService, nie Request.
+    @return array<string, mixed>
+    */
+    public function files(string $name): array
+    {
+        $entry = $this->files[$name] ?? null;
+
+        return is_array($entry) ? $entry : [];
+    }
+
+    /*
+    Czy PHP odrzucił całe ciało POST jako większe niż post_max_size (znika wtedy też token CSRF).
+    */
+    public function isBodyDiscarded(): bool
+    {
+        return $this->bodyDiscarded;
     }
 
     /*
