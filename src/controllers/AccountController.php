@@ -35,7 +35,6 @@ final class AccountController extends AppController
         $status = $request->queryOneOf('status', self::BID_STATUSES, 'all');
         $overview = $this->myBids->forUser($userId, MyBidStatus::tryFrom((string) $status));
 
-        // MAKIETA (T-009): widok nadal rysuje wiersze z partials/mock-my-bids.php, dopóki T-039 go nie podłączy.
         // Dane z bazy dla widoku: $myBids (list<MyBid>, po filtrze), $statusCounts (all, leading, outbid, won, lost),
         // $runningTotal (Money, suma ofert w trwających aukcjach), $serverTime (DateTimeImmutable).
         $this->render('account/my-bids', [
