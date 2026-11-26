@@ -143,6 +143,13 @@ final class BidApiController extends AppController
     private function json(int $status, array $payload, array $headers = []): void
     {
         http_response_code($status);
+
+        // PHP-FPM przekazuje Nginxowi sam kod 422 bez frazy (statusText w fetch jest pusty),
+        // więc linię statusu podajemy jawnie; inne kody używane tu mają frazę z Nginxa.
+        if ($status === 422) {
+            header('HTTP/1.1 422 Unprocessable Content', true, 422);
+        }
+
         header('Content-Type: application/json; charset=utf-8');
         header('Cache-Control: no-store');
 
