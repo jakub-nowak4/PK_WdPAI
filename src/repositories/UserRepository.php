@@ -12,6 +12,7 @@ use DateTimeImmutable;
 final class UserRepository extends BaseRepository
 {
     private const COLUMNS = 'id, email, password_hash, name, role, locale, created_at';
+    private const LOCALES = ['pl', 'en'];
 
     public function findById(int $id): ?User
     {
@@ -52,6 +53,20 @@ final class UserRepository extends BaseRepository
         ]);
 
         return $this->mapRow($statement->fetch());
+    }
+
+    // Zapamiętuje język konta (język e-maili wysyłanych bez sesji, np. przez CRON).
+    // Dozwolone wartości są zgodne z CHECK users_locale_chk; zwraca false, gdy konta nie ma.
+    public function updateLocale(int $userId, string $locale): bool
+    {
+        if (!in_array($locale, self::LOCALES, true)) {
+            throw new \InvalidArgumentException('Unsupported locale: ' . $locale);
+        }
+
+        $statement = $this->pdo->prepare('UPDATE users SET locale = :locale WHERE id = :id');
+        $statement->execute(['locale' => $locale, 'id' => $userId]);
+
+        return $statement->rowCount() > 0;
     }
 
     /**
