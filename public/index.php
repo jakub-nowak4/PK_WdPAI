@@ -31,6 +31,7 @@ use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
 use App\Service\MailService;
+use App\Service\MyBidsService;
 use App\Service\OutbidNotifier;
 use App\Service\Translator;
 use App\Service\WelcomeMailService;
@@ -120,6 +121,10 @@ $routing = new Routing([
         new AuctionRepository($database->getConnection()),
         dirname(__DIR__) . '/lang',
         $config['app']['url'],
+    ),
+    MyBidsService::class => static fn (): MyBidsService => new MyBidsService(
+        new BidRepository($database->getConnection()),
+        new AuctionRepository($database->getConnection()),
     ),
     AuctionStateService::class => static fn (): AuctionStateService => new AuctionStateService(
         new AuctionDetailsService(
