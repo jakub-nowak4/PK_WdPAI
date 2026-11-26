@@ -23,7 +23,7 @@
 
     <section class="auction-list" aria-labelledby="auction-list-title">
         <header class="auction-list__header">
-            <h2 id="auction-list-title"><?= $e($t('auction.found', 'Znaleziono')) ?>: <?= $e((string) $total) ?> <?= $e($t('auction.active', 'aktywnych aukcji')) ?></h2>
+            <h2 id="auction-list-title"><?= $e($t('auction.found_count', 'Znalezione aukcje: {count}', ['count' => (string) $total])) ?></h2>
             <span class="status-label status-label--active"><span class="status-label__dot" aria-hidden="true"></span><?= $e($t('auction.live', 'LIVE 24/7')) ?></span>
         </header>
 
