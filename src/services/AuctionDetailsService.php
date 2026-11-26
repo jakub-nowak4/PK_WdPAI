@@ -34,7 +34,7 @@ final class AuctionDetailsService
         $summary = $this->auctions->findSummaryById($id);
 
         if ($summary === null) {
-            throw HttpException::notFound('Auction not found');
+            throw HttpException::notFound('Auction not found', 'auction_not_found');
         }
 
         return new AuctionDetails(

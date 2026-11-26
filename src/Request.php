@@ -14,6 +14,8 @@ GET wysyła puste pola), zły format kończy się wyjątkiem 400.
 */
 final class Request
 {
+    private const MAX_BODY_BYTES = 4096;
+
     /**
      * @param array<string, mixed> $query
      * @param array<string, mixed> $post
@@ -28,6 +30,7 @@ final class Request
         private readonly array $cookies = [],
         private readonly bool $secure = false,
         private readonly array $headers = [],
+        private readonly string $body = '',
     ) {
     }
 
@@ -51,7 +54,34 @@ final class Request
             $_COOKIE,
             $https !== '' && strtolower($https) !== 'off',
             $headers,
+            // Ciało czytamy z limitem: JSON oferty ma kilkadziesiąt bajtów, więcej to nadużycie.
+            (string) file_get_contents('php://input', false, null, 0, self::MAX_BODY_BYTES + 1),
         );
+    }
+
+    /*
+    Ciało żądania jako obiekt JSON (Fetch API, docs/api.md 3.2). Puste ciało, zły JSON, ciało większe
+    od limitu albo wartość inna niż obiekt (np. liczba, lista) to 400 invalid_json. Wartości w obiekcie
+    zostają bez zmian (typ pola sprawdza serwis); poprawność UTF-8 sprawdza sam json_decode.
+    @return array<string, mixed>
+    */
+    public function jsonBody(): array
+    {
+        if ($this->body === '' || strlen($this->body) > self::MAX_BODY_BYTES) {
+            throw HttpException::badRequest('Invalid JSON body', 'invalid_json');
+        }
+
+        try {
+            $data = json_decode($this->body, true, 8, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            throw HttpException::badRequest('Invalid JSON body', 'invalid_json');
+        }
+
+        if (!is_array($data) || ($data !== [] && array_is_list($data))) {
+            throw HttpException::badRequest('Invalid JSON body', 'invalid_json');
+        }
+
+        return $data;
     }
 
     /*

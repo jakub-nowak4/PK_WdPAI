@@ -47,6 +47,9 @@ final class ErrorController extends AppController
     private const CODE_MESSAGES = [
         'login_required' => 'error.login_required',
         'csrf_invalid' => 'error.csrf_invalid',
+        'invalid_id' => 'error.invalid_id',
+        'invalid_json' => 'error.invalid_json',
+        'auction_not_found' => 'auction.error.not_found',
     ];
 
     public function handle(HttpException $exception, Request $request): void

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Controller\AccountController;
 use App\Controller\AdminController;
 use App\Controller\AuctionController;
+use App\Controller\BidApiController;
 use App\Controller\CompanyController;
 use App\Controller\DefaultController;
 use App\Controller\ErrorController;
@@ -17,12 +18,15 @@ use App\Repository\AuctionRepository;
 use App\Repository\BidRepository;
 use App\Repository\BrandRepository;
 use App\Repository\CompanyRepository;
+use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
 use App\Service\AuctionDetailsService;
 use App\Service\AuctionListService;
+use App\Service\AuctionStateService;
 use App\Service\AuthService;
+use App\Service\BidService;
 use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
@@ -97,6 +101,26 @@ $routing = new Routing([
         new AuctionImageRepository($database->getConnection()),
         new BidRepository($database->getConnection()),
     ),
+    UserRepository::class => static fn (): UserRepository => new UserRepository($database->getConnection()),
+    // Oferta: BidService prowadzi transakcję na tym samym PDO, na którym działają repozytoria (docs/api.md 1.8).
+    BidService::class => static fn (): BidService => new BidService(
+        new AuctionRepository($database->getConnection()),
+        new BidRepository($database->getConnection()),
+        new CompanyRepository($database->getConnection()),
+        $database->getConnection(),
+        $translator,
+    ),
+    AuctionStateService::class => static fn (): AuctionStateService => new AuctionStateService(
+        new AuctionDetailsService(
+            new AuctionRepository($database->getConnection()),
+            new AuctionImageRepository($database->getConnection()),
+            new BidRepository($database->getConnection()),
+        ),
+        new BidRepository($database->getConnection()),
+        new CompanyRepository($database->getConnection()),
+        new NotificationRepository($database->getConnection()),
+        $translator,
+    ),
     CompanyReviewService::class => static fn (): CompanyReviewService => new CompanyReviewService(
         new CompanyRepository($database->getConnection()),
         new AuctionRepository($database->getConnection()),
@@ -119,6 +143,8 @@ $routing->get('/company/auctions/new', CompanyController::class, 'create');
 $routing->get('/company/auctions/{id}/delete', CompanyController::class, 'delete');
 $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
+$routing->get('/api/auctions/{id}/state', BidApiController::class, 'state');
+$routing->post('/api/auctions/{id}/bids', BidApiController::class, 'placeBid');
 $routing->post('/admin/companies/{id}/approve', AdminController::class, 'approve');
 $routing->post('/admin/companies/{id}/reject', AdminController::class, 'reject');
 $routing->post('/register', SecurityController::class, 'register');
