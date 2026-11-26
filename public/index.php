@@ -23,6 +23,7 @@ use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
 use App\Service\AuctionCreationService;
+use App\Service\AuctionDeletionService;
 use App\Service\AuctionDetailsService;
 use App\Service\AuctionFormValidator;
 use App\Service\AuctionListService;
@@ -123,6 +124,14 @@ $routing = new Routing([
         new UploadService(__DIR__ . '/uploads', $translator),
         $database->getConnection(),
     ),
+    // Usunięcie aukcji bez ofert: transakcja z blokadą aukcji, potem kasowanie plików zdjęć z public/uploads/auctions/.
+    AuctionDeletionService::class => static fn (): AuctionDeletionService => new AuctionDeletionService(
+        new AuctionRepository($database->getConnection()),
+        new AuctionImageRepository($database->getConnection()),
+        new BidRepository($database->getConnection()),
+        new UploadService(__DIR__ . '/uploads', $translator),
+        $database->getConnection(),
+    ),
     // Oferta: BidService prowadzi transakcję na tym samym PDO, na którym działają repozytoria (docs/api.md 1.8).
     BidService::class => static fn (): BidService => new BidService(
         new AuctionRepository($database->getConnection()),
@@ -174,12 +183,13 @@ $routing->get('/register/company', SecurityController::class, 'registerCompany')
 $routing->get('/account/pending', AccountController::class, 'pending');
 $routing->get('/company', CompanyController::class, 'index');
 $routing->get('/company/auctions/new', CompanyController::class, 'create');
-$routing->get('/company/auctions/{id}/delete', CompanyController::class, 'delete');
+$routing->get('/company/auctions/{id}/delete', CompanyController::class, 'confirmDelete');
 $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
 $routing->get('/api/auctions/{id}/state', BidApiController::class, 'state');
 $routing->post('/api/auctions/{id}/bids', BidApiController::class, 'placeBid');
 $routing->post('/company/auctions', CompanyController::class, 'store');
+$routing->post('/company/auctions/{id}/delete', CompanyController::class, 'delete');
 $routing->post('/admin/companies/{id}/approve', AdminController::class, 'approve');
 $routing->post('/admin/companies/{id}/reject', AdminController::class, 'reject');
 $routing->post('/register', SecurityController::class, 'register');

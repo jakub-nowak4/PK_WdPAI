@@ -101,6 +101,7 @@ return [
     'auction.error.ends_too_soon' => 'The auction must last at least one hour.',
     'auction.error.ends_too_late' => 'The auction can last at most 30 days.',
     'company.auction_created' => 'The auction has been added.',
+    'company.auction_deleted' => 'The auction has been deleted.',
 
     // Photo upload
     'upload.required' => 'Choose at least one photo.',
