@@ -85,7 +85,7 @@ przegladarka
 
 ### Front Controller
 
-`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, konfiguruje i uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`, `Database`, `CurrentUserProvider`), tworzy `MailService` i `WelcomeMailService` (polaczenie SMTP dopiero przy wysylce), rejestruje w `Routing` serwisy korzystajace z bazy (`CompanyRepository`, `UserRepository`, `AuthService`, `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `BidService`, `OutbidNotifier`, `MyBidsService`, `CompanyReviewService`) jako leniwe fabryki (polaczenie otwiera sie dopiero przy tworzeniu kontrolera, ktory ich potrzebuje), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 401, 403, 404) obsluguje `ErrorController::handle()`, a kazdy inny wyjatek (`\Throwable`) jest logowany jedna linia i konczy sie odpowiedzia 500 z `ErrorController::handleServerError()` (bez bazy i bez tresci wyjatku).
+`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, konfiguruje i uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`, `Database`, `CurrentUserProvider`), tworzy `MailService` i `WelcomeMailService` (polaczenie SMTP dopiero przy wysylce), rejestruje w `Routing` serwisy korzystajace z bazy (`CompanyRepository`, `UserRepository`, `BrandRepository`, `AuthService`, `AuctionListService`, `AuctionDetailsService`, `WonAuctionService`, `AuctionCreationService`, `AuctionDeletionService`, `CompanyPanelService`, `AuctionStateService`, `BidService`, `OutbidNotifier`, `MyBidsService`, `NotificationService`, `CompanyReviewService`) jako leniwe fabryki (polaczenie otwiera sie dopiero przy tworzeniu kontrolera, ktory ich potrzebuje), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 401, 403, 404) obsluguje `ErrorController::handle()`, a kazdy inny wyjatek (`\Throwable`) jest logowany jedna linia i konczy sie odpowiedzia 500 z `ErrorController::handleServerError()` (bez bazy i bez tresci wyjatku).
 
 Nowe trasy dodawaj w tym pliku w postaci:
 
@@ -102,6 +102,12 @@ Przyklad: `/auctions/{id}` wywoluje `AuctionController::show(int $id, Request $r
 
 Router obsluguje obecnie metody GET i POST. Nie dodawaj logiki biznesowej do routera.
 
+Trasa GET, ktora tylko czyta sesje, moze byc zarejestrowana z `releaseSession: true` (dzis tylko `GET /api/auctions/{id}/state`): router wola wtedy `session_write_close()` zaraz po dopasowaniu trasy, przed utworzeniem kontrolera i polaczeniem z baza, wiec polling nie blokuje innych zadan tej samej przegladarki. Zapisy do `$_SESSION` w takiej akcji przepadaja.
+
+```php
+$routing->get('/api/auctions/{id}/state', BidApiController::class, 'state', releaseSession: true);
+```
+
 ### Controller
 
 Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Controller` i dziedzicza po `AppController`. Ich zadaniem jest:
@@ -113,24 +119,34 @@ Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Cont
 
 Kontroler powinien byc cienki. Nie umieszczaj w nim rozbudowanych zapytan do bazy, HTML ani stylow.
 
-Obecnie istnieja kontrolery (aukcja wygrana, powiadomienia i panel firmy to na razie makiety ze statycznymi danymi, ale z guardami dostepu):
+Obecnie istnieja kontrolery (wszystkie korzystaja z danych z bazy):
 
 - `AppController` — klasa bazowa: `render()`, `redirect()`, `addFlash()`, `currentUserId()`, `currentRole()`, `requireLogin()`, `requireRole()`, `verifyCsrf()`, `csrfToken()`, `logInUser()`, `logOutUser()`, `homePathFor()`, `redirectIfLoggedIn()`,
 - `DefaultController` — `index()` (strona glowna: baner i pierwsza strona listy aukcji z `AuctionListService`),
-- `AuctionController` — `index(Request)` (lista aukcji z bazy, filtry w query przez `AuctionListService`), `show(int $id, Request)` (szczegoly aukcji z `AuctionDetailsService`; makietowy `?state=` do usuniecia), `won(int $id)` (makieta aukcji wygranej, tylko zalogowany),
+- `AuctionController` — `index(Request)` (lista aukcji z bazy, filtry w query przez `AuctionListService`), `show(int $id, Request)` (szczegoly aukcji z `AuctionDetailsService`; makietowy `?state=` do usuniecia), `won(int $id)` (aukcja wygrana z `WonAuctionService::forWinner()`: zalogowany, potem 404 przed 403),
 - `BidApiController` — `state(int $id)` (`GET /api/auctions/{id}/state`, publiczny, JSON z `AuctionStateService`), `placeBid(int $id, Request)` (`POST /api/auctions/{id}/bids`, kupujacy, CSRF w naglowku; `BidService` w transakcji, po odpowiedzi e-mail `OutbidNotifier`),
-- `AccountController` — `myBids(Request)` (tylko kupujacy, filtr `?status=`, dane z `MyBidsService`; widok jeszcze makieta), `notifications()` (makieta, zalogowany), `pending()` (firma; status z bazy, zatwierdzona dostaje 303 na `/company`),
+- `AccountController` — `myBids(Request)` (tylko kupujacy, filtr `?status=`, dane z `MyBidsService`), `notifications()` (zalogowany, `NotificationService`, zmienna widoku `notificationItems`), `readNotifications(Request)` (`POST /notifications/read`, CSRF, flash, 303 na `/notifications`), `pending()` (firma; status z bazy, zatwierdzona dostaje 303 na `/company`),
 - `SecurityController` — `login()`, `register()`, `registerCompany()` (GET formularz, POST przez `AuthService`), `logout()` (`POST /logout`),
-- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (ekran usuwania aukcji); wszystko makiety; kazda akcja zaczyna od prywatnego `requireApprovedCompany()` (firma `pending`/`rejected`: `HttpException::companyNotApproved()`, 403 z ekranem „konto czeka"),
+- `CompanyController` — `index()` (panel firmy z `CompanyPanelService`), `create()` (formularz „Dodaj aukcje"), `store(Request)` (`POST /company/auctions`: odrzucone cialo POST 422 przed CSRF, potem CSRF i `AuctionCreationService`; sukces 303 na `/company`), `confirmDelete(int $id)` (GET, ekran potwierdzenia, niczego nie usuwa), `delete(int $id, Request)` (POST, CSRF, `AuctionDeletionService`); kazda akcja zaczyna od prywatnego `requireApprovedCompany()` (firma `pending`/`rejected`: `HttpException::companyNotApproved()`, 403 z ekranem „konto czeka"),
 - `AdminController` — `index(Request)` (tylko administrator, filtr `?status=`), `approve(int $id, Request)`, `reject(int $id, Request)` (`CompanyReviewService`, CSRF, 404/409),
 - `LanguageController` — `change()` (zmiana jezyka, `POST /language` z CSRF),
-- `ErrorController` — `handle()` (400/401/403/404; 401 w HTML to 303 na `/login`, kod `company_not_approved` renderuje `account/pending`; dla `/api/*` JSON), `handleServerError()` (500, bez bazy).
+- `ErrorController` — `handle()` (400/401/403/404; 401 w HTML to 303 na `/login`, kod `company_not_approved` renderuje `account/pending`; widoki bledow dostaja `errorMessage` i `errorCode`; dla `/api/*` JSON), `handleServerError()` (500, bez bazy).
 
-Serwisy (`src/services/`, `App\Service`): `AuthService` (+ `RegistrationResult`), `CurrentUserProvider`, `LanguageService`, `Translator`, `MailerInterface`/`MailService`, `WelcomeMailService`, `CompanyReviewService`, `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `BidService` (+ `BidResult`), `OutbidNotifier`, `MyBidsService`, `UploadService`. Kontrakt tras, JSON i kolejnosci sprawdzen jest w prywatnym `docs/api.md`.
+Serwisy (`src/services/`, `App\Service`):
+
+- konta i layout: `AuthService` (+ `RegistrationResult`), `CurrentUserProvider`, `LanguageService`, `Translator`,
+- poczta: `MailerInterface`/`MailService` (SMTP przez `fsockopen`), `WelcomeMailService`, `OutbidNotifier` (przebicie), `WonNotifier` (wygrana, wolany przez CRON); kazdy blad poczty to jedna linia logu `mail=failed type=welcome|outbid|won ...`, bez adresu i tresci,
+- aukcje: `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `WonAuctionService`, `MyBidsService`, `NotificationService`,
+- oferty: `BidService` (+ `BidResult`),
+- firma: `CompanyPanelService`, `AuctionFormValidator` (reguly formularza aukcji jako stale klasy), `AuctionCreationService`, `AuctionDeletionService`, `UploadService`,
+- administrator: `CompanyReviewService`,
+- CRON: `AuctionCloser` (+ `ClosedAuction`, `CloseReport`), `LineLogger` (log CLI: jedna linia na zdarzenie na stdout).
+
+Transakcje PostgreSQL prowadza serwisy (`BidService`, `AuctionCreationService`, `AuctionDeletionService`, `AuctionCloser`, `CompanyReviewService`, rejestracja firmy w `AuthService`), nie repozytoria. Kontrakt tras, JSON i kolejnosci sprawdzen jest w prywatnym `docs/api.md`.
 
 ### Model
 
-Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele (`src/models/`) i repozytoria (`src/repositories/`) istnieja dla wszystkich tabel. Z bazy korzystaja dzis konta (rejestracja, logowanie, `CurrentUserProvider` w layoucie), status firmy, panel administratora, lista i szczegoly aukcji oraz API licytacji; ekrany aukcji wygranej, powiadomien i panelu firmy nadal pokazuja dane statyczne, a widok „Moje oferty" rysuje makiete mimo danych z kontrolera. Nie udawaj, ze dane widoczne w tych widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
+Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele (`src/models/`) i repozytoria (`src/repositories/`) istnieja dla wszystkich tabel. Z bazy korzystaja wszystkie ekrany: konta (rejestracja, logowanie, `CurrentUserProvider` w layoucie), status firmy, panel administratora, lista i szczegoly aukcji, API licytacji, „Moje oferty", aukcja wygrana, powiadomienia i panel firmy (lista, dodawanie, usuwanie). Pliki `public/views/partials/mock-*.php` i galezie `$isMock` w widokach to martwe pozostalosci makiet (kontrolery zawsze podaja dane); nie dodawaj nowych i nie opieraj sie na nich. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
 
 `composer.json` ma dokladne mapowania PSR-4 dla katalogow pisanych malymi literami:
 
