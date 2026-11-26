@@ -4216,3 +4216,46 @@ textarea.form-field__control {
         scroll-behavior: auto;
     }
 }
+
+/* ---------- T-047: podgląd zdjęć, błędy pól formularza ---------- */
+.photo-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    gap: var(--space-md);
+    padding: 0;
+    margin: var(--space-sm) 0 0;
+    list-style: none;
+}
+
+.photo-preview:empty {
+    display: none;
+}
+
+.photo-preview__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+}
+
+.photo-preview__image {
+    display: block;
+    width: 100%;
+    max-width: 160px;
+    height: auto;
+    aspect-ratio: 160 / 107;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    object-fit: cover;
+}
+
+.photo-preview__name {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+}
+
+.auction-form .form-field__control[aria-invalid="true"] {
+    background: var(--color-danger-soft);
+}
