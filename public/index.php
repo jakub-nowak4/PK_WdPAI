@@ -200,7 +200,7 @@ $routing->get('/', DefaultController::class, 'index');
 $routing->get('/api/auctions/{id}/state', BidApiController::class, 'state');
 $routing->post('/api/auctions/{id}/bids', BidApiController::class, 'placeBid');
 $routing->post('/notifications/read', AccountController::class, 'readNotifications');
-$routing->post('/company/auctions',CompanyController::class, 'store');
+$routing->post('/company/auctions', CompanyController::class, 'store');
 $routing->post('/company/auctions/{id}/delete', CompanyController::class, 'delete');
 $routing->post('/admin/companies/{id}/approve', AdminController::class, 'approve');
 $routing->post('/admin/companies/{id}/reject', AdminController::class, 'reject');

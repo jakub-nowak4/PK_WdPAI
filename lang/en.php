@@ -387,7 +387,7 @@ return [
     'time.second_short' => 's',
 
     // Page titles (<title>), pageTitle from controllers
-    'page.home.title' => 'My application',
+    'page.home.title' => 'Live car auctions',
     'page.auctions.title' => 'Auctions',
     'page.auction_show.title' => 'Auction details',
     'page.auction_won.title' => 'Auction won',
@@ -536,7 +536,8 @@ return [
     'notifications.type_outbid' => 'Outbid',
     'notifications.type_won' => 'Won',
     'notifications.type_ended' => 'Ended',
-    'notifications.outbid' => 'Someone outbid you in the auction',
+    'notifications.outbid' => 'You have been outbid in',
+    'notifications.current_price' => 'Current bid',
     'notifications.won' => 'You won the auction',
     'notifications.ended' => 'The auction has ended',
     'notifications.outbid_cta' => 'Raise your bid',
