@@ -22,7 +22,9 @@ use App\Repository\NotificationRepository;
 use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
+use App\Service\AuctionCreationService;
 use App\Service\AuctionDetailsService;
+use App\Service\AuctionFormValidator;
 use App\Service\AuctionListService;
 use App\Service\AuctionStateService;
 use App\Service\AuthService;
@@ -34,6 +36,7 @@ use App\Service\MailService;
 use App\Service\MyBidsService;
 use App\Service\OutbidNotifier;
 use App\Service\Translator;
+use App\Service\UploadService;
 use App\Service\WelcomeMailService;
 use App\Service\WonAuctionService;
 
@@ -111,6 +114,15 @@ $routing = new Routing([
         new BidRepository($database->getConnection()),
     ),
     UserRepository::class => static fn (): UserRepository => new UserRepository($database->getConnection()),
+    BrandRepository::class => static fn (): BrandRepository => new BrandRepository($database->getConnection()),
+    // Dodanie aukcji: walidacja, zapis zdjęć do public/uploads/auctions/ i aukcja ze zdjęciami w jednej transakcji.
+    AuctionCreationService::class => static fn (): AuctionCreationService => new AuctionCreationService(
+        new AuctionFormValidator(new BrandRepository($database->getConnection()), $translator),
+        new AuctionRepository($database->getConnection()),
+        new AuctionImageRepository($database->getConnection()),
+        new UploadService(__DIR__ . '/uploads', $translator),
+        $database->getConnection(),
+    ),
     // Oferta: BidService prowadzi transakcję na tym samym PDO, na którym działają repozytoria (docs/api.md 1.8).
     BidService::class => static fn (): BidService => new BidService(
         new AuctionRepository($database->getConnection()),
@@ -167,6 +179,7 @@ $routing->get('/admin', AdminController::class, 'index');
 $routing->get('/', DefaultController::class, 'index');
 $routing->get('/api/auctions/{id}/state', BidApiController::class, 'state');
 $routing->post('/api/auctions/{id}/bids', BidApiController::class, 'placeBid');
+$routing->post('/company/auctions', CompanyController::class, 'store');
 $routing->post('/admin/companies/{id}/approve', AdminController::class, 'approve');
 $routing->post('/admin/companies/{id}/reject', AdminController::class, 'reject');
 $routing->post('/register', SecurityController::class, 'register');
