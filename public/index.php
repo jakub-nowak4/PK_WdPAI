@@ -30,6 +30,7 @@ use App\Service\AuctionListService;
 use App\Service\AuctionStateService;
 use App\Service\AuthService;
 use App\Service\BidService;
+use App\Service\CompanyPanelService;
 use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
@@ -131,6 +132,10 @@ $routing = new Routing([
         new BidRepository($database->getConnection()),
         new UploadService(__DIR__ . '/uploads', $translator),
         $database->getConnection(),
+    ),
+    // Panel firmy: aukcje firmy z widoku auction_summary (jedno zapytanie, bez N+1).
+    CompanyPanelService::class => static fn (): CompanyPanelService => new CompanyPanelService(
+        new AuctionRepository($database->getConnection()),
     ),
     // Oferta: BidService prowadzi transakcję na tym samym PDO, na którym działają repozytoria (docs/api.md 1.8).
     BidService::class => static fn (): BidService => new BidService(

@@ -14,6 +14,7 @@ use App\Repository\CompanyRepository;
 use App\Request;
 use App\Service\AuctionCreationService;
 use App\Service\AuctionDeletionService;
+use App\Service\CompanyPanelService;
 use App\Service\CurrentUserProvider;
 use App\Service\Translator;
 use App\Service\UploadService;
@@ -33,17 +34,20 @@ final class CompanyController extends AppController
         private readonly BrandRepository $brands,
         private readonly AuctionCreationService $auctionCreation,
         private readonly AuctionDeletionService $auctionDeletion,
+        private readonly CompanyPanelService $panel,
     ) {
         parent::__construct($translator, $currentUsers);
     }
 
+    // GET /company (docs/api.md 2.5): aukcje firmy z bazy (CompanyPanelService, jedno zapytanie).
     public function index(): void
     {
-        $this->requireApprovedCompany();
+        $company = $this->requireApprovedCompany();
 
-        // MAKIETA: tresc statyczna, do czasu panelu firmy.
         $this->render('company/index', [
             'pageTitle' => $this->translator->translate('page.company.title'),
+            'company' => $this->panel->companyView($company),
+            'auctions' => $this->panel->auctionsFor($company),
         ]);
     }
 
