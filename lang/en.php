@@ -95,6 +95,9 @@ return [
     'validation.email_taken' => 'An account with this e-mail address already exists.',
     'validation.invalid_choice' => 'Choose a value from the list.',
     'validation.datetime' => 'Enter a valid date and time.',
+    'validation.number_range' => 'Enter a whole number from {min} to {max}.',
+    'validation.ends_too_soon' => 'The auction must last at least 1 hour.',
+    'validation.ends_too_late' => 'The auction can last 30 days at most.',
 
     // Adding an auction (docs/api.md 2.5)
     'auction.error.starts_in_past' => 'The auction start cannot be in the past.',
@@ -246,6 +249,12 @@ return [
     'create.anti_sniping' => 'A bid placed in the last 30 seconds extends the auction by 30 seconds.',
     'create.submit' => 'Publish auction',
     'create.cancel' => 'Cancel',
+    'create.photos_preview' => 'Preview of the selected photos',
+    'photo.required' => 'Add at least one photo.',
+    'photo.too_many' => 'You can add up to {max} photos.',
+    'photo.too_big' => 'The file {name} is too large (limit {max} MB).',
+    'photo.bad_type' => 'The file {name} has an unsupported format. Allowed: JPG, PNG, WebP.',
+    'photo.cover' => 'cover',
     'field.auction_title' => 'Listing title',
     'field.auction_title_hint' => '5 to 120 characters, e.g. 2018 Ford Mustang GT',
     'field.brand' => 'Brand',

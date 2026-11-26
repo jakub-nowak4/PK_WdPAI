@@ -95,6 +95,9 @@ return [
     'validation.email_taken' => 'Konto z tym adresem e-mail już istnieje.',
     'validation.invalid_choice' => 'Wybierz wartość z listy.',
     'validation.datetime' => 'Podaj poprawną datę i godzinę.',
+    'validation.number_range' => 'Podaj liczbę całkowitą od {min} do {max}.',
+    'validation.ends_too_soon' => 'Aukcja musi trwać co najmniej 1 godzinę.',
+    'validation.ends_too_late' => 'Aukcja może trwać najwyżej 30 dni.',
 
     // Dodawanie aukcji (docs/api.md 2.5)
     'auction.error.starts_in_past' => 'Początek aukcji nie może być w przeszłości.',
@@ -246,6 +249,12 @@ return [
     'create.anti_sniping' => 'Oferta złożona w ostatnich 30 sekundach przedłuża aukcję o 30 sekund.',
     'create.submit' => 'Opublikuj aukcję',
     'create.cancel' => 'Anuluj',
+    'create.photos_preview' => 'Podgląd wybranych zdjęć',
+    'photo.required' => 'Dodaj co najmniej jedno zdjęcie.',
+    'photo.too_many' => 'Możesz dodać najwyżej {max} zdjęć.',
+    'photo.too_big' => 'Plik {name} jest za duży (limit {max} MB).',
+    'photo.bad_type' => 'Plik {name} ma niedozwolony format. Dozwolone: JPG, PNG, WebP.',
+    'photo.cover' => 'okładka',
     'field.auction_title' => 'Tytuł ogłoszenia',
     'field.auction_title_hint' => 'Od 5 do 120 znaków, np. 2018 Ford Mustang GT',
     'field.brand' => 'Marka',
