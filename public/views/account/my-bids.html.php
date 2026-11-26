@@ -1,20 +1,18 @@
 <?php
 /**
- * Moje oferty (ekran 09): GET /my-bids?status=all|leading|outbid|won|lost.
- * Oczekiwane zmienne od kontrolera (na razie brak, uzywana jest MAKIETA z partials/mock-my-bids.php):
- * $bids (auctionId, title, vin, origin, image|null, status, myBid, price, minIncrement, endsAtLabel, timeLeft), $status;
- * opcjonalnie $t, $e. Filtrowanie po statusie robi docelowo zapytanie SQL, nie widok.
+ * Moje oferty (ekran 09): GET /my-bids?status=all|leading|outbid|won|lost. Dane z bazy (AccountController::myBids).
+ * Zmienne od kontrolera: $myBids (list<App\Model\MyBid>, po filtrze statusu), $statusCounts (all, leading, outbid,
+ * won, lost; z calej listy), $runningTotal (App\Model\Money), $serverTime (DateTimeImmutable), $status.
+ * Filtrowanie i statusy liczy serwer (MyBidsService); widok tylko prezentuje.
  */
+require_once __DIR__ . '/../partials/auction-card-data.php';
+
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
 $status = (string) ($status ?? 'all');
-
-$isMock = false;
-if (!isset($bids)) {
-    $bids = require __DIR__ . '/../partials/mock-my-bids.php';
-    $isMock = true;
-}
-$money = static fn (int|float $amount): string => number_format((int) $amount, 0, ',', "\u{00A0}") . "\u{00A0}zł";
+$myBids = $myBids ?? [];
+$counts = $statusCounts ?? ['all' => 0, 'leading' => 0, 'outbid' => 0, 'won' => 0, 'lost' => 0];
+$now = $serverTime ?? new \DateTimeImmutable();
 
 $tabs = [
     'all' => $t('bids.tab_all', 'Wszystkie'),
@@ -29,13 +27,10 @@ $statusLabels = [
     'won' => $t('bids.status_won', 'Wygrana'),
     'lost' => $t('bids.status_lost', 'Przegrana'),
 ];
-$counts = ['all' => count($bids)];
-foreach (array_keys($statusLabels) as $key) {
-    $counts[$key] = count(array_filter($bids, static fn (array $row): bool => $row['status'] === $key));
+if (!isset($tabs[$status])) {
+    $status = 'all';
 }
-$rows = $status === 'all' ? $bids : array_values(array_filter($bids, static fn (array $row): bool => $row['status'] === $status));
-$running = array_filter($bids, static fn (array $row): bool => in_array($row['status'], ['leading', 'outbid'], true));
-$runningValue = array_sum(array_column($running, 'myBid'));
+$runningCount = (int) $counts['leading'] + (int) $counts['outbid'];
 ?>
 <main class="page page--my-bids" id="main-content">
     <header class="page__header">
@@ -46,22 +41,18 @@ $runningValue = array_sum(array_column($running, 'myBid'));
         </div>
     </header>
 
-    <?php if ($isMock): ?>
-        <p class="alert alert--info" role="note">MAKIETA: dane przykładowe, nie pochodzą z bazy.</p>
-    <?php endif; ?>
-
-    <?php if ($counts['outbid'] > 0): ?>
+    <?php if ((int) $counts['outbid'] > 0): ?>
         <p class="alert alert--danger" role="status"><?= $e($t('bids.needs_reaction', 'Aukcje wymagające reakcji (przebite):')) ?> <?= (int) $counts['outbid'] ?></p>
     <?php endif; ?>
 
     <section class="stat-tiles" aria-label="<?= $e($t('bids.stats', 'Podsumowanie ofert')) ?>">
         <article class="stat-tile">
             <p class="stat-tile__label"><?= $e($t('bids.stat_running', 'Trwające aukcje')) ?></p>
-            <p class="stat-tile__value"><?= count($running) ?></p>
+            <p class="stat-tile__value"><?= $runningCount ?></p>
         </article>
         <article class="stat-tile">
             <p class="stat-tile__label"><?= $e($t('bids.stat_value', 'Wartość Twoich ofert')) ?></p>
-            <p class="stat-tile__value"><?= $e($money($runningValue)) ?></p>
+            <p class="stat-tile__value"><?= $e(isset($runningTotal) ? $runningTotal->format() : '0' . "\u{00A0}zł") ?></p>
         </article>
         <article class="stat-tile stat-tile--highlight">
             <p class="stat-tile__label"><?= $e($t('bids.stat_won', 'Wygrane pojazdy')) ?></p>
@@ -76,14 +67,14 @@ $runningValue = array_sum(array_column($running, 'myBid'));
     </nav>
 
     <section class="card my-bids" aria-labelledby="my-bids-title">
-        <h2 class="card__title" id="my-bids-title"><?= $e($tabs[$status]) ?> <span class="my-bids__count">(<?= count($rows) ?>)</span></h2>
+        <h2 class="card__title" id="my-bids-title"><?= $e($tabs[$status]) ?> <span class="my-bids__count">(<?= count($myBids) ?>)</span></h2>
 
-        <?php if ($bids === []): ?>
+        <?php if ((int) $counts['all'] === 0): ?>
             <div class="empty-state">
                 <p class="empty-state__title"><?= $e($t('bids.empty_title', 'Nie licytujesz jeszcze żadnej aukcji')) ?></p>
                 <a class="button button--primary" href="/auctions"><?= $e($t('bids.empty_cta', 'Przeglądaj aukcje')) ?></a>
             </div>
-        <?php elseif ($rows === []): ?>
+        <?php elseif ($myBids === []): ?>
             <div class="empty-state">
                 <p class="empty-state__title"><?= $e($t('bids.empty_tab', 'Brak aukcji w tej kategorii')) ?></p>
             </div>
@@ -101,34 +92,41 @@ $runningValue = array_sum(array_column($running, 'myBid'));
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($rows as $row):
-                        $rowStatus = array_key_exists($row['status'], $statusLabels) ? $row['status'] : 'lost';
-                        $title = (string) $row['title'];
-                        $href = $rowStatus === 'won' ? '/auctions/' . (int) $row['auctionId'] . '/won' : '/auctions/' . (int) $row['auctionId']; ?>
+                    <?php foreach ($myBids as $row):
+                        $summary = $row->getSummary();
+                        $auction = $summary->getAuction();
+                        $card = auctionCardData($summary, $t, $now);
+                        $rowStatus = $row->getStatus()->value;
+                        $title = $auction->getTitle();
+                        $href = $row->getLink();
+                        $isRunning = $rowStatus === 'leading' || $rowStatus === 'outbid';
+                        $timeLeft = $isRunning
+                            ? auctionCardTimeLeft($auction->getEndsAt(), $now, $t)
+                            : $t('auction.ended', 'Aukcja zakończona'); ?>
                         <tr>
                             <td class="data-table__vehicle" data-label="<?= $e($t('bids.col_vehicle', 'Pojazd')) ?>">
-                                <?php if (!empty($row['image'])): ?>
-                                    <img class="data-table__thumb" src="<?= $e($row['image']) ?>" alt="<?= $e($title) ?>" loading="lazy" width="96" height="64">
+                                <?php if ($card['image'] !== null): ?>
+                                    <img class="data-table__thumb" src="<?= $e($card['image']) ?>" alt="<?= $e($title) ?>" loading="lazy" width="96" height="64">
                                 <?php else: ?>
-                                    <span class="data-table__thumb data-table__thumb--empty" role="img" aria-label="<?= $e($t('auction.no_photo', 'Brak zdjęcia')) ?>">🚗</span>
+                                    <span class="data-table__thumb data-table__thumb--empty" role="img" aria-label="<?= $e($t('auction.no_photo', 'Brak zdjęcia')) ?>"></span>
                                 <?php endif; ?>
                                 <span>
-                                    <a href="/auctions/<?= (int) $row['auctionId'] ?>"><?= $e($title) ?></a>
-                                    <span class="data-table__note"><?= $e($t('auction.vin', 'VIN')) ?>: <?= $e($row['vin']) ?> · <?= $e($row['origin']) ?></span>
+                                    <a href="/auctions/<?= (int) $auction->getId() ?>"><?= $e($title) ?></a>
+                                    <span class="data-table__note"><?php if ($auction->getVin() !== null): ?><?= $e($t('auction.vin', 'VIN')) ?>: <?= $e($auction->getVin()) ?> · <?php endif; ?><?= $e($card['origin']) ?></span>
                                 </span>
                             </td>
                             <td data-label="<?= $e($t('bids.col_mine', 'Twoja oferta')) ?>">
-                                <?php if ($rowStatus === 'outbid'): ?><s><?= $e($money($row['myBid'])) ?></s><?php else: ?><?= $e($money($row['myBid'])) ?><?php endif; ?>
+                                <?php if ($rowStatus === 'outbid'): ?><s><?= $e($row->getMyHighestBid()->format()) ?></s><?php else: ?><?= $e($row->getMyHighestBid()->format()) ?><?php endif; ?>
                             </td>
                             <td class="data-table__price" data-label="<?= $e($t('bids.col_price', 'Aktualna cena')) ?>">
-                                <?= $e($money($row['price'])) ?>
+                                <?= $e($summary->getCurrentPrice()->format()) ?>
                                 <?php if ($rowStatus === 'outbid'): ?>
-                                    <span class="data-table__note">+<?= $e($money($row['price'] - $row['myBid'])) ?></span>
+                                    <span class="data-table__note">+<?= $e($row->getGap()->format()) ?></span>
                                 <?php endif; ?>
                             </td>
                             <td data-label="<?= $e($t('bids.col_time', 'Pozostały czas')) ?>">
-                                <?= $e($row['timeLeft'] !== '' ? $row['timeLeft'] : $t('auction.ended', 'Aukcja zakończona')) ?>
-                                <span class="data-table__note"><?= $e($row['endsAtLabel']) ?></span>
+                                <?= $e($timeLeft) ?>
+                                <span class="data-table__note"><?= $e($auction->getEndsAt()->format('d.m.Y H:i')) ?></span>
                             </td>
                             <td data-label="<?= $e($t('bids.col_status', 'Status')) ?>">
                                 <span class="status-label status-label--<?= $e($rowStatus) ?>"><?= $e($statusLabels[$rowStatus]) ?></span>
