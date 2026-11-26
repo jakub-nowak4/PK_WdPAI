@@ -42,10 +42,13 @@ Jeszcze nie istnieje: testy jednostkowe (`tests/`, PHPUnit), konfiguracja produk
 
 ```text
 .
+├── bin/
+│   └── close-auctions.php     # skrypt CLI dla CRON (zamykanie aukcji)
 ├── docker/
 │   ├── nginx/                 # obraz i konfiguracja Nginx
-│   ├── php/                   # obraz PHP-FPM i rozszerzenia PHP
-│   └── db/                    # obraz PostgreSQL
+│   ├── php/                   # obraz PHP-FPM, rozszerzenia i limity PHP (tez dla uslugi cron)
+│   ├── cron/crontab           # harmonogram uslugi `cron`
+│   └── db/                    # obraz PostgreSQL, schemat i dane demo
 ├── public/                    # jedyny publicznie dostepny katalog
 │   ├── index.php              # front controller i definicje tras
 │   └── views/                 # szablony HTML renderowane przez kontrolery
@@ -56,11 +59,11 @@ Jeszcze nie istnieje: testy jednostkowe (`tests/`, PHPUnit), konfiguracja produk
 │   ├── services/              # logika aplikacji (App\Service)
 │   ├── Exception/             # wyjatki aplikacji (App\Exception): HttpException, ValidationException, BidException, MailException
 │   ├── Database.php           # polaczenie PDO z PostgreSQL
-│   ├── Request.php            # niezmienny obiekt zadania (query, post, naglowki, ciasteczka, cialo JSON)
+│   ├── Request.php            # niezmienny obiekt zadania (query, post, pliki, naglowki, ciasteczka, cialo JSON)
 │   └── Routing.php            # rejestracja i obsluga tras
 ├── config.php                 # konfiguracja ze zmiennych srodowiskowych
 ├── composer.json              # konfiguracja autoloadingu
-└── docker-compose.yaml        # uslugi `server`, `php`, `db`, `mailpit`, `pgadmin-wdpai`
+└── docker-compose.yaml        # uslugi `server`, `php`, `cron`, `db`, `mailpit`, `pgadmin-wdpai`
 ```
 
 Nie umieszczaj logiki aplikacji ani danych wrazliwych w `public/`. Ten katalog jest document rootem Nginx i sluzy tylko jako punkt wejscia oraz miejsce na widoki i zasoby publiczne.
@@ -198,6 +201,8 @@ docker compose ps
 docker compose logs -f
 docker compose exec php php -l src/Routing.php
 docker compose exec php composer dump-autoload
+docker compose exec php php bin/close-auctions.php   # jeden przebieg CRON recznie
+docker compose logs -f cron                          # log CRON (co minute)
 docker compose down
 ```
 
@@ -212,6 +217,9 @@ Warto wiedziec:
 - `vendor/` nie jest w repozytorium, wiec na czystym klonie po `docker compose up --build -d` trzeba raz wykonac `docker compose exec php composer install`.
 - Nazwy wolumenu bazy i sieci nie sa sztywne: Compose dodaje prefiks nazwy projektu (katalog albo opcja `-p`), np. `<projekt>_app` i `<projekt>_app-network`. Dzieki temu `-p` izoluje zasoby kilku kopii projektu. Stary wolumen o nazwie `app` nie jest juz uzywany; nowy startuje pusty i wykonuje `01-schema.sql` oraz `02-demo-data.sql`.
 - Nginx wykonuje PHP wylacznie przez `/index.php`; zadanie o inny plik `.php` (widok, partial) dostaje 404. `display_errors` jest wylaczone, a bledy PHP trafiaja do logow kontenera: `docker compose logs php`.
+- Usluga `cron` uzywa tego samego obrazu, kodu i zmiennych srodowiskowych co `php`, ale zamiast PHP-FPM uruchamia BusyBox `crond` z harmonogramem z `docker/cron/crontab` (znaki CR z pliku sa usuwane przy starcie). Skrypt `bin/close-auctions.php` konczy sie kodem 0 (sukces, takze gdy e-mail nie wyszedl), 1 (blad przy czesci aukcji) albo 2 (blad krytyczny, np. baza niedostepna).
+- Limity uploadu w `docker/php/Dockerfile`: `upload_max_filesize = 5M`, `post_max_size = 45M`, `max_file_uploads = 20` (celowo wiecej niz 8: limit 8 zdjec pilnuje `AuctionFormValidator`, a przy limicie PHP rownym 8 dziewiaty plik znikalby po cichu). Nginx: `client_max_body_size 50M`.
+- Usluga `php` ma `dns_opt` (`timeout:1`, `attempts:1`): zatrzymany kontener (np. `mailpit`) nie ma wpisu w DNS Dockera, a domyslne rozwiazywanie nazwy trwalo ok. 3 s. `MailService` ma osobny limit polaczenia 2 s i 5 s na odpowiedz serwera.
 
 ## Weryfikacja zmian
 
