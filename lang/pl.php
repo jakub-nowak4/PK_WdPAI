@@ -542,4 +542,6 @@ return [
     'notifications.outbid_cta' => 'Przebij ofertę',
     'notifications.won_cta' => 'Zobacz wygraną',
     'notifications.ended_cta' => 'Szczegóły aukcji',
+    'notifications.marked_read' => 'Wszystkie powiadomienia oznaczono jako przeczytane.',
+    'notifications.nothing_to_mark' => 'Nie masz nowych powiadomień.',
 ];

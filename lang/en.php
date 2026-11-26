@@ -542,4 +542,6 @@ return [
     'notifications.outbid_cta' => 'Raise your bid',
     'notifications.won_cta' => 'View your win',
     'notifications.ended_cta' => 'Auction details',
+    'notifications.marked_read' => 'All notifications marked as read.',
+    'notifications.nothing_to_mark' => 'You have no new notifications.',
 ];
