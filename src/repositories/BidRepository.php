@@ -50,6 +50,20 @@ final class BidRepository extends BaseRepository
         return $row === false ? null : $this->mapRow($row);
     }
 
+    // Id użytkowników, którzy złożyli w aukcji choć jedną ofertę (każdy raz): odbiorcy powiadomień po zamknięciu aukcji.
+    /**
+     * @return list<int>
+     */
+    public function findBidderIds(int $auctionId): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT DISTINCT user_id FROM bids WHERE auction_id = :auction_id ORDER BY user_id'
+        );
+        $statement->execute(['auction_id' => $auctionId]);
+
+        return array_map(static fn (mixed $id): int => (int) $id, $statement->fetchAll(\PDO::FETCH_COLUMN));
+    }
+
     // Historia ofert aukcji od najstarszej (docs/api.md 3.1 recentBids). Chronologia jest potrzebna serwisowi,
     // bo numer "Licytujący N" wynika z kolejności pierwszej oferty danej osoby; ostatnie 10 wycina serwis.
     /**
