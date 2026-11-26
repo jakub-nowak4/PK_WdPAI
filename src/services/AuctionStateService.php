@@ -10,6 +10,7 @@ use App\Model\Role;
 use App\Repository\BidRepository;
 use App\Repository\CompanyRepository;
 use App\Repository\NotificationRepository;
+use App\Support\LocalTime;
 
 /*
 Stan aukcji dla Fetch API (docs/api.md 3.1): składa tablicę gotową do json_encode z AuctionDetailsService
@@ -20,8 +21,6 @@ w strefie Europe/Warsaw. Serwis tylko czyta; po złożeniu oferty woła się go 
 */
 final class AuctionStateService
 {
-    private const TIMEZONE = 'Europe/Warsaw';
-
     public function __construct(
         private readonly AuctionDetailsService $details,
         private readonly BidRepository $bids,
@@ -163,6 +162,6 @@ final class AuctionStateService
 
     private function iso(\DateTimeImmutable $time): string
     {
-        return $time->setTimezone(new \DateTimeZone(self::TIMEZONE))->format(\DATE_ATOM);
+        return LocalTime::iso($time);
     }
 }

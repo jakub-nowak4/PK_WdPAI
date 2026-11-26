@@ -126,7 +126,7 @@ $runningCount = (int) $counts['leading'] + (int) $counts['outbid'];
                             </td>
                             <td data-label="<?= $e($t('bids.col_time', 'Pozostały czas')) ?>">
                                 <?= $e($timeLeft) ?>
-                                <span class="data-table__note"><?= $e($auction->getEndsAt()->format('d.m.Y H:i')) ?></span>
+                                <span class="data-table__note"><?= $e(\App\Support\LocalTime::format($auction->getEndsAt(), 'd.m.Y H:i')) ?></span>
                             </td>
                             <td data-label="<?= $e($t('bids.col_status', 'Status')) ?>">
                                 <span class="status-label status-label--<?= $e($rowStatus) ?>"><?= $e($statusLabels[$rowStatus]) ?></span>

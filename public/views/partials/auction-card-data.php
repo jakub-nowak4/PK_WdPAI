@@ -76,7 +76,7 @@ if (!function_exists('auctionCardData')) {
             'price' => $format(intdiv($auction->getCurrentPrice()->grosze(), 100)),
             'bids' => $auction->getBidCount(),
             'timeLeft' => $isScheduled
-                ? $t('auction.starts', 'Start') . ' ' . $a->getStartsAt()->format('d.m.Y H:i')
+                ? $t('auction.starts', 'Start') . ' ' . \App\Support\LocalTime::format($a->getStartsAt(), 'd.m.Y H:i')
                 : auctionCardTimeLeft($a->getEndsAt(), $now, $t),
             'urgent' => !$isScheduled && $secondsLeft < 3600,
             'status' => $a->getStatus()->value,

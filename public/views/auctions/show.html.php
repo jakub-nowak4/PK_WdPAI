@@ -58,7 +58,7 @@ foreach ($recentList as $index => $bid) {
         'isYou' => $bid->isYou(),
         'amount' => $zloty($bid->getAmount()),
         'diff' => $diff,
-        'when' => $bid->getPlacedAt()->format('d.m.Y H:i'),
+        'when' => \App\Support\LocalTime::format($bid->getPlacedAt(), 'd.m.Y H:i'),
     ];
 }
 
@@ -76,10 +76,10 @@ $auction = [
     'minNextBid' => $zloty($auctionSummary->getMinNextBid()),
     'startPrice' => $zloty($record->getStartingPrice()),
     'bidCount' => $auctionSummary->getBidCount(),
-    'endsAt' => $record->getEndsAt()->format(DATE_ATOM),
-    'endsAtLabel' => $record->getEndsAt()->format('d.m.Y, H:i'),
-    'startsAtLabel' => $record->getStartsAt()->format('d.m.Y, H:i'),
-    'serverTime' => $serverTime->format(DATE_ATOM),
+    'endsAt' => \App\Support\LocalTime::iso($record->getEndsAt()),
+    'endsAtLabel' => \App\Support\LocalTime::format($record->getEndsAt()),
+    'startsAtLabel' => \App\Support\LocalTime::format($record->getStartsAt()),
+    'serverTime' => \App\Support\LocalTime::iso($serverTime),
     'secondsLeft' => $secondsLeft,
     'timeLeft' => $timeLeft($secondsLeft),
     'seller' => ['name' => $companyName, 'initials' => mb_strtoupper(mb_substr($companyName, 0, 2))],
