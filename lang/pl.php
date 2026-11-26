@@ -101,6 +101,7 @@ return [
     'auction.error.ends_too_soon' => 'Aukcja musi trwać co najmniej godzinę.',
     'auction.error.ends_too_late' => 'Aukcja może trwać najwyżej 30 dni.',
     'company.auction_created' => 'Aukcja została dodana.',
+    'company.auction_deleted' => 'Aukcja została usunięta.',
 
     // Upload zdjęć
     'upload.required' => 'Wybierz co najmniej jedno zdjęcie.',
