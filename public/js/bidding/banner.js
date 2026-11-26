@@ -19,6 +19,9 @@ export function createBanner(i18n, focusTarget) {
 
     return {
         hide: hideAll,
+        hideSuccess() {
+            setHidden(success, true);
+        },
         // amount: sformatowana kwota oferty, extended: czy anti-sniping przedluzyl aukcje.
         showSuccess(amount, extended) {
             if (!success) {
