@@ -1,22 +1,43 @@
 <?php
 /**
  * Powiadomienia (GET /notifications): lista kart, najnowsze pierwsze.
- * Oczekiwane zmienne od kontrolera (na razie brak, uzywana jest MAKIETA z partials/mock-notifications.php):
- * $notifications (id, type outbid|won|auction_ended, auctionId, title, dateLabel, unread); opcjonalnie $csrfToken, $t, $e.
+ * Kontrakt T-060: $notificationItems (list<App\Model\NotificationItem>, moze byc pusta), $currentUser['unreadCount'], $csrfToken.
+ * Gdy $notificationItems nie istnieje (backend T-060 jeszcze nie scalony), uzywana jest MAKIETA z partials/mock-notifications.php.
  */
 $e = $e ?? static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 $t = $t ?? static fn (string $key, string $default = ''): string => $default;
 $csrfToken = (string) ($csrfToken ?? '');
 
-$isMock = false;
-if (!isset($notifications)) {
-    $notifications = require __DIR__ . '/../partials/mock-notifications.php';
-    $isMock = true;
+// Wspolny ksztalt wiersza dla danych z bazy i makiety.
+$rows = [];
+$isMock = !isset($notificationItems);
+if ($isMock) {
+    foreach (require __DIR__ . '/../partials/mock-notifications.php' as $mock) {
+        $rows[] = [
+            'type' => $mock['type'], 'title' => $mock['title'], 'dateLabel' => $mock['dateLabel'],
+            'unread' => $mock['unread'], 'price' => '', 'brand' => '',
+            'href' => '/auctions/' . (int) $mock['auctionId'] . ($mock['type'] === 'won' ? '/won' : ''),
+        ];
+    }
+    $unread = count(array_filter($rows, static fn (array $row): bool => $row['unread']));
+} else {
+    foreach ($notificationItems as $item) {
+        $summary = $item->getSummary();
+        $rows[] = [
+            'type' => $item->getNotification()->getType()->value,
+            'title' => $summary->getAuction()->getTitle(),
+            'dateLabel' => $item->getNotification()->getCreatedAt()->format('d.m.Y, H:i'),
+            'unread' => !$item->getNotification()->isRead(),
+            'price' => $summary->getCurrentPrice()->format(),
+            'brand' => $summary->getBrandName(),
+            'href' => $item->getLink(),
+        ];
+    }
+    $unread = (int) ($currentUser['unreadCount'] ?? 0);
 }
-$unread = count(array_filter($notifications, static fn (array $row): bool => $row['unread']));
 
 $types = [
-    'outbid' => ['icon' => '⚠', 'label' => $t('notifications.type_outbid', 'Przebity'), 'text' => $t('notifications.outbid', 'Ktoś przebił Twoją ofertę w aukcji'), 'cta' => $t('notifications.outbid_cta', 'Przebij ofertę')],
+    'outbid' => ['icon' => '⚠', 'label' => $t('notifications.type_outbid', 'Przebity'), 'text' => $t('notifications.outbid', 'Zostałeś przebity w aukcji'), 'cta' => $t('notifications.outbid_cta', 'Przebij ofertę')],
     'won' => ['icon' => '🏆', 'label' => $t('notifications.type_won', 'Wygrana'), 'text' => $t('notifications.won', 'Wygrałeś aukcję'), 'cta' => $t('notifications.won_cta', 'Zobacz wygraną')],
     'auction_ended' => ['icon' => '⏱', 'label' => $t('notifications.type_ended', 'Zakończona'), 'text' => $t('notifications.ended', 'Zakończyła się aukcja'), 'cta' => $t('notifications.ended_cta', 'Szczegóły aukcji')],
 ];
@@ -41,33 +62,37 @@ $types = [
     <?php endif; ?>
 
     <section aria-labelledby="notifications-title">
-        <h2 class="visually-hidden" id="notifications-title"><?= $e($t('notifications.list_title', 'Lista powiadomień')) ?> (<?= count($notifications) ?>)</h2>
+        <h2 class="visually-hidden" id="notifications-title"><?= $e($t('notifications.list_title', 'Lista powiadomień')) ?> (<?= count($rows) ?>)</h2>
 
-        <?php if ($notifications === []): ?>
+        <?php if ($rows === []): ?>
             <div class="empty-state">
                 <p class="empty-state__title"><?= $e($t('notifications.empty', 'Nie masz jeszcze powiadomień')) ?></p>
                 <a class="button button--primary" href="/auctions"><?= $e($t('bids.empty_cta', 'Przeglądaj aukcje')) ?></a>
             </div>
         <?php else: ?>
             <ul class="notification-list">
-                <?php foreach ($notifications as $row):
+                <?php foreach ($rows as $row):
                     $type = array_key_exists($row['type'], $types) ? $row['type'] : 'auction_ended';
                     $meta = $types[$type];
                     $title = (string) $row['title'];
-                    $href = '/auctions/' . (int) $row['auctionId'] . ($type === 'won' ? '/won' : ''); ?>
+                    $statusClass = $type === 'auction_ended' ? 'lost' : $type; ?>
                     <li>
                         <article class="card notification<?= $row['unread'] ? ' notification--unread' : '' ?>">
                             <span class="notification__icon" aria-hidden="true"><?= $e($meta['icon']) ?></span>
                             <div class="notification__body">
-                                <p class="notification__text"><?= $e($meta['text']) ?>: <a href="/auctions/<?= (int) $row['auctionId'] ?>"><?= $e($title) ?></a></p>
+                                <p class="notification__text"><?= $e($meta['text']) ?>: <a href="<?= $e($row['href']) ?>"><?= $e($title) ?></a></p>
+                                <?php if ($type === 'outbid' && $row['price'] !== ''): ?>
+                                    <p class="notification__price">
+                                        <?= $e($t('notifications.current_price', 'Aktualna oferta')) ?>: <strong><?= $e($row['price']) ?></strong>
+                                    </p>
+                                <?php endif; ?>
                                 <p class="notification__meta">
                                     <time><?= $e($row['dateLabel']) ?></time>
                                     <?php if ($row['unread']): ?><span class="visually-hidden"> · <?= $e($t('notifications.unread', 'Nowe')) ?></span><?php endif; ?>
                                 </p>
                             </div>
-                            <?php $statusClass = $type === 'auction_ended' ? 'lost' : $type; ?>
                             <span class="status-label status-label--<?= $e($statusClass) ?>"><?= $e($meta['label']) ?></span>
-                            <a class="button button--secondary button--small" href="<?= $e($href) ?>"
+                            <a class="button button--<?= $type === 'outbid' ? 'primary' : 'secondary' ?> button--small" href="<?= $e($row['href']) ?>"
                                aria-label="<?= $e($meta['cta'] . ': ' . $title) ?>"><?= $e($meta['cta']) ?></a>
                         </article>
                     </li>
