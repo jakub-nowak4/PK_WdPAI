@@ -12,10 +12,18 @@ Aktualnie aplikacja obsluguje:
 
 - konta z bazy danych: rejestracje kupujacego (`GET|POST /register`) i firmy (`GET|POST /register/company`, konto i firma w jednej transakcji), logowanie (`GET|POST /login`) i wylogowanie (`POST /logout`) przez `App\Service\AuthService`; w sesji tylko `userId` i `role`, token CSRF na kazdym POST, komunikaty flash po przekierowaniu,
 - ekran „konto czeka na zatwierdzenie" (`/account/pending`) ze statusem firmy z bazy (zatwierdzona firma dostaje 303 na `/company`); uzytkownika w naglowku layoutu dostarcza `App\Service\CurrentUserProvider` (z bazy, tylko dla zalogowanego),
-- strone glowna pod `/` oraz ekrany, ktore sa jeszcze makietami ze statycznymi danymi: lista i szczegoly aukcji (`/auctions`, `/auctions/{id}`), aukcja wygrana, moje oferty, powiadomienia, panel firmy (`/company`, dodaj i usun aukcje) i panel administratora (`/admin`); makiety maja juz guardy dostepu (gosc: 303 na `/login`, zla rola: 403, firma niezatwierdzona: 403 z ekranem „konto czeka"); pelna lista tras w `public/index.php`,
-- przelacznik jezyka PL/EN (`POST /language`, teksty w `lang/pl.php` i `lang/en.php`) oraz przelacznik motywu jasny/ciemny,
-- odpowiedzi bledow 400 (zly format `{id}` lub query param), 401 (w HTML przekierowanie na `/login`), 403 i 404 (nieznana trasa lub zasob) przez `ErrorController`, dla `/api/*` w JSON,
+- e-mail powitalny po rejestracji (`App\Service\MailService`: wlasny klient SMTP, lokalnie Mailpit; tresc w `WelcomeMailService`); blad poczty nie cofa konta, tylko flash `info` i linia `mail=failed` w logu,
+- panel administratora z bazy (`/admin?status=`, `POST /admin/companies/{id}/approve|reject` przez `CompanyReviewService`, decyzja w transakcji, 409 gdy firma juz rozpatrzona),
+- strone glowna `/` i liste aukcji `/auctions` z bazy (`AuctionListService`: query `q`, `brand`, `priceMax`, `sort`, `page`, zly format 400) oraz szczegoly aukcji `/auctions/{id}` z bazy (`AuctionDetailsService`, brak aukcji 404); szczegoly przyjmuja jeszcze makietowy `?state=` (podglad ekranow 04-07, do usuniecia),
+- licytacje na zywo przez Fetch API: `GET /api/auctions/{id}/state` (polling, `AuctionStateService`) i `POST /api/auctions/{id}/bids` (`BidApiController` -> `BidService`: transakcja z `SELECT ... FOR UPDATE`, czas z bazy, anti-sniping 30 s, CSRF w naglowku `X-CSRF-Token`, bledy regul jako `BidException` -> JSON 403/404/409/422); modul JS `public/js/live-bidding.js` + `public/js/bidding/`; przebity dostaje powiadomienie w bazie (w tej samej transakcji) i e-mail (`OutbidNotifier`, wysylany po oddaniu odpowiedzi przez `fastcgi_finish_request()`),
+- „Moje oferty" (`/my-bids?status=`): kontroler podaje dane z bazy (`MyBidsService`), ale widok jeszcze rysuje makiete,
+- `UploadService` (kontrola rozmiaru, MIME z `finfo`, rozszerzenia, `getimagesize()`, losowa nazwa w `public/uploads/auctions/`) jest gotowy, ale nie jest jeszcze podlaczony do zadnej trasy,
+- ekrany, ktore sa jeszcze makietami ze statycznymi danymi: aukcja wygrana (`/auctions/{id}/won`), powiadomienia (`/notifications`), panel firmy (`/company`, dodaj i usun aukcje); makiety maja juz guardy dostepu (gosc: 303 na `/login`, zla rola: 403, firma niezatwierdzona: 403 z ekranem „konto czeka"); pelna lista tras w `public/index.php`,
+- przelacznik jezyka PL/EN (`POST /language`, teksty w `lang/pl.php` i `lang/en.php`) oraz przelacznik motywu jasny/ciemny (bez opcji „systemowy"),
+- odpowiedzi bledow 400 (zly format `{id}` lub query param, niepoprawny UTF-8, zly JSON), 401 (w HTML przekierowanie na `/login`), 403, 404 (nieznana trasa lub zasob) i 500 (nieoczekiwany wyjatek, szczegoly tylko w logu) przez `ErrorController`, dla `/api/*` w JSON,
 - schemat SQL z widokiem `auction_summary` (`docker/db/01-schema.sql`) i dane demo (`docker/db/02-demo-data.sql`), ladowane przy pierwszym starcie pustego wolumenu bazy, oraz modele i repozytoria dla wszystkich tabel.
+
+Jeszcze nie istnieje: CRON zamykajacy aukcje (katalog `bin/`; do tego czasu aukcja po czasie jest traktowana jako zakonczona tylko na czasie serwera, ale nie ma ustawionego zwyciezcy), dodawanie i usuwanie aukcji, oznaczanie powiadomien jako przeczytane, testy jednostkowe (`tests/`), konfiguracja produkcyjna.
 
 ## Stack technologiczny
 
@@ -43,7 +51,9 @@ Aktualnie aplikacja obsluguje:
 │   ├── models/                # encje i value objecty (App\Model)
 │   ├── repositories/          # zapytania SQL (App\Repository)
 │   ├── services/              # logika aplikacji (App\Service)
+│   ├── Exception/             # wyjatki aplikacji (App\Exception): HttpException, ValidationException, BidException, MailException
 │   ├── Database.php           # polaczenie PDO z PostgreSQL
+│   ├── Request.php            # niezmienny obiekt zadania (query, post, naglowki, ciasteczka, cialo JSON)
 │   └── Routing.php            # rejestracja i obsluga tras
 ├── config.php                 # konfiguracja ze zmiennych srodowiskowych
 ├── composer.json              # konfiguracja autoloadingu
@@ -69,7 +79,7 @@ przegladarka
 
 ### Front Controller
 
-`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, konfiguruje i uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`, `Database`, `CurrentUserProvider`), rejestruje w `Routing` serwisy korzystajace z bazy (`CompanyRepository`, `AuthService`) jako leniwe fabryki (polaczenie otwiera sie dopiero dla kontrolera, ktory ich potrzebuje), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 401, 403, 404) obsluguje `ErrorController`.
+`public/index.php` jest jedynym punktem wejscia aplikacji. Laduje autoloader Composera, konfiguruje i uruchamia sesje, tworzy zaleznosci (`Translator`, `LanguageService`, `Database`, `CurrentUserProvider`), tworzy `MailService` i `WelcomeMailService` (polaczenie SMTP dopiero przy wysylce), rejestruje w `Routing` serwisy korzystajace z bazy (`CompanyRepository`, `UserRepository`, `AuthService`, `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `BidService`, `OutbidNotifier`, `MyBidsService`, `CompanyReviewService`) jako leniwe fabryki (polaczenie otwiera sie dopiero przy tworzeniu kontrolera, ktory ich potrzebuje), rejestruje trasy i przekazuje zadanie (`App\Request`) do routera. Wyjatek `App\Exception\HttpException` (400, 401, 403, 404) obsluguje `ErrorController::handle()`, a kazdy inny wyjatek (`\Throwable`) jest logowany jedna linia i konczy sie odpowiedzia 500 z `ErrorController::handleServerError()` (bez bazy i bez tresci wyjatku).
 
 Nowe trasy dodawaj w tym pliku w postaci:
 
@@ -97,21 +107,24 @@ Kontrolery znajduja sie w `src/controllers/`, uzywaja przestrzeni nazw `App\Cont
 
 Kontroler powinien byc cienki. Nie umieszczaj w nim rozbudowanych zapytan do bazy, HTML ani stylow.
 
-Obecnie istnieja kontrolery (ekrany aukcji, moich ofert, powiadomien, firmy i administratora to na razie makiety ze statycznymi danymi, ale z guardami dostepu):
+Obecnie istnieja kontrolery (aukcja wygrana, powiadomienia i panel firmy to na razie makiety ze statycznymi danymi, ale z guardami dostepu):
 
-- `AppController` — klasa bazowa: `render()`, `redirect()`, `addFlash()`, `requireLogin()`, `requireRole()`, `verifyCsrf()`, `csrfToken()`, `logInUser()`, `logOutUser()`, `homePathFor()`, `redirectIfLoggedIn()`,
-- `DefaultController` — `index()` (strona glowna),
-- `AuctionController` — `index(Request)` (lista aukcji z filtrami w query), `show(int $id, Request)` (szczegoly aukcji), `won(int $id)` (aukcja wygrana, tylko zalogowany),
-- `AccountController` — `myBids(Request)` (tylko kupujacy, filtr `?status=`), `notifications()` (zalogowany), `pending()` (firma; status z bazy, zatwierdzona dostaje 303 na `/company`),
+- `AppController` — klasa bazowa: `render()`, `redirect()`, `addFlash()`, `currentUserId()`, `currentRole()`, `requireLogin()`, `requireRole()`, `verifyCsrf()`, `csrfToken()`, `logInUser()`, `logOutUser()`, `homePathFor()`, `redirectIfLoggedIn()`,
+- `DefaultController` — `index()` (strona glowna: baner i pierwsza strona listy aukcji z `AuctionListService`),
+- `AuctionController` — `index(Request)` (lista aukcji z bazy, filtry w query przez `AuctionListService`), `show(int $id, Request)` (szczegoly aukcji z `AuctionDetailsService`; makietowy `?state=` do usuniecia), `won(int $id)` (makieta aukcji wygranej, tylko zalogowany),
+- `BidApiController` — `state(int $id)` (`GET /api/auctions/{id}/state`, publiczny, JSON z `AuctionStateService`), `placeBid(int $id, Request)` (`POST /api/auctions/{id}/bids`, kupujacy, CSRF w naglowku; `BidService` w transakcji, po odpowiedzi e-mail `OutbidNotifier`),
+- `AccountController` — `myBids(Request)` (tylko kupujacy, filtr `?status=`, dane z `MyBidsService`; widok jeszcze makieta), `notifications()` (makieta, zalogowany), `pending()` (firma; status z bazy, zatwierdzona dostaje 303 na `/company`),
 - `SecurityController` — `login()`, `register()`, `registerCompany()` (GET formularz, POST przez `AuthService`), `logout()` (`POST /logout`),
-- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (ekran usuwania aukcji); kazda akcja zaczyna od prywatnego `requireApprovedCompany()` (firma `pending`/`rejected`: `HttpException::companyNotApproved()`, 403 z ekranem „konto czeka"),
-- `AdminController` — `index(Request)` (tylko administrator, filtr `?status=`),
+- `CompanyController` — `index()` (panel firmy), `create()` (dodaj aukcje), `delete(int $id)` (ekran usuwania aukcji); wszystko makiety; kazda akcja zaczyna od prywatnego `requireApprovedCompany()` (firma `pending`/`rejected`: `HttpException::companyNotApproved()`, 403 z ekranem „konto czeka"),
+- `AdminController` — `index(Request)` (tylko administrator, filtr `?status=`), `approve(int $id, Request)`, `reject(int $id, Request)` (`CompanyReviewService`, CSRF, 404/409),
 - `LanguageController` — `change()` (zmiana jezyka, `POST /language` z CSRF),
-- `ErrorController` — `handle()` (400/401/403/404; 401 w HTML to 303 na `/login`, kod `company_not_approved` renderuje `account/pending`; dla `/api/*` JSON).
+- `ErrorController` — `handle()` (400/401/403/404; 401 w HTML to 303 na `/login`, kod `company_not_approved` renderuje `account/pending`; dla `/api/*` JSON), `handleServerError()` (500, bez bazy).
+
+Serwisy (`src/services/`, `App\Service`): `AuthService` (+ `RegistrationResult`), `CurrentUserProvider`, `LanguageService`, `Translator`, `MailerInterface`/`MailService`, `WelcomeMailService`, `CompanyReviewService`, `AuctionListService`, `AuctionDetailsService`, `AuctionStateService`, `BidService` (+ `BidResult`), `OutbidNotifier`, `MyBidsService`, `UploadService`. Kontrakt tras, JSON i kolejnosci sprawdzen jest w prywatnym `docs/api.md`.
 
 ### Model
 
-Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele (`src/models/`) i repozytoria (`src/repositories/`) istnieja dla wszystkich tabel. Z bazy korzystaja dzis konta (rejestracja, logowanie, `CurrentUserProvider` w layoucie) i status firmy; ekrany aukcji, ofert, powiadomien, panelu firmy i administratora nadal pokazuja dane statyczne. Nie udawaj, ze dane widoczne w tych widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
+Dostep do bazy jest przygotowany: `config.php` zwraca ustawienia ze zmiennych srodowiskowych (przekazywanych kontenerowi `php` w `docker-compose.yaml`), a `App\Database` (`getConnection(): PDO`) leniwie otwiera jedno polaczenie PostgreSQL (`ERRMODE_EXCEPTION`, `EMULATE_PREPARES => false`). Modele (`src/models/`) i repozytoria (`src/repositories/`) istnieja dla wszystkich tabel. Z bazy korzystaja dzis konta (rejestracja, logowanie, `CurrentUserProvider` w layoucie), status firmy, panel administratora, lista i szczegoly aukcji oraz API licytacji; ekrany aukcji wygranej, powiadomien i panelu firmy nadal pokazuja dane statyczne, a widok „Moje oferty" rysuje makiete mimo danych z kontrolera. Nie udawaj, ze dane widoczne w tych widokach pochodza z bazy danych. Gdy funkcja wymaga trwalego przechowywania danych, wydziel klasy modelu/repozytorium zamiast dodawac zapytania SQL do kontrolera.
 
 `composer.json` ma dokladne mapowania PSR-4 dla katalogow pisanych malymi literami:
 
