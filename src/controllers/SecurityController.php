@@ -13,8 +13,11 @@ use App\Service\Translator;
 
 final class SecurityController extends AppController
 {
-    public function __construct(Translator $translator, private readonly AuthService $auth)
-    {
+    public function __construct(
+        Translator $translator,
+        private readonly AuthService $auth,
+        private readonly LanguageService $languages,
+    ) {
         parent::__construct($translator);
     }
 
@@ -69,6 +72,8 @@ final class SecurityController extends AppController
         }
 
         $this->logInUser($user);
+        // Język zapisany na koncie wygrywa z wyborem sprzed logowania (UI i e-maile w jednym języku).
+        $this->languages->adoptAccountLanguage($user, $request->isSecure());
         $this->redirect($next ?? $this->homePathFor($user->getRole()));
     }
 
