@@ -124,7 +124,7 @@ export function createBidForm(root, i18n, messages, banner, { view, applyState, 
             applyState(state, { fromBid: true });
         }
         if (ok) {
-            messages.showStatus(data?.message ?? '', 'success');
+            // Sukces ogłasza baner (role="status"); drugi komunikat w panelu podwoiłby odczyt czytnika ekranu.
             banner.showSuccess(data?.bid?.amountFormatted ?? money(grosze), data?.extended === true);
             const focusTarget = one('[data-leading-block]', root);
             if (focusTarget && !focusTarget.hidden) {
