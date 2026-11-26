@@ -71,6 +71,47 @@ final class AuctionRepository extends BaseRepository
         return new DateTimeImmutable((string) $statement->fetchColumn());
     }
 
+    // Id aukcji, które CRON ma zamknąć: nie zakończone, a czas końca już minął (czas serwera bazy, reguła 3). Zwykły
+    // odczyt bez blokady; serwis zamykający blokuje każdą aukcję osobno (findForUpdate) i sprawdza warunek jeszcze raz,
+    // bo oferta mogła w międzyczasie przedłużyć aukcję (anti-sniping). Najstarsze zaległości pierwsze.
+    /**
+     * @return list<int>
+     */
+    public function findDueForClosing(): array
+    {
+        $statement = $this->pdo->query(
+            "SELECT id FROM auctions WHERE status <> 'ended' AND ends_at <= now() ORDER BY ends_at ASC, id ASC"
+        );
+
+        return array_map(static fn (mixed $id): int => (int) $id, $statement->fetchAll(PDO::FETCH_COLUMN));
+    }
+
+    // Zamknięcie aukcji (CRON): status ended, closed_at = czas serwera bazy i zwycięska oferta (null, gdy ofert brak).
+    // Warunek status <> 'ended' sprawia, że ponowne wywołanie niczego nie zmienia (idempotencja): zwraca false, gdy
+    // aukcja jest już zakończona albo nie istnieje. Wywołuje serwis w transakcji, po findForUpdate().
+    public function close(int $id, ?int $winningBidId): bool
+    {
+        $statement = $this->pdo->prepare(
+            "UPDATE auctions SET status = 'ended', closed_at = now(), winning_bid_id = :winning_bid_id
+             WHERE id = :id AND status <> 'ended'"
+        );
+        $statement->bindValue('winning_bid_id', $winningBidId, $winningBidId === null ? PDO::PARAM_NULL : PDO::PARAM_INT);
+        $statement->bindValue('id', $id, PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->rowCount() > 0;
+    }
+
+    // Aukcje zaplanowane, których start już minął, stają się aktywne (tylko wtedy BidService przyjmuje oferty).
+    // Aukcja zaplanowana, której koniec też już minął, jest pomijana: najpierw zamyka ją CRON (findDueForClosing).
+    // Zwraca liczbę zmienionych wierszy; ponowne wywołanie zwraca 0.
+    public function activateStarted(): int
+    {
+        return $this->pdo->exec(
+            "UPDATE auctions SET status = 'active' WHERE status = 'scheduled' AND starts_at <= now() AND ends_at > now()"
+        );
+    }
+
     // Aukcja z cena, liczba ofert, liderem i okładką z widoku auction_summary: jedno zapytanie, bez N+1.
     public function findSummaryById(int $id): ?AuctionSummary
     {
