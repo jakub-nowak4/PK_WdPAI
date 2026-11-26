@@ -17,7 +17,10 @@ if (root && i18nElement) {
     const messages = createMessages(root);
     const poller = createPoller(root.dataset.stateUrl, {
         onState: (state) => handleState(state, { fromBid: false }),
-        onOnline: () => messages.clearStatus('offline'),
+        onOnline: () => {
+            messages.clearStatus('offline');
+            banner.hideError('network'); // siec wrocila: stary baner "oferta nie zostala wyslana" nie jest juz aktualny
+        },
         onOffline: () => messages.showStatus(i18n.offline, 'offline'),
     });
     const panel = createPanel(root, i18n, { onNeedSync: () => poller.pollNow() });

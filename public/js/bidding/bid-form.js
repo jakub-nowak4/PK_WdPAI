@@ -109,7 +109,7 @@ export function createBidForm(root, i18n, messages, banner, { view, applyState, 
             retry.className = 'button button--link';
             retry.textContent = i18n.retry;
             retry.addEventListener('click', () => submit(grosze));
-            banner.showError(i18n.networkError, { extra: retry });
+            banner.showError(i18n.networkError, { extra: retry, kind: 'network' });
             setBusy(false);
             return;
         }
