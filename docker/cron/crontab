@@ -1,0 +1,5 @@
+# Harmonogram CRON (BusyBox crond w kontenerze `cron`, uzytkownik root).
+# Pola: minuta godzina dzien-miesiaca miesiac dzien-tygodnia polecenie.
+# Co minute zamyka aukcje po czasie i wylania zwyciezcow (bin/close-auctions.php, idempotentny).
+# Wyjscie trafia na stdout procesu 1 kontenera, czyli do `docker compose logs cron`.
+* * * * * cd /app && /usr/local/bin/php bin/close-auctions.php >> /proc/1/fd/1 2>&1
