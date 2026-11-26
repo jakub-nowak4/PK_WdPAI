@@ -11,6 +11,7 @@ use App\Repository\CompanyRepository;
 use App\Request;
 use App\Service\CurrentUserProvider;
 use App\Service\MyBidsService;
+use App\Service\NotificationService;
 use App\Service\Translator;
 
 final class AccountController extends AppController
@@ -22,6 +23,7 @@ final class AccountController extends AppController
         CurrentUserProvider $currentUsers,
         private readonly CompanyRepository $companies,
         private readonly MyBidsService $myBids,
+        private readonly NotificationService $notifications,
     ) {
         parent::__construct($translator, $currentUsers);
     }
@@ -47,14 +49,36 @@ final class AccountController extends AppController
         ]);
     }
 
+    /*
+    GET /notifications (docs/api.md, 2.4): każdy zalogowany widzi tylko swoje powiadomienia, 50 najnowszych.
+    Dane dla widoku: $notificationItems (list<NotificationItem>, najnowsze pierwsze). Liczba nieprzeczytanych
+    (wszystkich, także starszych niż 50) jest w $currentUser['unreadCount'] z layoutu.
+    */
     public function notifications(): void
     {
-        $this->requireLogin();
+        $userId = $this->requireLogin();
 
-        // MAKIETA: dane z partials/mock-notifications.php, do czasu repozytorium.
         $this->render('account/notifications', [
             'pageTitle' => $this->translator->translate('page.notifications.title'),
+            'notificationItems' => $this->notifications->forUser($userId),
         ]);
+    }
+
+    /*
+    POST /notifications/read (docs/api.md, 2.1 wiersz 15): oznacza wszystkie powiadomienia zalogowanego jako
+    przeczytane. Kolejność: zalogowany (401, POST: 303 /login), CSRF (403), zapis; potem 303 na /notifications.
+    */
+    public function readNotifications(Request $request): void
+    {
+        $userId = $this->requireLogin();
+        $this->verifyCsrf($request);
+
+        $changed = $this->notifications->markAllRead($userId);
+        $this->addFlash(
+            $changed > 0 ? 'success' : 'info',
+            $changed > 0 ? 'notifications.marked_read' : 'notifications.nothing_to_mark',
+        );
+        $this->redirect('/notifications');
     }
 
     /*
