@@ -31,6 +31,7 @@ use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
 use App\Service\LanguageService;
 use App\Service\MailService;
+use App\Service\OutbidNotifier;
 use App\Service\Translator;
 use App\Service\WelcomeMailService;
 
@@ -66,13 +67,14 @@ $config = require dirname(__DIR__) . '/config.php';
 $database = new Database($config['database']);
 
 // Poczta: MailService łączy się z SMTP dopiero przy wysyłce, więc samo utworzenie obiektu nic nie kosztuje.
+$mailer = new MailService(
+    $config['mail']['host'],
+    $config['mail']['port'],
+    $config['mail']['from'],
+    $config['mail']['fromName'],
+);
 $welcomeMail = new WelcomeMailService(
-    new MailService(
-        $config['mail']['host'],
-        $config['mail']['port'],
-        $config['mail']['from'],
-        $config['mail']['fromName'],
-    ),
+    $mailer,
     dirname(__DIR__) . '/lang',
     $config['app']['url'],
 );
@@ -107,8 +109,17 @@ $routing = new Routing([
         new AuctionRepository($database->getConnection()),
         new BidRepository($database->getConnection()),
         new CompanyRepository($database->getConnection()),
+        new NotificationRepository($database->getConnection()),
         $database->getConnection(),
         $translator,
+    ),
+    // E-mail o przebiciu idzie po COMMIT oferty, w języku konta przebitego (users.locale).
+    OutbidNotifier::class => static fn (): OutbidNotifier => new OutbidNotifier(
+        $mailer,
+        new UserRepository($database->getConnection()),
+        new AuctionRepository($database->getConnection()),
+        dirname(__DIR__) . '/lang',
+        $config['app']['url'],
     ),
     AuctionStateService::class => static fn (): AuctionStateService => new AuctionStateService(
         new AuctionDetailsService(

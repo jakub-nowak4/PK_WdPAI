@@ -113,6 +113,8 @@ return [
     'mail.welcome.body' => "Cześć {name},\n\nTwoje konto w MotoBid zostało utworzone. Możesz już przeglądać aukcje samochodów i licytować.\n\nPrzejdź do aukcji: {url}\n\nZespół MotoBid",
     'mail.welcome_company.subject' => 'Witaj w MotoBid: konto firmy czeka na zatwierdzenie',
     'mail.welcome_company.body' => "Cześć {name},\n\nTwoje konto firmowe w MotoBid zostało utworzone i czeka na zatwierdzenie przez administratora. Po zatwierdzeniu zalogujesz się do panelu firmy i dodasz pierwszą aukcję.\n\nStatus zgłoszenia: {url}\n\nZespół MotoBid",
+    'mail.outbid.subject' => 'Zostałeś przebity w aukcji: {title}',
+    'mail.outbid.body' => "Cześć {name},\n\nKtoś złożył wyższą ofertę w aukcji „{title}”. Aktualna cena to {price}. Złóż wyższą ofertę, żeby wrócić na prowadzenie.\n\nPrzejdź do aukcji: {url}\n\nZespół MotoBid",
 
     // Pola formularzy kont
     'field.name' => 'Imię i nazwisko',

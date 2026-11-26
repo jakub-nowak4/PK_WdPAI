@@ -9,7 +9,8 @@ use App\Model\Bid;
 /*
 Wynik przyjętej oferty: zapisana oferta (nowa cena = jej kwota), koniec aukcji po ewentualnym przedłużeniu,
 flaga przedłużenia (anti-sniping) i id przebitego prowadzącego (null, gdy to pierwsza oferta w aukcji).
-Powiadomienie i e-mail dla przebitego robi T-036 na podstawie tego pola.
+Powiadomienie w serwisie zapisuje BidService w transakcji, a e-mail dla przebitego wysyła po COMMIT
+OutbidNotifier (T-036) na podstawie tego pola.
 */
 final class BidResult
 {
