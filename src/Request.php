@@ -61,8 +61,10 @@ final class Request
             // Ciało czytamy z limitem: JSON oferty ma kilkadziesiąt bajtów, więcej to nadużycie.
             (string) file_get_contents('php://input', false, null, 0, self::MAX_BODY_BYTES + 1),
             $_FILES,
-            // Przy przekroczonym post_max_size PHP zostawia Content-Length > 0 i puste $_POST oraz $_FILES.
-            ((int) ($_SERVER['CONTENT_LENGTH'] ?? 0)) > 0 && $_POST === [] && $_FILES === [],
+            // Za duże ciało odrzuca zwykle Nginx i przekazuje PHP puste żądanie z parametrem REQUEST_BODY_TOO_LARGE
+            // (docker/nginx/nginx.conf). Gdyby ciało jednak dotarło, PHP zostawia Content-Length > 0 i puste $_POST oraz $_FILES.
+            ($_SERVER['REQUEST_BODY_TOO_LARGE'] ?? '') === '1'
+                || (((int) ($_SERVER['CONTENT_LENGTH'] ?? 0)) > 0 && $_POST === [] && $_FILES === []),
         );
     }
 
