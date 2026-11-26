@@ -34,6 +34,16 @@ final class BidRepository extends BaseRepository
         return $this->mapRow($statement->fetch());
     }
 
+    // Oferta po id albo null (np. zwycięska oferta z auctions.winning_bid_id na ekranie "Aukcja wygrana").
+    public function findById(int $id): ?Bid
+    {
+        $statement = $this->pdo->prepare('SELECT ' . self::COLUMNS . ' FROM bids WHERE id = :id');
+        $statement->execute(['id' => $id]);
+        $row = $statement->fetch();
+
+        return $row === false ? null : $this->mapRow($row);
+    }
+
     // Najwyższa oferta aukcji (prowadzący i aktualna cena) albo null, gdy ofert brak. Wywołuj w transakcji
     // po AuctionRepository::findForUpdate(), wtedy wynik jest aktualny. Kwoty w aukcji są unikalne, id tylko stabilizuje sort.
     public function findLeading(int $auctionId): ?Bid

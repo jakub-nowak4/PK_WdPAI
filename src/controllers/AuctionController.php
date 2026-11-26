@@ -9,6 +9,7 @@ use App\Service\AuctionDetailsService;
 use App\Service\AuctionListService;
 use App\Service\CurrentUserProvider;
 use App\Service\Translator;
+use App\Service\WonAuctionService;
 
 final class AuctionController extends AppController
 {
@@ -19,6 +20,7 @@ final class AuctionController extends AppController
         CurrentUserProvider $currentUsers,
         private readonly AuctionListService $auctionList,
         private readonly AuctionDetailsService $auctionDetails,
+        private readonly WonAuctionService $wonAuctions,
     ) {
         parent::__construct($translator, $currentUsers);
     }
@@ -67,13 +69,18 @@ final class AuctionController extends AppController
 
     public function won(int $id): void
     {
-        // Tylko zalogowany; sprawdzenie zwycięzcy i 404 dojdą z danymi.
-        $this->requireLogin();
+        // Gość: 401 (w HTML 303 na /login?next=...), też z Cache-Control: no-store. Reguły zwycięzcy (404, potem 403)
+        // są w serwisie; wyjątek HttpException zamienia na odpowiedź ErrorController.
+        $userId = $this->requireLogin();
+        $won = $this->wonAuctions->forWinner($id, $userId);
 
-        // MAKIETA (T-009): ekran 08 jako osobna strona; docelowo tylko zwycięzca (403/404 inaczej).
+        // MAKIETA (T-009): widok nadal rysuje dane statyczne, dopóki T-041 go nie podłączy. $wonAuction (WonAuction):
+        // getSummary() (AuctionSummary), getFinalPrice() (Money) i getClosedAt(). Nie przekazujemy zmiennej $auction,
+        // bo widok traktuje jej brak jako tryb makiety.
         $this->render('auctions/won', [
             'pageTitle' => $this->translator->translate('page.auction_won.title'),
             'auctionId' => $id,
+            'wonAuction' => $won,
         ]);
     }
 }

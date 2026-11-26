@@ -65,6 +65,7 @@ return [
 
     // Bids: BidService errors (docs/api.md 3.2 and the table in section 4)
     'auction.error.not_found' => 'Auction not found.',
+    'auction.won.error.not_winner' => 'Only the winner of the auction can see this page.',
     'bid.error.forbidden_role' => 'Only a buyer account can place bids.',
     'bid.error.own_auction' => 'You cannot bid on your own auction.',
     'bid.error.not_active' => 'This auction no longer accepts bids.',

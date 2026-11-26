@@ -35,6 +35,7 @@ use App\Service\MyBidsService;
 use App\Service\OutbidNotifier;
 use App\Service\Translator;
 use App\Service\WelcomeMailService;
+use App\Service\WonAuctionService;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -102,6 +103,11 @@ $routing = new Routing([
     AuctionDetailsService::class => static fn (): AuctionDetailsService => new AuctionDetailsService(
         new AuctionRepository($database->getConnection()),
         new AuctionImageRepository($database->getConnection()),
+        new BidRepository($database->getConnection()),
+    ),
+    // Ekran "Aukcja wygrana": tylko odczyt wyniku ustawionego przez CRON (aukcja i zwycięska oferta).
+    WonAuctionService::class => static fn (): WonAuctionService => new WonAuctionService(
+        new AuctionRepository($database->getConnection()),
         new BidRepository($database->getConnection()),
     ),
     UserRepository::class => static fn (): UserRepository => new UserRepository($database->getConnection()),
