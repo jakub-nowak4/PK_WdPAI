@@ -23,7 +23,13 @@ if (root && i18nElement) {
     const panel = createPanel(root, i18n, { onNeedSync: () => poller.pollNow() });
 
     function handleState(state, { fromBid }) {
+        const wasLeading = panel.view.viewerStatus === 'leading';
         const outcome = panel.apply(state);
+        if (wasLeading && panel.view.viewerStatus !== 'leading') {
+            // przebicie: stary sukces ("Oferta przyjeta", "Prowadzisz") przestaje byc prawdziwy
+            messages.clearStatus('success');
+            banner.hideSuccess();
+        }
         if (outcome.ended) {
             poller.stop();
             messages.clearStatus('offline');
