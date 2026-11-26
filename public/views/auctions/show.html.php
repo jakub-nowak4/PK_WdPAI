@@ -195,7 +195,7 @@ $specLabels = [
         <div class="auction-detail__main">
             <header class="auction-detail__header">
                 <?php if ($status === 'active'): ?>
-                    <p class="status-label status-label--active"><span class="status-label__dot" aria-hidden="true"></span><?= $e($t('auction.live', 'Licytacja na żywo')) ?></p>
+                    <p class="status-label status-label--active" data-live-badge><span class="status-label__dot" aria-hidden="true"></span><?= $e($t('auction.live', 'Licytacja na żywo')) ?></p>
                 <?php elseif ($status === 'scheduled'): ?>
                     <p class="status-label status-label--scheduled"><?= $e($t('auction.soon', 'Wkrótce')) ?></p>
                 <?php else: ?>

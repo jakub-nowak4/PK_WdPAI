@@ -3,7 +3,7 @@
 // zle ustawiony zegar przegladarki nie ma wplywu na wynik.
 import { timeLeft } from './format.js';
 
-export function createCountdown(elements, labels, onZero) {
+export function createCountdown(elements, labels, onZero, onTick = () => {}) {
     let endsAtMs = null;
     let serverMsAtSync = 0;
     let perfAtSync = 0;
@@ -29,6 +29,7 @@ export function createCountdown(elements, labels, onZero) {
                 element.textContent = text;
             });
         }
+        onTick(seconds);
         if (seconds === 0 && zeroNotifiedFor !== endsAtMs) {
             zeroNotifiedFor = endsAtMs; // jednorazowo na dany koniec: pobierz autorytatywny stan z serwera
             onZero();
