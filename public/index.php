@@ -65,14 +65,17 @@ session_set_cookie_params([
 ]);
 session_start();
 
-// Język: sesja -> ciasteczko -> pl. Zależności są tworzone tu i wstrzykiwane kontrolerom.
-$languageService = new LanguageService();
-$translator = new Translator(dirname(__DIR__) . '/lang', $languageService->resolve($request));
-
 // Baza: Database łączy się leniwie. Serwisy z bazą to fabryki, wywoływane dopiero
 // przy pierwszym kontrolerze, który ich potrzebuje (makiety i strony błędów nie łączą się z bazą).
 $config = require dirname(__DIR__) . '/config.php';
 $database = new Database($config['database']);
+
+// Język: sesja -> ciasteczko -> pl. Zależności są tworzone tu i wstrzykiwane kontrolerom.
+// Zapis users.locale zalogowanego idzie przez fabrykę, więc gość nie otwiera połączenia z bazą.
+$languageService = new LanguageService(
+    static fn (): UserRepository => new UserRepository($database->getConnection()),
+);
+$translator = new Translator(dirname(__DIR__) . '/lang', $languageService->resolve($request));
 
 // Poczta: MailService łączy się z SMTP dopiero przy wysyłce, więc samo utworzenie obiektu nic nie kosztuje.
 $mailer = new MailService(

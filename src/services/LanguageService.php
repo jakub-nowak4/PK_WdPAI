@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Service;
 
+use App\Model\User;
+use App\Repository\UserRepository;
 use App\Request;
 
 /*
@@ -19,6 +21,14 @@ final class LanguageService
     private const SESSION_KEY = 'lang';
     private const COOKIE_LIFETIME = 31536000; // 1 rok
     private const MAX_BACK_LENGTH = 200;
+
+    /**
+     * @param \Closure(): UserRepository $users fabryka repozytorium: baza otwiera się dopiero
+     *                                          przy zapisie języka zalogowanego (gość jej nie używa)
+     */
+    public function __construct(private readonly \Closure $users)
+    {
+    }
 
     public function resolve(Request $request): string
     {
@@ -36,13 +46,42 @@ final class LanguageService
     /*
     Zapisuje wybór w sesji i w ciasteczku (HttpOnly, SameSite=Lax, Path=/, 1 rok).
     Wywołujący sprawdza wcześniej język (Translator::isSupported).
+    Dla zalogowanego ($userId) zapisuje też users.locale, bo z tego języka korzystają
+    e-maile wysyłane bez sesji (przebicie, wygrana). Gość nie dotyka bazy. Błąd zapisu
+    w bazie nie psuje przełączenia (sesja i ciasteczko już działają): idzie jedna linia do logu.
     */
-    public function remember(string $language, bool $secure): void
+    public function remember(string $language, bool $secure, ?int $userId = null): void
     {
         if (!Translator::isSupported($language)) {
             throw new \InvalidArgumentException('Unsupported language: ' . $language);
         }
 
+        $this->storeChoice($language, $secure);
+
+        if ($userId === null) {
+            return;
+        }
+
+        try {
+            ($this->users)()->updateLocale($userId, $language);
+        } catch (\Throwable $exception) {
+            error_log(sprintf('locale=save_failed userId=%d reason=%s', $userId, $exception::class));
+        }
+    }
+
+    /*
+    Po zalogowaniu język sesji przyjmuje users.locale konta (bez zapisu do bazy: wartość już tam jest),
+    więc UI i e-maile mówią tym samym językiem. Nieznana wartość w bazie jest ignorowana.
+    */
+    public function adoptAccountLanguage(User $user, bool $secure): void
+    {
+        if (Translator::isSupported($user->getLocale())) {
+            $this->storeChoice($user->getLocale(), $secure);
+        }
+    }
+
+    private function storeChoice(string $language, bool $secure): void
+    {
         if ($this->sessionActive()) {
             $_SESSION[self::SESSION_KEY] = $language;
         }

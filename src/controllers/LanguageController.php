@@ -31,7 +31,8 @@ final class LanguageController extends AppController
             throw HttpException::badRequest('Unsupported language');
         }
 
-        $this->languages->remember($language, $request->isSecure());
+        // Zalogowany: język trafia też do users.locale (e-maile bez sesji); gość tylko do sesji i ciasteczka.
+        $this->languages->remember($language, $request->isSecure(), $this->currentUserId());
         $this->redirect($this->languages->safeBackPath($request->post('back')));
     }
 }
