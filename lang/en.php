@@ -74,6 +74,7 @@ return [
     'bid.error.not_active' => 'This auction no longer accepts bids.',
     'bid.error.already_leading' => 'Your bid is already leading in this auction.',
     'bid.error.amount_invalid' => 'Enter a valid bid amount.',
+    'bid.error.amount_too_high' => 'Your bid is too high. Maximum bid: {max}.',
     'bid.error.too_low' => 'Your bid is too low. Minimum bid: {min}.',
     'bid.success' => 'Bid accepted. You are leading.',
     'bid.success_extended' => 'Bid accepted. You are leading. The auction was extended by {seconds} s.',
