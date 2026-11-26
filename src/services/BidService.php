@@ -103,6 +103,7 @@ final class BidService
             throw $this->error(409, 'already_leading', 'bid.error.already_leading');
         }
 
+        $this->assertAmountNotTooHigh($auction, $amount);
         $this->assertAmountEnough($auction, $leading, $amount);
 
         $bid = $this->bids->create($auctionId, $bidder->getId(), $amount);
@@ -122,6 +123,25 @@ final class BidService
         }
 
         return new BidResult($bid, $endsAt, $extended, $outbidUserId);
+    }
+
+    // Po zapisie widok auction_summary liczy minNextBid = oferta + krok, a Money nie przyjmuje więcej niż MAX_GROSZE.
+    // Oferta, po której następna minimalna wyszłaby poza zakres, jest więc odrzucana (422 amount_invalid).
+    private function assertAmountNotTooHigh(Auction $auction, Money $amount): void
+    {
+        $maxGrosze = Money::MAX_GROSZE - $auction->getMinIncrement()->grosze();
+
+        if ($amount->grosze() <= $maxGrosze) {
+            return;
+        }
+
+        $max = new Money(max(0, $maxGrosze));
+
+        throw new BidException(
+            422,
+            'amount_invalid',
+            $this->translator->translate('bid.error.amount_too_high', ['max' => $max->format()]),
+        );
     }
 
     // Pierwsza oferta musi osiągnąć cenę wywoławczą, kolejne: cena prowadzącego + minimalny krok (reguła 2).
