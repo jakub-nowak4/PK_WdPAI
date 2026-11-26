@@ -489,4 +489,20 @@ return [
     'bids.col_status' => 'Status',
     'bids.col_actions' => 'Akcje',
     'bids.details' => 'Szczegóły aukcji',
+
+    // Aukcja wygrana (widok auctions/won i partials/won-summary)
+    'won.label' => 'Aukcja zakończona pomyślnie',
+    'won.title' => 'Gratulacje! Wygrałeś aukcję',
+    'won.text' => 'Twoja oferta okazała się najwyższa. Poniżej znajdziesz dane sprzedającego i kolejne kroki.',
+    'won.final_price' => 'Cena końcowa',
+    'won.end_date' => 'Data zakończenia',
+    'won.next_steps' => 'Następne kroki',
+    'won.back' => 'Wróć do aukcji',
+    'won.contact_note' => 'Firma skontaktuje się z Tobą w ciągu 48 godzin.',
+    'won.step1_title' => 'Kontakt ze sprzedającym',
+    'won.step1_text' => 'Skontaktuj się z firmą, aby uzgodnić szczegóły.',
+    'won.step2_title' => 'Umowa i płatność',
+    'won.step2_text' => 'Podpisz umowę i opłać pojazd zgodnie z ustaleniami.',
+    'won.step3_title' => 'Odbiór pojazdu',
+    'won.step3_text' => 'Odbierz auto osobiście albo zamów transport.',
 ];

@@ -489,4 +489,20 @@ return [
     'bids.col_status' => 'Status',
     'bids.col_actions' => 'Actions',
     'bids.details' => 'Auction details',
+
+    // Won auction (views auctions/won and partials/won-summary)
+    'won.label' => 'Auction completed successfully',
+    'won.title' => 'Congratulations! You won the auction',
+    'won.text' => 'Your bid was the highest. Below you will find the seller details and the next steps.',
+    'won.final_price' => 'Final price',
+    'won.end_date' => 'End date',
+    'won.next_steps' => 'Next steps',
+    'won.back' => 'Back to the auction',
+    'won.contact_note' => 'The company will contact you within 48 hours.',
+    'won.step1_title' => 'Contact the seller',
+    'won.step1_text' => 'Get in touch with the company to agree on the details.',
+    'won.step2_title' => 'Contract and payment',
+    'won.step2_text' => 'Sign the contract and pay for the vehicle as agreed.',
+    'won.step3_title' => 'Vehicle pickup',
+    'won.step3_text' => 'Pick the car up in person or order transport.',
 ];
