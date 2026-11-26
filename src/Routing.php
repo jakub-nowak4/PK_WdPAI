@@ -130,15 +130,18 @@ final class Routing
     Wywołuje akcję pasującej trasy albo rzuca HttpException (400 lub 404).
     Trasy statyczne mają pierwszeństwo przed trasami z parametrem.
     Trasa tylko dla innej metody HTTP jest traktowana jak brak trasy (404).
+    HEAD jest obsługiwany jak GET: szuka trasy GET i uruchamia jej akcję, a ciała
+    odpowiedzi nie wysyła PHP (HEAD nie trafia do tras POST, więc nic nie modyfikuje).
     */
     public function dispatch(Request $request): void
     {
         $path = $request->path();
+        $method = $request->method() === 'HEAD' ? 'GET' : $request->method();
         $invalidParameter = false;
 
         foreach ([true, false] as $static) {
             foreach ($this->routes as $route) {
-                if ($route['static'] !== $static || $route['method'] !== $request->method()) {
+                if ($route['static'] !== $static || $route['method'] !== $method) {
                     continue;
                 }
 

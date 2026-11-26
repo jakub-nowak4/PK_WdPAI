@@ -44,7 +44,7 @@ $steps = [
         <?php if ($closedAt !== null): ?>
             <div class="won-summary__fact">
                 <dt><?= $e($t('won.end_date', 'Data zakończenia')) ?></dt>
-                <dd><time datetime="<?= $e($closedAt->format(DATE_ATOM)) ?>"><?= $e($closedAt->format('d.m.Y, H:i')) ?></time></dd>
+                <dd><time datetime="<?= $e(\App\Support\LocalTime::iso($closedAt)) ?>"><?= $e(\App\Support\LocalTime::format($closedAt)) ?></time></dd>
             </div>
         <?php endif; ?>
     </dl>

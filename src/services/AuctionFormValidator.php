@@ -10,8 +10,8 @@ use App\Model\Money;
 use App\Model\NewAuction;
 use App\Model\Transmission;
 use App\Repository\BrandRepository;
+use App\Support\LocalTime;
 use DateTimeImmutable;
-use DateTimeZone;
 
 /*
 Walidacja formularza "Dodaj aukcję" (docs/api.md 1.7 i 2.5): jedyne miejsce z regułami pól. Granice są stałymi
@@ -33,7 +33,6 @@ final class AuctionFormValidator
     public const START_TOLERANCE_MINUTES = 5;
     public const DURATION_MIN = 'PT1H';
     public const DURATION_MAX = 'P30D';
-    public const TIMEZONE = 'Europe/Warsaw';
 
     /** Kroki licytacji w pełnych złotych (CHECK auctions_increment_chk w groszach). */
     public const INCREMENTS_ZLOTY = [100, 200, 500, 1000, 2000];
@@ -177,7 +176,7 @@ final class AuctionFormValidator
     // "2026-12-01T18:30" (datetime-local, czasem z sekundami) w strefie Warszawy; inny zapis lub data spoza kalendarza to null.
     private function parseLocal(string $value): ?DateTimeImmutable
     {
-        $zone = new DateTimeZone(self::TIMEZONE);
+        $zone = LocalTime::zone();
         foreach (['Y-m-d\TH:i', 'Y-m-d\TH:i:s'] as $format) {
             $date = DateTimeImmutable::createFromFormat('!' . $format, $value, $zone);
             $problems = DateTimeImmutable::getLastErrors();

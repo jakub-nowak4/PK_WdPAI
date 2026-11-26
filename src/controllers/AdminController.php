@@ -11,6 +11,7 @@ use App\Request;
 use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
 use App\Service\Translator;
+use App\Support\LocalTime;
 
 final class AdminController extends AppController
 {
@@ -99,9 +100,7 @@ final class AdminController extends AppController
             'name' => $company->getName(),
             'city' => $company->getCity(),
             'email' => $application->getEmail(),
-            'registeredAtLabel' => $company->getCreatedAt()
-                ->setTimezone(new \DateTimeZone('Europe/Warsaw'))
-                ->format('d.m.Y, H:i'),
+            'registeredAtLabel' => LocalTime::format($company->getCreatedAt()),
             'status' => $company->getStatus()->value,
         ];
     }
