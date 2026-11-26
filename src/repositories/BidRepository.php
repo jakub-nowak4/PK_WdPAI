@@ -60,6 +60,16 @@ final class BidRepository extends BaseRepository
         return $row === false ? null : $this->mapRow($row);
     }
 
+    // Liczba ofert aukcji (usuwanie aukcji: dozwolone tylko przy 0, docs/api.md 2.5). Wołaj w transakcji po
+    // AuctionRepository::findForUpdate(): blokada aukcji wstrzymuje równoległą ofertę, więc wynik nie zdąży się zmienić.
+    public function countByAuctionId(int $auctionId): int
+    {
+        $statement = $this->pdo->prepare('SELECT COUNT(*) FROM bids WHERE auction_id = :auction_id');
+        $statement->execute(['auction_id' => $auctionId]);
+
+        return (int) $statement->fetchColumn();
+    }
+
     // Id użytkowników, którzy złożyli w aukcji choć jedną ofertę (każdy raz): odbiorcy powiadomień po zamknięciu aukcji.
     /**
      * @return list<int>
