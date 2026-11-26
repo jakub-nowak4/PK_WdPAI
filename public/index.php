@@ -13,10 +13,12 @@ use App\Controller\SecurityController;
 use App\Exception\HttpException;
 use App\Database;
 use App\Repository\AuctionRepository;
+use App\Repository\BrandRepository;
 use App\Repository\CompanyRepository;
 use App\Repository\UserRepository;
 use App\Request;
 use App\Routing;
+use App\Service\AuctionListService;
 use App\Service\AuthService;
 use App\Service\CompanyReviewService;
 use App\Service\CurrentUserProvider;
@@ -82,6 +84,10 @@ $routing = new Routing([
         $database->getConnection(),
         $translator,
         $welcomeMail,
+    ),
+    AuctionListService::class => static fn (): AuctionListService => new AuctionListService(
+        new AuctionRepository($database->getConnection()),
+        new BrandRepository($database->getConnection()),
     ),
     CompanyReviewService::class => static fn (): CompanyReviewService => new CompanyReviewService(
         new CompanyRepository($database->getConnection()),
