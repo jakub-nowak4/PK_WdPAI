@@ -52,6 +52,11 @@ services:
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_FROM: ${SMTP_FROM:-no-reply@motobid.local}
       SMTP_FROM_NAME: ${SMTP_FROM_NAME:-MotoBid}
+    # Limit zapytania DNS (musl: timeout/attempts). Zatrzymany kontener (np. mailpit) nie ma wpisu w DNS Dockera
+    # i rozwiązanie nazwy trwało ok. 3 s, czego nie skraca limit połączenia w MailService (działa dopiero po DNS).
+    dns_opt:
+      - timeout:1
+      - attempts:1
     depends_on:
       db:
         condition: service_healthy
