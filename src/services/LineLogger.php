@@ -34,9 +34,20 @@ final class LineLogger
 
     private function write(string $level, string $message): void
     {
+        fwrite($this->stream, self::formatLine($level, $message) . "\n");
+    }
+
+    /*
+    Jedna linia logu w tym samym formacie co CRON ("[ISO8601] LEVEL wiadomość"), bez zapisu do
+    strumienia. Używane też poza CRON (błąd wysyłki e-maila w AuthService, WonNotifier,
+    OutbidNotifier przez PHP error_log()), żeby każdy log aplikacji miał ten sam nagłówek
+    czasu i poziomu (T-107).
+    */
+    public static function formatLine(string $level, string $message): string
+    {
         // Wyjątek z bazy może zawierać łamanie linii; log ma zostać jedną linią.
         $line = preg_replace('/\s+/', ' ', $message);
 
-        fwrite($this->stream, sprintf("[%s] %s %s\n", (new \DateTimeImmutable())->format(DATE_ATOM), $level, $line));
+        return sprintf('[%s] %s %s', (new \DateTimeImmutable())->format(DATE_ATOM), $level, $line);
     }
 }

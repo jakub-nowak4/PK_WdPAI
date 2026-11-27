@@ -36,12 +36,12 @@ final class WonNotifier
 
             return true;
         } catch (\Throwable $exception) {
-            error_log(sprintf(
+            error_log(LineLogger::formatLine('ERROR', sprintf(
                 'mail=failed type=won userId=%d auctionId=%d reason=%s',
                 $winnerUserId,
                 $auctionId,
                 $exception instanceof MailException ? $exception->getMessage() : $exception::class,
-            ));
+            )));
 
             return false;
         }
