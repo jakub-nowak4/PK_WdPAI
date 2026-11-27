@@ -4,9 +4,12 @@
  * @var callable $t
  * @var callable $e
  * @var callable $money
- * @var array<string,mixed> $auction bidCount, startPrice
+ * @var array<string,mixed> $auction bidCount, startPrice, status (uzywane do wyboru tekstu dla pustej historii zakonczonej aukcji)
  * @var list<array{bidder:string,isYou:bool,amount:int,diff:?int,when:string,badge?:string}> badge: leader|outbid (opcjonalnie) $bids
  */
+$emptyHistoryText = ($auction['status'] ?? '') === 'ended'
+    ? $t('bids.empty_ended', 'Brak ofert w tej aukcji.')
+    : $t('bids.none', 'Brak ofert. Bądź pierwszy.');
 ?>
 <section class="bid-history" aria-labelledby="bid-history-title" data-bid-history data-start-price="<?= $e((string) ((int) $auction['startPrice'] * 100)) ?>">
     <header class="bid-history__header">
@@ -14,7 +17,7 @@
         <p class="bid-history__count"><span data-bid-count><?= $e((string) $auction['bidCount']) ?></span> <?= $e($t('auction.bids', 'ofert')) ?></p>
     </header>
 
-    <p class="bid-history__empty" data-bid-empty<?= $bids === [] ? '' : ' hidden' ?>><?= $e($t('bids.none', 'Brak ofert. Bądź pierwszy.')) ?></p>
+    <p class="bid-history__empty" data-bid-empty<?= $bids === [] ? '' : ' hidden' ?>><?= $e($emptyHistoryText) ?></p>
     <ol class="bid-history__list" data-bid-list<?= $bids === [] ? ' hidden' : '' ?>>
             <?php foreach ($bids as $index => $bid): ?>
                 <li class="bid-history__item<?= $index === 0 ? ' bid-history__item--leader' : '' ?><?= $bid['isYou'] ? ' bid-history__item--you' : '' ?>">
