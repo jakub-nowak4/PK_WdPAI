@@ -43,6 +43,8 @@ $cannotText = $isOwn
     ? $t('bids.own_auction', 'Nie możesz licytować własnej aukcji.')
     : $t('bids.cannot_bid', 'Nie możesz licytować tej aukcji.');
 $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundach przedłuża aukcję o 30 sekund.');
+// Zakonczona aukcja bez ofert: cena = cena wywolawcza, "cena koncowa" byloby mylace (nic sie nie sprzedalo).
+$endedNoBids = $panelState === 'ended' && (int) ($auction['bidCount'] ?? 0) === 0;
 ?>
 <section class="bid-panel<?= $modifier ?>" aria-labelledby="bid-panel-title"
          data-auction-id="<?= $e((string) $auctionId) ?>"
@@ -71,10 +73,15 @@ $antiSniping = $t('bids.anti_sniping', 'Oferta złożona w ostatnich 30 sekundac
         <p class="bid-panel__end"><?= $e($t('auction.ends', 'Koniec')) ?>: <span data-ends-at-label><?= $e($auction['endsAtLabel']) ?></span></p>
     <?php endif; ?>
 
-    <p class="bid-panel__label" data-price-label>
-        <?= $e($panelState === 'ended' ? $t('auction.final_price', 'Cena końcowa') : $t('auction.highest_bid', 'Aktualnie najwyższa oferta')) ?>
-    </p>
-    <p class="bid-panel__price" aria-live="polite" data-current-price><?= $e($money($auction['price'])) ?></p>
+    <?php if ($endedNoBids): ?>
+        <p class="bid-panel__label" data-price-label><?= $e($t('bids.ended_no_bids', 'Aukcja zakończona bez ofert')) ?></p>
+        <p class="bid-panel__price" aria-live="polite" data-current-price hidden></p>
+    <?php else: ?>
+        <p class="bid-panel__label" data-price-label>
+            <?= $e($panelState === 'ended' ? $t('auction.final_price', 'Cena końcowa') : $t('auction.highest_bid', 'Aktualnie najwyższa oferta')) ?>
+        </p>
+        <p class="bid-panel__price" aria-live="polite" data-current-price><?= $e($money($auction['price'])) ?></p>
+    <?php endif; ?>
 
     <?php if ($panelState === 'buyer' || $panelState === 'ended'): ?>
         <div data-leading-block tabindex="-1"<?= $viewerStatus === 'leading' ? '' : ' hidden' ?>>
