@@ -3,6 +3,7 @@
 .vscode/
 .DS_Store
 /vendor/
+/.composer-install.lock
 node_modules/
 docker/data/
 

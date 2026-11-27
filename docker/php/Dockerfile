@@ -3,6 +3,7 @@ FROM php:8.3-fpm-alpine
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 RUN apk add --no-cache \
+        fcgi \
         libjpeg-turbo \
         libpng \
         libwebp \
@@ -51,4 +52,16 @@ RUN { \
 # Nie ujawniaj wersji PHP (naglowek X-Powered-By).
 RUN echo 'expose_php = Off' > /usr/local/etc/php/conf.d/security.ini
 
+# Wbudowany "ping" php-fpm (healthcheck w docker-compose.yaml, usluga php), bez wykonania kodu aplikacji.
+COPY docker/php/healthcheck-pool.conf /usr/local/etc/php-fpm.d/zz-healthcheck.conf
+
 WORKDIR /app
+
+# Auto-install zaleznosci na czystym klonie (vendor/ nie jest w repo i nie jest instalowany
+# przy budowie obrazu): usluga php i usluga cron (ten sam obraz) doinstaluja je przy pierwszym
+# starcie kontenera, zanim wystartuje php-fpm / crond (T-107).
+COPY docker/php/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["php-fpm"]
