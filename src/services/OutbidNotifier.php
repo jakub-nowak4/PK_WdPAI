@@ -42,12 +42,12 @@ final class OutbidNotifier
 
             return true;
         } catch (\Throwable $exception) {
-            error_log(sprintf(
+            error_log(LineLogger::formatLine('ERROR', sprintf(
                 'mail=failed type=outbid userId=%d auctionId=%d reason=%s',
                 $outbidUserId,
                 $auctionId,
                 $exception instanceof MailException ? $exception->getMessage() : $exception::class,
-            ));
+            )));
 
             return false;
         }

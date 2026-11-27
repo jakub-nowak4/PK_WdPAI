@@ -294,11 +294,11 @@ final class AuthService
 
             return true;
         } catch (\Throwable $exception) {
-            error_log(sprintf(
+            error_log(LineLogger::formatLine('ERROR', sprintf(
                 'mail=failed type=welcome userId=%d reason=%s',
                 $user->getId(),
                 $exception instanceof MailException ? $exception->getMessage() : $exception::class,
-            ));
+            )));
 
             return false;
         }

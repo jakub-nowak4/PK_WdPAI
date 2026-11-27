@@ -11,7 +11,15 @@ services:
       - php
     networks:
       - app-network
-  
+    # Statyczny plik (public/css/style.css), ktory Nginx obsluguje sam przez try_files, bez PHP-FPM
+    # i bazy: zdrowy Nginx to taki, ktory potrafi obsluzyc zadanie o plik (T-107).
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/css/style.css"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
   db:
     build:
       context: .
@@ -62,6 +70,14 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    # Wbudowany "ping" php-fpm (docker/php/healthcheck-pool.conf): odpowiada "pong" bez wykonania
+    # kodu aplikacji, wiec zdrowie php-fpm nie zalezy od bazy (T-107).
+    healthcheck:
+      test: ["CMD-SHELL", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 | grep -q pong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   # CRON (kryterium 32): ten sam obraz i kod co `php`, ale zamiast PHP-FPM działa BusyBox crond (jest w Alpine).
   # Harmonogram jest w docker/cron/crontab (co minutę: bin/close-auctions.php); wyjście zadania idzie do logów
@@ -83,15 +99,20 @@ services:
 
 
   mailpit:
-    image: axllent/mailpit:latest
+    # Przypiete wydanie (T-107): zamiast "latest", zeby czysty klon zawsze uruchamial ten sam obraz.
+    # Warto sprawdzic najnowszy stabilny tag przy kolejnej aktualizacji.
+    image: axllent/mailpit:v1.22.3
     ports:
       - "${MAILPIT_PORT}:8025"
     networks:
       - app-network
 
   pgadmin-wdpai:
-    image: dpage/pgadmin4:latest
-    container_name: ${PGADMIN_CONTAINER_NAME}
+    # Przypiete wydanie (T-107): zamiast "latest", zeby czysty klon zawsze uruchamial ten sam obraz.
+    # Warto sprawdzic najnowszy stabilny tag przy kolejnej aktualizacji.
+    image: dpage/pgadmin4:9.4
+    # Bez container_name: dwa stosy (np. dwa worktree) z ta sama wartoscia PGADMIN_CONTAINER_NAME
+    # w .env kolidowaly nazwa kontenera. Compose nazywa go teraz <projekt>-pgadmin-wdpai-1 (T-107).
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
